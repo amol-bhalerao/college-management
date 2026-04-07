@@ -68,7 +68,7 @@ Implemented so far:
 - certificate center with issue/verification flow
 - institute header manager for graphical print branding edits
 - theme studio UI
-- student ledger + fee collection + A5 receipt preview
+- fee counter dashboard + student ledger + printable A5 receipt preview
 - mock data seeders and institute records
 - QR/public verification API base
 - ready-to-run test database scripts for SQLite and MySQL setup

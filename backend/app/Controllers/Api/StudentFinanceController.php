@@ -23,6 +23,11 @@ class StudentFinanceController extends BaseController
         return $this->response->setJSON($this->buildLedgerResponse($student));
     }
 
+    public function counterSummary(?int $instituteId = null): ResponseInterface
+    {
+        return $this->response->setJSON($this->buildCounterSummary($instituteId));
+    }
+
     public function collect(string $studentId): ResponseInterface
     {
         $student = $this->findStudent($studentId);
@@ -178,6 +183,54 @@ class StudentFinanceController extends BaseController
         ];
     }
 
+    private function buildCounterSummary(?int $instituteId = null): array
+    {
+        $db = db_connect();
+        $builder = $db->table('fee_receipts r')
+            ->select('r.receipt_number, r.receipt_date, r.amount, r.payment_mode, r.received_by, r.remarks, r.verification_token, s.gr_number, s.first_name, s.last_name')
+            ->join('students s', 's.id = r.student_id', 'left')
+            ->orderBy('r.receipt_date', 'DESC')
+            ->orderBy('r.id', 'DESC');
+
+        if ($instituteId !== null) {
+            $builder->where('r.institute_id', $instituteId);
+        }
+
+        $receipts = $builder->get()->getResultArray();
+        $totalCollected = (float) array_sum(array_map(static fn (array $row): float => (float) ($row['amount'] ?? 0), $receipts));
+        $cashCollected = (float) array_sum(array_map(static fn (array $row): float => (($row['payment_mode'] ?? '') === 'Cash') ? (float) ($row['amount'] ?? 0) : 0.0, $receipts));
+        $digitalCollected = $totalCollected - $cashCollected;
+
+        $studentBuilder = $db->table('students')->select('id');
+        if ($instituteId !== null) {
+            $studentBuilder->where('institute_id', $instituteId);
+        }
+
+        $studentIds = array_map(static fn (array $row): int => (int) $row['id'], $studentBuilder->get()->getResultArray());
+        $pendingAmount = 0.0;
+
+        foreach ($studentIds as $studentId) {
+            $latest = $db->table('student_ledger_entries')
+                ->select('balance')
+                ->where('student_id', $studentId)
+                ->orderBy('entry_date', 'DESC')
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getRowArray();
+
+            $pendingAmount += (float) ($latest['balance'] ?? 0);
+        }
+
+        return [
+            'totalCollected' => $totalCollected,
+            'receiptCount' => count($receipts),
+            'cashCollected' => $cashCollected,
+            'digitalCollected' => $digitalCollected,
+            'pendingAmount' => $pendingAmount,
+            'recentReceipts' => array_map(fn (array $row): array => $this->formatCounterReceipt($row), array_slice($receipts, 0, 8)),
+        ];
+    }
+
     private function formatReceipt(array $receipt): array
     {
         return [
@@ -187,6 +240,20 @@ class StudentFinanceController extends BaseController
             'paymentMode' => $receipt['payment_mode'] ?? '',
             'receivedBy' => $receipt['received_by'] ?? null,
             'remarks' => $receipt['remarks'] ?? null,
+            'verificationToken' => $receipt['verification_token'] ?? null,
+        ];
+    }
+
+    private function formatCounterReceipt(array $receipt): array
+    {
+        return [
+            'receiptNumber' => $receipt['receipt_number'] ?? '',
+            'receiptDate' => $receipt['receipt_date'] ?? '',
+            'amount' => (float) ($receipt['amount'] ?? 0),
+            'paymentMode' => $receipt['payment_mode'] ?? '',
+            'receivedBy' => $receipt['received_by'] ?? null,
+            'studentName' => trim(($receipt['first_name'] ?? '') . ' ' . ($receipt['last_name'] ?? '')),
+            'studentId' => $receipt['gr_number'] ?? '',
             'verificationToken' => $receipt['verification_token'] ?? null,
         ];
     }

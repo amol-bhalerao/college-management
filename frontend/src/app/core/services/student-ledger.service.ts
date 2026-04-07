@@ -35,6 +35,26 @@ export interface StudentLedgerResponse {
   receipts: ReceiptRow[];
 }
 
+export interface CounterReceiptRow {
+  receiptNumber: string;
+  receiptDate: string;
+  amount: number;
+  paymentMode: string;
+  receivedBy: string | null;
+  studentName: string;
+  studentId: string;
+  verificationToken: string | null;
+}
+
+export interface FeeCounterSummary {
+  totalCollected: number;
+  receiptCount: number;
+  cashCollected: number;
+  digitalCollected: number;
+  pendingAmount: number;
+  recentReceipts: CounterReceiptRow[];
+}
+
 export interface CollectPaymentPayload {
   amount: number;
   mode: string;
@@ -48,6 +68,10 @@ export class StudentLedgerService {
 
   async getLedger(studentId: string): Promise<StudentLedgerResponse> {
     return firstValueFrom(this.http.get<StudentLedgerResponse>(`${environment.apiBaseUrl}/students/${studentId}/ledger`));
+  }
+
+  async getCounterSummary(instituteId: number): Promise<FeeCounterSummary> {
+    return firstValueFrom(this.http.get<FeeCounterSummary>(`${environment.apiBaseUrl}/fees/summary/${instituteId}`));
   }
 
   async collectPayment(studentId: string, payload: CollectPaymentPayload): Promise<{ message: string; receipt: ReceiptRow }> {

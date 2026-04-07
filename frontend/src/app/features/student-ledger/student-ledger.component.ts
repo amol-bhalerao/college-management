@@ -6,7 +6,14 @@ import { ColDef } from 'ag-grid-community';
 import Swal from 'sweetalert2';
 
 import { AppContextService } from '../../core/services/context.service';
-import { LedgerRow, ReceiptRow, StudentLedgerResponse, StudentLedgerService } from '../../core/services/student-ledger.service';
+import {
+  CounterReceiptRow,
+  FeeCounterSummary,
+  LedgerRow,
+  ReceiptRow,
+  StudentLedgerResponse,
+  StudentLedgerService,
+} from '../../core/services/student-ledger.service';
 
 @Component({
   selector: 'app-student-ledger',
@@ -17,8 +24,8 @@ import { LedgerRow, ReceiptRow, StudentLedgerResponse, StudentLedgerService } fr
       <div class="page-head">
         <div>
           <p class="eyebrow">Account module</p>
-          <h1>Student Ledger & Fee Collection</h1>
-          <p>Collect fees, print A5-friendly receipts, and verify payment tokens from one accountant screen.</p>
+          <h1>Fee Counter Dashboard</h1>
+          <p>Track counter collections, print A5 receipts, and verify student payments from one screen.</p>
         </div>
 
         <div class="head-actions">
@@ -26,10 +33,52 @@ import { LedgerRow, ReceiptRow, StudentLedgerResponse, StudentLedgerService } fr
             Student ID / GR No
             <input type="text" [(ngModel)]="studentSearch" placeholder="JC2025001" />
           </label>
-          <button type="button" class="ghost-btn" (click)="reloadLedger()">Load ledger</button>
+          <button type="button" class="ghost-btn" (click)="reloadLedgerAndSummary()">Refresh</button>
           <button type="button" class="primary-btn" (click)="openCollectModal()" [disabled]="!ledger()">Collect fee</button>
         </div>
       </div>
+
+      <div class="counter-grid-cards">
+        <article>
+          <span>Total collected</span>
+          <strong>{{ counterSummary().totalCollected | currency:'INR':'symbol':'1.0-0' }}</strong>
+          <small>All receipts for {{ context.activeInstitute().name }}</small>
+        </article>
+        <article>
+          <span>Receipts issued</span>
+          <strong>{{ counterSummary().receiptCount }}</strong>
+          <small>Verification-ready payment records</small>
+        </article>
+        <article>
+          <span>Cash / Digital</span>
+          <strong>{{ counterSummary().cashCollected | currency:'INR':'symbol':'1.0-0' }}</strong>
+          <small>Digital: {{ counterSummary().digitalCollected | currency:'INR':'symbol':'1.0-0' }}</small>
+        </article>
+        <article>
+          <span>Pending dues</span>
+          <strong>{{ counterSummary().pendingAmount | currency:'INR':'symbol':'1.0-0' }}</strong>
+          <small>Latest balances across selected institute</small>
+        </article>
+      </div>
+
+      <article class="panel">
+        <div class="panel__header">
+          <div>
+            <h2>Counter activity board</h2>
+            <p>Recent receipt register from the live API response for the selected institute.</p>
+          </div>
+          <span class="tag">AG Grid</span>
+        </div>
+
+        <ag-grid-angular
+          class="ag-theme-quartz counter-grid"
+          [rowData]="counterSummary().recentReceipts"
+          [columnDefs]="counterColumnDefs"
+          [defaultColDef]="defaultColDef"
+          [pagination]="true"
+          [paginationPageSize]="5"
+        ></ag-grid-angular>
+      </article>
 
       @if (ledger(); as currentLedger) {
         <div class="ledger-body">
@@ -74,33 +123,43 @@ import { LedgerRow, ReceiptRow, StudentLedgerResponse, StudentLedgerService } fr
             </article>
 
             <article class="panel receipt-panel" id="receipt-preview-card">
-              <div class="panel__header">
+              <div class="panel__header no-print">
                 <div>
-                  <h2>A5 Receipt Preview</h2>
-                  <p>Ready for print and token verification.</p>
+                  <h2>Printable A5 Receipt</h2>
+                  <p>Student copy with verification token and payment summary.</p>
                 </div>
                 <button type="button" class="ghost-btn" (click)="printReceipt()">Print A5</button>
               </div>
 
               @if (latestReceipt(); as receipt) {
                 <div class="receipt-card">
-                  <p class="receipt-number">{{ receipt.receiptNumber }}</p>
-                  <h3>{{ currentLedger.institute }}</h3>
-                  <p>{{ currentLedger.studentName }} · {{ currentLedger.studentId }}</p>
+                  <div class="receipt-header">
+                    <small>College Management ERP · Student Copy</small>
+                    <h3>{{ currentLedger.institute }}</h3>
+                    <p>Academic Year {{ currentLedger.academicYear }}</p>
+                  </div>
 
-                  <div class="receipt-meta">
-                    <span>Date</span>
-                    <strong>{{ receipt.receiptDate }}</strong>
-                    <span>Mode</span>
-                    <strong>{{ receipt.paymentMode }}</strong>
-                    <span>Amount</span>
+                  <div class="receipt-line"><span>Receipt No</span><strong>{{ receipt.receiptNumber }}</strong></div>
+                  <div class="receipt-line"><span>Date</span><strong>{{ receipt.receiptDate }}</strong></div>
+                  <div class="receipt-line"><span>Student</span><strong>{{ currentLedger.studentName }}</strong></div>
+                  <div class="receipt-line"><span>GR Number</span><strong>{{ currentLedger.studentId }}</strong></div>
+                  <div class="receipt-line"><span>Payment Mode</span><strong>{{ receipt.paymentMode }}</strong></div>
+                  <div class="receipt-line"><span>Received By</span><strong>{{ receipt.receivedBy || 'Account Office' }}</strong></div>
+
+                  <div class="receipt-highlight">
+                    <span>Amount Received</span>
                     <strong>{{ receipt.amount | currency:'INR':'symbol':'1.0-0' }}</strong>
+                    <small>Outstanding after payment: {{ currentLedger.outstandingAmount | currency:'INR':'symbol':'1.0-0' }}</small>
                   </div>
 
                   <p class="receipt-note">{{ receipt.remarks || 'Fee payment recorded successfully.' }}</p>
-                  <a class="verify-link" [href]="verifyUrl(receipt.verificationToken)" target="_blank" rel="noreferrer">
-                    Verify receipt token
-                  </a>
+
+                  <div class="receipt-footer">
+                    <small>Verification Token: {{ receipt.verificationToken || 'Pending' }}</small>
+                    <a class="verify-link no-print" [href]="verifyUrl(receipt.verificationToken)" target="_blank" rel="noreferrer">
+                      Verify receipt token
+                    </a>
+                  </div>
                 </div>
               } @else {
                 <p class="empty-state">No receipt issued yet for this student.</p>
@@ -111,7 +170,7 @@ import { LedgerRow, ReceiptRow, StudentLedgerResponse, StudentLedgerService } fr
           <article class="panel">
             <div class="panel__header">
               <div>
-                <h2>Recent receipts</h2>
+                <h2>Student receipt history</h2>
                 <p>Latest payment acknowledgements with verification links.</p>
               </div>
             </div>
@@ -187,6 +246,14 @@ export class StudentLedgerComponent {
   private readonly ledgerService = inject(StudentLedgerService);
 
   protected readonly ledger = signal<StudentLedgerResponse | null>(null);
+  protected readonly counterSummary = signal<FeeCounterSummary>({
+    totalCollected: 0,
+    receiptCount: 0,
+    cashCollected: 0,
+    digitalCollected: 0,
+    pendingAmount: 0,
+    recentReceipts: [],
+  });
   protected readonly showCollectModal = signal(false);
   protected readonly isSaving = signal(false);
   protected studentSearch = 'JC2025001';
@@ -207,6 +274,15 @@ export class StudentLedgerComponent {
     { field: 'balance', headerName: 'Balance' },
   ];
 
+  protected readonly counterColumnDefs: ColDef<CounterReceiptRow>[] = [
+    { field: 'receiptNumber', headerName: 'Receipt No', minWidth: 150 },
+    { field: 'studentName', headerName: 'Student', minWidth: 180 },
+    { field: 'studentId', headerName: 'GR No' },
+    { field: 'paymentMode', headerName: 'Mode' },
+    { field: 'amount', headerName: 'Amount' },
+    { field: 'receiptDate', headerName: 'Date' },
+  ];
+
   protected readonly defaultColDef: ColDef = {
     sortable: true,
     filter: true,
@@ -225,7 +301,7 @@ export class StudentLedgerComponent {
       };
 
       this.studentSearch = defaults[instituteId] ?? 'JC2025001';
-      void this.loadLedger(this.studentSearch);
+      void this.reloadLedgerAndSummary();
     });
   }
 
@@ -237,8 +313,11 @@ export class StudentLedgerComponent {
     return `http://127.0.0.1:8080/api/verify/receipt/${token ?? ''}`;
   }
 
-  protected async reloadLedger(): Promise<void> {
-    await this.loadLedger(this.studentSearch);
+  protected async reloadLedgerAndSummary(): Promise<void> {
+    await Promise.all([
+      this.loadLedger(this.studentSearch),
+      this.loadCounterSummary(this.context.activeInstitute().id),
+    ]);
   }
 
   protected openCollectModal(): void {
@@ -262,14 +341,14 @@ export class StudentLedgerComponent {
 
     try {
       const response = await this.ledgerService.collectPayment(this.studentSearch, this.collectForm);
-      await this.loadLedger(this.studentSearch);
+      await this.reloadLedgerAndSummary();
       this.closeCollectModal();
       await Swal.fire({
         icon: 'success',
         title: 'Receipt issued',
         text: `${response.receipt.receiptNumber} created successfully.`,
       });
-    } catch (error) {
+    } catch {
       await Swal.fire({ icon: 'error', title: 'Unable to collect fee', text: 'Please verify the student ID and amount.' });
     } finally {
       this.isSaving.set(false);
@@ -283,5 +362,9 @@ export class StudentLedgerComponent {
       this.ledger.set(null);
       await Swal.fire({ icon: 'error', title: 'Student not found', text: 'Please enter a valid GR number or student ID.' });
     }
+  }
+
+  private async loadCounterSummary(instituteId: number): Promise<void> {
+    this.counterSummary.set(await this.ledgerService.getCounterSummary(instituteId));
   }
 }
