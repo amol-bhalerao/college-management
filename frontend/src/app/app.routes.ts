@@ -2,7 +2,9 @@ import { Routes } from '@angular/router';
 
 import { authGuard, guestGuard } from './core/guards/auth.guard';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
+import { InstituteHeaderComponent } from './features/institute-header/institute-header.component';
 import { LoginComponent } from './features/login/login.component';
+import { AdmissionCrmComponent } from './features/admission-crm/admission-crm.component';
 import { StudentLedgerComponent } from './features/student-ledger/student-ledger.component';
 import { ThemeStudioComponent } from './features/theme-studio/theme-studio.component';
 
@@ -23,6 +25,18 @@ export const routes: Routes = [
     component: DashboardComponent,
     canActivate: [authGuard],
     title: 'Executive Dashboard',
+  },
+  {
+    path: 'admissions',
+    component: AdmissionCrmComponent,
+    canActivate: [authGuard],
+    title: 'Admission CRM',
+  },
+  {
+    path: 'institute-header',
+    component: InstituteHeaderComponent,
+    canActivate: [authGuard],
+    title: 'Institute Header Manager',
   },
   {
     path: 'theme-studio',

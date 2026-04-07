@@ -449,9 +449,11 @@ Completed in the working foundation phase:
 - seeded demo users and mock institute/student data
 - super admin test credentials: `superadmin / Password@123`
 - executive dashboard prototype
+- admission CRM prototype with enquiry conversion flow
+- institute header manager for institute-specific receipt/certificate branding
 - theme studio prototype for non-technical super admin
 - student ledger prototype for accountant
-- CodeIgniter API endpoints for auth, dashboard summary, ledger, settings, and QR verification
+- CodeIgniter API endpoints for auth, dashboard summary, ledger, institute settings, admissions/enquiries, and QR verification
 
 ### Verified local URLs
 - Frontend: `http://127.0.0.1:4200/login`

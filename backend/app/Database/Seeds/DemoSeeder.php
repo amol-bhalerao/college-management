@@ -68,6 +68,30 @@ class DemoSeeder extends Seeder
             ],
         ]);
 
+        $db->table('institutes')->where('id', 1)->update([
+            'header_subtitle' => 'Affiliated Higher Secondary Section',
+            'principal_name' => 'Dr. Sunita Deshmukh',
+            'footer_note' => 'Quality education, discipline, and student support are our core values.',
+            'website_url' => 'https://jc.demo-college.local',
+            'updated_at' => $now,
+        ]);
+
+        $db->table('institutes')->where('id', 2)->update([
+            'header_subtitle' => 'NAAC-ready Undergraduate Programs',
+            'principal_name' => 'Prof. Rajesh Kulkarni',
+            'footer_note' => 'All receipts and certificates can be verified through QR validation.',
+            'website_url' => 'https://degree.demo-college.local',
+            'updated_at' => $now,
+        ]);
+
+        $db->table('institutes')->where('id', 3)->update([
+            'header_subtitle' => 'Professional Teacher Education Wing',
+            'principal_name' => 'Dr. Nilofer Shaikh',
+            'footer_note' => 'Institute follows academic-year-based and IQAC-aligned operations.',
+            'website_url' => 'https://bed.demo-college.local',
+            'updated_at' => $now,
+        ]);
+
         $db->table('academic_years')->ignore(true)->insertBatch([
             ['id' => 1, 'institute_id' => 1, 'label' => '2025-26', 'start_date' => '2025-06-01', 'end_date' => '2026-05-31', 'is_current' => 1, 'created_at' => $now, 'updated_at' => $now],
             ['id' => 2, 'institute_id' => 2, 'label' => '2025-26', 'start_date' => '2025-06-01', 'end_date' => '2026-05-31', 'is_current' => 1, 'created_at' => $now, 'updated_at' => $now],
@@ -131,6 +155,28 @@ class DemoSeeder extends Seeder
             ['id' => 1, 'institute_id' => 1, 'module' => 'Scholarship follow-up', 'target' => 120, 'achieved' => 92, 'pending' => 28, 'owner' => 'Clerk Desk', 'trend' => 'Up', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 2, 'institute_id' => 1, 'module' => 'Admission conversion', 'target' => 220, 'achieved' => 163, 'pending' => 57, 'owner' => 'Admissions Team', 'trend' => 'Up', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 3, 'institute_id' => 1, 'module' => 'Fee collection drive', 'target' => 500, 'achieved' => 428, 'pending' => 72, 'owner' => 'Account Office', 'trend' => 'Stable', 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        $db->table('enquiries')->ignore(true)->insertBatch([
+            ['id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'enquiry_number' => 'ENQ-JC-0001', 'student_name' => 'Pratiksha More', 'mobile_number' => '9011111111', 'email' => 'pratiksha@example.com', 'source' => 'Website', 'desired_course' => 'FYJC Science', 'current_class' => '10th', 'category' => 'OBC', 'status' => 'new', 'assigned_to' => 'Clerk Desk', 'follow_up_date' => '2026-04-09', 'notes' => 'Interested in science stream and scholarship guidance.', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'enquiry_number' => 'ENQ-JC-0002', 'student_name' => 'Tanish Jadhav', 'mobile_number' => '9022222222', 'email' => 'tanish@example.com', 'source' => 'Reference', 'desired_course' => 'FYJC Commerce', 'current_class' => '10th', 'category' => 'SC', 'status' => 'follow-up', 'assigned_to' => 'Admissions Team', 'follow_up_date' => '2026-04-10', 'notes' => 'Waiting for document submission and caste certificate copy.', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 3, 'institute_id' => 1, 'academic_year_id' => 1, 'enquiry_number' => 'ENQ-JC-0003', 'student_name' => 'Aditi Kulkarni', 'mobile_number' => '9033333333', 'email' => 'aditi@example.com', 'source' => 'Walk-in', 'desired_course' => 'FYJC Arts', 'current_class' => '10th', 'category' => 'Open', 'status' => 'converted', 'assigned_to' => 'Clerk Desk', 'follow_up_date' => '2026-04-08', 'notes' => 'Converted after counselling visit.', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 4, 'institute_id' => 2, 'academic_year_id' => 2, 'enquiry_number' => 'ENQ-DC-0001', 'student_name' => 'Farhan Shaikh', 'mobile_number' => '9044444444', 'email' => 'farhan@example.com', 'source' => 'Website', 'desired_course' => 'B.Com I', 'current_class' => '12th', 'category' => 'Minority', 'status' => 'new', 'assigned_to' => 'Degree Admission Cell', 'follow_up_date' => '2026-04-11', 'notes' => 'Asks about minority scholarship and fee concession.', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 5, 'institute_id' => 3, 'academic_year_id' => 3, 'enquiry_number' => 'ENQ-BED-0001', 'student_name' => 'Sneha Pawar', 'mobile_number' => '9055555555', 'email' => 'sneha@example.com', 'source' => 'Campaign', 'desired_course' => 'B.Ed I', 'current_class' => 'Graduation', 'category' => 'EWS', 'status' => 'contacted', 'assigned_to' => 'Professional Wing Desk', 'follow_up_date' => '2026-04-12', 'notes' => 'Interested in hostel and scholarship support.', 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        $db->table('admissions')->ignore(true)->insert([
+            'id' => 1,
+            'enquiry_id' => 3,
+            'student_id' => null,
+            'institute_id' => 1,
+            'academic_year_id' => 1,
+            'admission_number' => 'ADM-2026-0003',
+            'status' => 'confirmed',
+            'admitted_on' => '2026-04-08',
+            'remarks' => 'Converted from enquiry after counselling and document verification.',
+            'created_at' => $now,
+            'updated_at' => $now,
         ]);
     }
 }

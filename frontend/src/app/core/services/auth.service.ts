@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
+import { AppContextService } from './context.service';
 
 export interface LoginPayload {
   username: string;
@@ -28,6 +29,7 @@ export interface AuthSession {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
+  private readonly context = inject(AppContextService);
   private readonly storageKey = 'college-management-session';
   private readonly sessionState = signal<AuthSession | null>(this.readStoredSession());
 
@@ -35,17 +37,27 @@ export class AuthService {
   readonly currentUser = computed(() => this.sessionState()?.user ?? null);
   readonly isAuthenticated = computed(() => this.sessionState() !== null);
 
+  constructor() {
+    const session = this.sessionState();
+
+    if (session) {
+      this.context.syncFromSession(session);
+    }
+  }
+
   async login(payload: LoginPayload): Promise<void> {
     const response = await firstValueFrom(
       this.http.post<AuthSession>(`${environment.apiBaseUrl}/auth/login`, payload),
     );
 
     this.sessionState.set(response);
+    this.context.syncFromSession(response);
     localStorage.setItem(this.storageKey, JSON.stringify(response));
   }
 
   logout(): void {
     this.sessionState.set(null);
+    this.context.reset();
     localStorage.removeItem(this.storageKey);
   }
 

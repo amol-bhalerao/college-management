@@ -12,6 +12,14 @@ $routes->group('api', static function ($routes): void {
     $routes->post('auth/login', 'Api\AuthController::login');
     $routes->get('dashboard/summary', 'Api\DashboardController::summary');
     $routes->get('dashboard/summary/(:num)', 'Api\DashboardController::summary/$1');
+    $routes->get('institutes', 'Api\InstituteController::index');
+    $routes->get('institutes/(:num)/settings', 'Api\InstituteController::settings/$1');
+    $routes->put('institutes/(:num)/settings', 'Api\InstituteController::updateSettings/$1');
+    $routes->get('enquiries/summary', 'Api\EnquiryController::summary');
+    $routes->get('enquiries/summary/(:num)', 'Api\EnquiryController::summary/$1');
+    $routes->get('enquiries', 'Api\EnquiryController::index');
+    $routes->get('enquiries/(:num)', 'Api\EnquiryController::index/$1');
+    $routes->post('enquiries/(:num)/convert', 'Api\EnquiryController::convert/$1');
     $routes->get('settings/app', 'Api\SettingsController::app');
     $routes->get('settings/theme', 'Api\SettingsController::theme');
     $routes->get('students/(:segment)/ledger', 'Api\StudentFinanceController::ledger/$1');

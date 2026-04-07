@@ -1,0 +1,22 @@
+:host { display: block; }
+
+.page { display: grid; gap: 1.25rem; }
+.page-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.eyebrow { margin: 0 0 0.35rem; color: var(--primary-color); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
+.page-head h1, .panel h2 { margin: 0; }
+.page-head p { color: var(--muted-text); }
+.tag { display: inline-flex; align-items: center; padding: 0.35rem 0.65rem; border-radius: 999px; background: rgba(79,70,229,0.12); color: var(--primary-color); font-size: 0.8rem; font-weight: 700; }
+.layout { display: grid; gap: 1rem; grid-template-columns: 1.15fr 0.85fr; }
+.panel { padding: 1rem 1.1rem; background: var(--surface-color); border-radius: var(--radius); box-shadow: 0 24px 48px rgba(15,23,42,var(--shadow-opacity)); }
+.form-panel { display: grid; gap: 0.85rem; }
+.form-panel label { display: grid; gap: 0.4rem; color: var(--muted-text); }
+.form-panel input, .form-panel textarea { padding: 0.8rem 0.9rem; border: 1px solid rgba(148,163,184,0.35); border-radius: 12px; background: #fff; }
+.form-panel button { padding: 0.85rem 1rem; border: 0; border-radius: 999px; background: linear-gradient(135deg, var(--header-start), var(--header-end)); color: #fff; cursor: pointer; }
+.grid-two { display: grid; gap: 0.85rem; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.preview-panel { display: grid; gap: 1rem; }
+.header-preview { display: grid; gap: 0.35rem; padding: 1rem; color: #fff; border-radius: calc(var(--radius) - 4px); background: linear-gradient(135deg, var(--header-start), var(--header-end)); }
+.header-preview span { width: fit-content; padding: 0.25rem 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.16); font-size: 0.8rem; }
+.receipt-preview { display: grid; gap: 0.75rem; }
+.receipt-line { padding: 0.85rem; border-radius: calc(var(--radius) - 6px); background: rgba(79,70,229,0.05); }
+.receipt-line span { display: block; margin-bottom: 0.35rem; color: var(--muted-text); font-size: 0.85rem; }
+@media (max-width: 1024px) { .layout, .grid-two, .page-head { grid-template-columns: 1fr; flex-direction: column; } }

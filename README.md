@@ -53,6 +53,8 @@ Open: `http://127.0.0.1:8080/`
 Implemented so far:
 - login flow with local mock auth
 - executive dashboard
+- admission CRM (enquiries and conversion flow)
+- institute header manager for graphical print branding edits
 - theme studio UI
 - student ledger screen
 - mock data seeders and institute records

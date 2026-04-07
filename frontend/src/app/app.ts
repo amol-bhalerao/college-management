@@ -43,7 +43,7 @@ import { ThemeService } from './core/services/theme.service';
               <label>
                 Institute
                 <select [(ngModel)]="selectedInstituteId" (ngModelChange)="onInstituteChange($event)">
-                  @for (institute of context.institutes; track institute.id) {
+                  @for (institute of context.institutes(); track institute.id) {
                     <option [value]="institute.id">{{ institute.name }}</option>
                   }
                 </select>
@@ -52,7 +52,7 @@ import { ThemeService } from './core/services/theme.service';
               <label>
                 Academic Year
                 <select [(ngModel)]="selectedAcademicYear" (ngModelChange)="onAcademicYearChange($event)">
-                  @for (year of context.academicYears; track year) {
+                  @for (year of context.academicYears(); track year) {
                     <option [value]="year">{{ year }}</option>
                   }
                 </select>
@@ -260,6 +260,8 @@ export class App {
 
   protected readonly navItems = [
     { label: 'Executive Dashboard', route: '/dashboard', icon: '📊' },
+    { label: 'Admission CRM', route: '/admissions', icon: '🧾' },
+    { label: 'Institute Header', route: '/institute-header', icon: '🏫' },
     { label: 'Student Ledger', route: '/student-ledger', icon: '📒' },
     { label: 'Theme Studio', route: '/theme-studio', icon: '🎨' },
   ];
