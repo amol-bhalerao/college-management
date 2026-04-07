@@ -16,6 +16,7 @@ class WebsitePageModel extends Model
         'slug',
         'nav_label',
         'menu_group',
+        'parent_page_id',
         'title',
         'hero_title',
         'hero_subtitle',
@@ -26,6 +27,7 @@ class WebsitePageModel extends Model
         'seo_description',
         'is_published',
         'show_on_home',
+        'show_in_nav',
         'sort_order',
     ];
 }

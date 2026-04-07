@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import Swal from 'sweetalert2';
 
@@ -29,7 +29,7 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
           <div class="panel__header">
             <div>
               <h2>Page list</h2>
-              <p>Home, About, Notices, Downloads, Gallery, RTI, SSR, MOU, and other SEO-ready pages.</p>
+              <p>Manage top-level menus, sub menus, and nested public pages from one super-admin control center.</p>
             </div>
             <span class="tag">Published website</span>
           </div>
@@ -39,9 +39,9 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
               <button type="button" class="page-item" [class.active]="selectedPage()?.id === page.id" (click)="selectPage(page)">
                 <div>
                   <strong>{{ page.nav_label || page.title }}</strong>
-                  <small>{{ page.menu_group || 'General' }} · /{{ page.slug }}</small>
+                  <small>{{ page.menu_group || 'General' }} · {{ parentLabel(page) }} · /{{ page.slug }}</small>
                 </div>
-                <span>{{ isPublished(page) ? 'Published' : 'Draft' }}</span>
+                <span>{{ isShownInNav(page) ? 'In menu' : 'Hidden' }}</span>
               </button>
             }
           </div>
@@ -68,7 +68,7 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
                 <div>
                   <h3>{{ page.hero_title || page.title }}</h3>
                   <p>{{ page.hero_subtitle || 'Hero subtitle will appear here.' }}</p>
-                  <small>Group: {{ page.menu_group || 'General' }} · Home card: {{ isHomeCard(page) ? 'Yes' : 'No' }}</small>
+                  <small>Group: {{ page.menu_group || 'General' }} · Parent: {{ parentLabel(page) }} · Navbar: {{ isShownInNav(page) ? 'Yes' : 'No' }} · Home card: {{ isHomeCard(page) ? 'Yes' : 'No' }}</small>
                 </div>
                 @if (page.cover_image_url) {
                   <img class="preview-image" [src]="page.cover_image_url" [alt]="page.title" />
@@ -111,6 +111,15 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
                 <select name="menu_group" [(ngModel)]="form.menu_group">
                   @for (group of menuGroupOptions; track group) {
                     <option [value]="group">{{ group }}</option>
+                  }
+                </select>
+              </label>
+              <label>
+                Parent menu
+                <select name="parent_page_id" [(ngModel)]="form.parent_page_id">
+                  <option [ngValue]="null">Top-level menu</option>
+                  @for (option of parentPageOptions(); track option.id) {
+                    <option [ngValue]="option.id">{{ option.nav_label || option.title }}</option>
                   }
                 </select>
               </label>
@@ -168,6 +177,13 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
                   <option [ngValue]="0">No</option>
                 </select>
               </label>
+              <label>
+                Show in navbar
+                <select name="show_in_nav" [(ngModel)]="form.show_in_nav">
+                  <option [ngValue]="1">Yes</option>
+                  <option [ngValue]="0">No</option>
+                </select>
+              </label>
               <label class="full-span route-preview">
                 Shareable route preview
                 <input type="text" [value]="'/?site=' + context.activeInstitute().code.toLowerCase() + '&page=' + (form.slug || 'home')" readonly />
@@ -197,7 +213,10 @@ export class WebsiteCmsComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
 
-  protected readonly menuGroupOptions = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'Quality', 'Governance', 'Gallery', 'Downloads', 'Notices', 'Students', 'Contact', 'General'];
+  protected readonly menuGroupOptions = ['Home', 'About', 'Code of Conduct', 'Academics', 'Departments', 'College Cells', 'Alumni', 'IQAC', 'Gallery', 'Other', 'Contact', 'General'];
+  protected readonly parentPageOptions = computed(() => this.pages()
+    .filter((page) => page.id !== this.editingId())
+    .sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || a.title.localeCompare(b.title)));
 
   protected form: WebsitePagePayload = this.createEmptyForm();
 
@@ -219,6 +238,18 @@ export class WebsiteCmsComponent {
     return Number(page.show_on_home ?? 1) === 1;
   }
 
+  protected isShownInNav(page: WebsitePage): boolean {
+    return Number(page.show_in_nav ?? 1) === 1;
+  }
+
+  protected parentLabel(page: WebsitePage): string {
+    if (!page.parent_page_id) {
+      return 'Top level';
+    }
+
+    return this.pages().find((item) => item.id === page.parent_page_id)?.title || 'Child page';
+  }
+
   protected openCreate(): void {
     this.editingId.set(null);
     this.form = this.createEmptyForm();
@@ -231,6 +262,7 @@ export class WebsiteCmsComponent {
       slug: page.slug,
       nav_label: page.nav_label || '',
       menu_group: page.menu_group || 'General',
+      parent_page_id: page.parent_page_id || null,
       title: page.title,
       hero_title: page.hero_title || '',
       hero_subtitle: page.hero_subtitle || '',
@@ -241,6 +273,7 @@ export class WebsiteCmsComponent {
       seo_description: page.seo_description || '',
       is_published: Number(page.is_published),
       show_on_home: Number(page.show_on_home ?? 1),
+      show_in_nav: Number(page.show_in_nav ?? 1),
       sort_order: Number(page.sort_order),
     };
     this.showModal.set(true);
@@ -317,6 +350,7 @@ export class WebsiteCmsComponent {
       slug: '',
       nav_label: '',
       menu_group: 'General',
+      parent_page_id: null,
       title: '',
       hero_title: '',
       hero_subtitle: '',
@@ -327,6 +361,7 @@ export class WebsiteCmsComponent {
       seo_description: '',
       is_published: 1,
       show_on_home: 1,
+      show_in_nav: 1,
       sort_order: 1,
     };
   }

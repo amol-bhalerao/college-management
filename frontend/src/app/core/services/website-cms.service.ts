@@ -11,6 +11,7 @@ export interface WebsitePage {
   slug: string;
   nav_label: string | null;
   menu_group: string | null;
+  parent_page_id: number | null;
   title: string;
   hero_title: string | null;
   hero_subtitle: string | null;
@@ -21,6 +22,7 @@ export interface WebsitePage {
   seo_description: string | null;
   is_published: number;
   show_on_home: number;
+  show_in_nav: number;
   sort_order: number;
 }
 
@@ -29,6 +31,7 @@ export interface WebsitePagePayload {
   slug?: string;
   nav_label?: string;
   menu_group?: string;
+  parent_page_id?: number | null;
   title: string;
   hero_title?: string;
   hero_subtitle?: string;
@@ -39,6 +42,7 @@ export interface WebsitePagePayload {
   seo_description?: string;
   is_published?: number;
   show_on_home?: number;
+  show_in_nav?: number;
   sort_order?: number;
 }
 

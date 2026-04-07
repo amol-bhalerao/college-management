@@ -53,6 +53,7 @@ class WebsiteController extends BaseController
             'slug' => $slug,
             'nav_label' => trim((string) ($payload['nav_label'] ?? $title)),
             'menu_group' => trim((string) ($payload['menu_group'] ?? 'General')),
+            'parent_page_id' => (int) ($payload['parent_page_id'] ?? 0) ?: null,
             'title' => $title,
             'hero_title' => trim((string) ($payload['hero_title'] ?? $title)),
             'hero_subtitle' => trim((string) ($payload['hero_subtitle'] ?? '')),
@@ -63,6 +64,7 @@ class WebsiteController extends BaseController
             'seo_description' => trim((string) ($payload['seo_description'] ?? '')),
             'is_published' => (int) ($payload['is_published'] ?? 1) ? 1 : 0,
             'show_on_home' => (int) ($payload['show_on_home'] ?? 1) ? 1 : 0,
+            'show_in_nav' => (int) ($payload['show_in_nav'] ?? 1) ? 1 : 0,
             'sort_order' => (int) ($payload['sort_order'] ?? 1),
         ], true);
 
@@ -92,6 +94,10 @@ class WebsiteController extends BaseController
             }
         }
 
+        if (array_key_exists('parent_page_id', $payload)) {
+            $updates['parent_page_id'] = (int) ($payload['parent_page_id'] ?? 0) ?: null;
+        }
+
         if (isset($payload['slug'])) {
             $slug = $this->buildSlug((string) $payload['slug']);
             $existing = $model->where('institute_id', $page['institute_id'])->where('slug', $slug)->where('id !=', $id)->first();
@@ -103,7 +109,7 @@ class WebsiteController extends BaseController
             $updates['slug'] = $slug;
         }
 
-        foreach (['is_published', 'show_on_home', 'sort_order'] as $field) {
+        foreach (['is_published', 'show_on_home', 'show_in_nav', 'sort_order'] as $field) {
             if (isset($payload[$field])) {
                 $updates[$field] = (int) $payload[$field];
             }

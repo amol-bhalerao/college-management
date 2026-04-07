@@ -75,7 +75,7 @@ interface PublicNavLink {
           </button>
 
           <div class="main-menu-shell" [class.open]="mobileMenuOpen()">
-            @for (item of primaryNav(); track item.label) {
+            @for (item of primaryNav(); track item.page?.id || item.label) {
               <div class="nav-item" [class.active]="isNavActive(item)" [class.open]="openDropdownLabel() === item.label">
                 <button
                   type="button"
@@ -89,11 +89,32 @@ interface PublicNavLink {
                 </button>
 
                 @if (item.children?.length && openDropdownLabel() === item.label) {
-                  <div class="dropdown-panel">
-                    @for (child of item.children ?? []; track child.label) {
-                      <button type="button" class="dropdown-link" (click)="openNavLink(child)">
-                        {{ child.label }}
+                  <div class="dropdown-panel" [class.dropdown-panel--wide]="hasNestedChildren(item)">
+                    @if (item.page) {
+                      <button type="button" class="dropdown-link dropdown-link--overview" (click)="openNavLink(item)">
+                        {{ item.label }} Overview
                       </button>
+                    }
+
+                    @for (child of item.children ?? []; track child.page?.id || child.label) {
+                      @if (child.children?.length) {
+                        <div class="dropdown-group">
+                          <button type="button" class="dropdown-link dropdown-link--group" (click)="openNavLink(child)">
+                            {{ child.label }}
+                          </button>
+                          <div class="dropdown-subgrid">
+                            @for (grandChild of child.children ?? []; track grandChild.page?.id || grandChild.label) {
+                              <button type="button" class="dropdown-link dropdown-link--sub" (click)="openNavLink(grandChild)">
+                                {{ grandChild.label }}
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      } @else {
+                        <button type="button" class="dropdown-link" (click)="openNavLink(child)">
+                          {{ child.label }}
+                        </button>
+                      }
                     }
                   </div>
                 }
@@ -103,42 +124,6 @@ interface PublicNavLink {
         </nav>
 
         <div class="public-layout">
-          <aside class="left-sidebar">
-            <section class="sidebar-panel">
-              <h3>{{ activeMenuGroup() }}</h3>
-              <div class="sidebar-links">
-                @for (page of activeGroupPages(); track page.id) {
-                  <button type="button" [class.active]="selectedPage()?.id === page.id" (click)="openPage(page)">
-                    {{ pageLabel(page) }}
-                  </button>
-                }
-              </div>
-            </section>
-
-            <section class="sidebar-panel">
-              <h3>Important links</h3>
-              <div class="sidebar-links">
-                @for (page of importantPages(); track page.id) {
-                  <button type="button" class="mini-link" (click)="openPage(page)">{{ pageLabel(page) }}</button>
-                }
-              </div>
-            </section>
-
-            @if (pageSections().length) {
-              <section class="sidebar-panel">
-                <h3>On this page</h3>
-                <div class="sidebar-links">
-                  @for (section of pageSections(); track section.id) {
-                    <button type="button" [class.active]="currentSection() === section.id" (click)="goToSection(section.id)">
-                      {{ section.label }}
-                    </button>
-                  }
-                </div>
-                <small class="share-note">Shareable route: {{ sharePath(currentSection()) }}</small>
-              </section>
-            }
-          </aside>
-
           <div class="content-stack">
             @if (isHomePage()) {
               <section class="carousel-card">
@@ -193,6 +178,19 @@ interface PublicNavLink {
               </section>
 
               @if (selectedPage(); as page) {
+                @if (pageSections().length) {
+                  <section class="section-jump-bar">
+                    <strong>Quick links</strong>
+                    <div class="section-jump-list">
+                      @for (section of pageSections(); track section.id) {
+                        <button type="button" [class.active]="currentSection() === section.id" (click)="goToSection(section.id)">
+                          {{ section.label }}
+                        </button>
+                      }
+                    </div>
+                  </section>
+                }
+
                 <section class="page-surface">
                   <article class="content-card">
                     <div class="content-meta">
@@ -258,6 +256,19 @@ interface PublicNavLink {
                   </div>
                 </div>
               </section>
+
+              @if (pageSections().length) {
+                <section class="section-jump-bar">
+                  <strong>Quick links</strong>
+                  <div class="section-jump-list">
+                    @for (section of pageSections(); track section.id) {
+                      <button type="button" [class.active]="currentSection() === section.id" (click)="goToSection(section.id)">
+                        {{ section.label }}
+                      </button>
+                    }
+                  </div>
+                </section>
+              }
 
               <section class="page-surface">
                 <article class="content-card">
@@ -331,7 +342,7 @@ export class PublicWebsiteComponent {
       return [];
     }
 
-    const order = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'Quality', 'Governance', 'Gallery', 'Downloads', 'Notices', 'Students', 'Contact', 'General'];
+    const order = ['Home', 'About', 'Code of Conduct', 'Academics', 'Departments', 'College Cells', 'Alumni', 'IQAC', 'Gallery', 'Other', 'Contact', 'General'];
     const grouped = new Map<string, WebsitePage[]>();
 
     for (const page of site.pages) {
@@ -353,90 +364,31 @@ export class PublicWebsiteComponent {
 
   protected readonly homePage = computed(() => (this.siteData()?.pages ?? []).find((page) => page.slug === 'home') ?? this.siteData()?.pages?.[0] ?? null);
   protected readonly primaryNav = computed<PublicNavLink[]>(() => {
-    const pages = this.siteData()?.pages ?? [];
-    const findBySlug = (...slugs: string[]): WebsitePage | null => {
-      for (const slug of slugs) {
-        const match = pages.find((page) => page.slug === slug);
-        if (match) {
-          return match;
-        }
+    const pages = (this.siteData()?.pages ?? []).filter((page) => Number(page.show_in_nav ?? 1) === 1);
+    const pageMap = new Map<number, WebsitePage>(pages.map((page) => [page.id, page]));
+    const childrenByParent = new Map<number, WebsitePage[]>();
+    const roots: WebsitePage[] = [];
+
+    for (const page of pages) {
+      const parentId = Number(page.parent_page_id ?? 0);
+      if (parentId > 0 && pageMap.has(parentId)) {
+        childrenByParent.set(parentId, [...(childrenByParent.get(parentId) ?? []), page]);
+      } else {
+        roots.push(page);
       }
+    }
 
-      return null;
-    };
+    const sortPages = (items: WebsitePage[]) => [...items].sort(
+      (a, b) => Number(a.sort_order) - Number(b.sort_order) || this.pageLabel(a).localeCompare(this.pageLabel(b)),
+    );
 
-    const about = findBySlug('about');
-    const academics = findBySlug('academics');
-    const admissions = findBySlug('admissions');
-    const departments = findBySlug('departments');
-    const facilities = findBySlug('facilities');
-    const library = findBySlug('library');
-    const gallery = findBySlug('gallery');
-    const students = findBySlug('alumni-students');
-    const downloads = findBySlug('downloads');
-    const iqac = findBySlug('iqac');
-    const ssr = findBySlug('ssr');
-    const feedback = findBySlug('feedback');
-    const mou = findBySlug('mou');
-    const notices = findBySlug('notices');
-    const rti = findBySlug('rti');
-    const contact = findBySlug('contact');
+    const buildNode = (page: WebsitePage): PublicNavLink => ({
+      label: this.pageLabel(page),
+      page,
+      children: sortPages(childrenByParent.get(page.id) ?? []).map(buildNode),
+    });
 
-    return [
-      { label: 'Home', page: this.homePage() },
-      {
-        label: 'About',
-        page: about,
-        children: [
-          { label: 'About College', page: about },
-          { label: 'Institute Profile', page: about, sectionId: 'institution-profile' },
-          { label: 'Mission & Vision', page: about, sectionId: 'vision-mission' },
-          { label: 'Principal', page: about, sectionId: 'principal-message' },
-        ],
-      },
-      {
-        label: 'Academics',
-        page: academics ?? admissions ?? departments,
-        children: [
-          { label: 'Admissions', page: admissions },
-          { label: 'Academic Programs', page: academics, sectionId: 'courses' },
-          { label: 'Academic Support', page: academics, sectionId: 'student-support' },
-          { label: 'Departments', page: departments },
-        ],
-      },
-      {
-        label: 'Departments',
-        page: departments ?? facilities ?? library,
-        children: [
-          { label: 'All Departments', page: departments },
-          { label: 'Campus Facilities', page: facilities },
-          { label: 'Library', page: library ?? facilities, sectionId: library ? '' : 'library' },
-        ],
-      },
-      {
-        label: 'College Cells',
-        page: students ?? notices ?? gallery,
-        children: [
-          { label: 'Students & Alumni', page: students },
-          { label: 'Gallery', page: gallery },
-          { label: 'Downloads', page: downloads },
-          { label: 'Notices', page: notices },
-        ],
-      },
-      {
-        label: 'IQAC / NAAC',
-        page: iqac ?? ssr ?? rti,
-        children: [
-          { label: 'IQAC', page: iqac },
-          { label: 'SSR', page: ssr ?? iqac, sectionId: ssr ? '' : 'naac-support' },
-          { label: 'Feedback', page: feedback },
-          { label: 'MOU', page: mou },
-          { label: 'RTI', page: rti },
-          { label: 'Notices', page: notices },
-        ],
-      },
-      { label: 'Contact', page: contact },
-    ].filter((item) => item.page || item.children?.some((child) => child.page));
+    return sortPages(roots).map(buildNode);
   });
   protected readonly activeMenuGroup = computed(() => this.selectedPage()?.menu_group?.trim() || this.menuGroups()[0]?.label || 'Home');
   protected readonly isHomePage = computed(() => (this.selectedPage()?.slug ?? 'home') === (this.homePage()?.slug ?? 'home'));
@@ -463,9 +415,9 @@ export class PublicWebsiteComponent {
     const selectedId = this.selectedPage()?.id;
     return (this.siteData()?.pages ?? []).filter((page) => page.id !== selectedId).slice(0, 8);
   });
-  protected readonly noticePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Notices', 'Downloads'].includes((page.menu_group || '').trim())).slice(0, 6));
-  protected readonly resourcePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Downloads', 'Gallery', 'Facilities', 'Contact'].includes((page.menu_group || '').trim())).slice(0, 6));
-  protected readonly governancePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Quality', 'Governance'].includes((page.menu_group || '').trim())).slice(0, 6));
+  protected readonly noticePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Other', 'IQAC'].includes((page.menu_group || '').trim()) && ['notices', 'feedback', 'ssr'].includes(page.slug)).slice(0, 6));
+  protected readonly resourcePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Gallery', 'About', 'Departments', 'Other'].includes((page.menu_group || '').trim())).slice(0, 6));
+  protected readonly governancePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['IQAC', 'Code of Conduct', 'Other'].includes((page.menu_group || '').trim())).slice(0, 6));
   protected readonly pageSections = computed<PageSectionLink[]>(() => this.extractSections(this.selectedPage()?.body_html ?? ''));
 
   constructor() {
@@ -523,12 +475,12 @@ export class PublicWebsiteComponent {
   }
 
   protected isNavActive(item: PublicNavLink): boolean {
-    const selected = this.selectedPage();
-    if (!selected) {
-      return false;
-    }
+    const selectedId = this.selectedPage()?.id;
+    return selectedId ? this.navContainsPage(item, selectedId) : false;
+  }
 
-    return item.page?.id === selected.id || !!item.children?.some((child) => child.page?.id === selected.id);
+  protected hasNestedChildren(item: PublicNavLink): boolean {
+    return !!item.children?.some((child) => child.children?.length);
   }
 
   protected openPage(page: WebsitePage, sectionId = ''): void {
@@ -671,6 +623,14 @@ export class PublicWebsiteComponent {
   private extractHeading(html: string): string {
     const match = html.match(/<h[1-4][^>]*>(.*?)<\/h[1-4]>/i);
     return this.plainText(match?.[1] || '');
+  }
+
+  private navContainsPage(item: PublicNavLink, selectedId: number): boolean {
+    if (item.page?.id === selectedId) {
+      return true;
+    }
+
+    return !!item.children?.some((child) => this.navContainsPage(child, selectedId));
   }
 
   private humanize(value: string): string {
