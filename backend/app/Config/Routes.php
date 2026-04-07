@@ -46,6 +46,11 @@ $routes->group('api', static function ($routes): void {
     $routes->get('settings/theme', 'Api\SettingsController::theme');
     $routes->get('fees/summary', 'Api\StudentFinanceController::counterSummary');
     $routes->get('fees/summary/(:num)', 'Api\StudentFinanceController::counterSummary/$1');
+    $routes->get('students/master', 'Api\StudentController::index');
+    $routes->get('students/master/(:num)', 'Api\StudentController::index/$1');
+    $routes->post('students/master', 'Api\StudentController::create');
+    $routes->put('students/master/(:num)', 'Api\StudentController::update/$1');
+    $routes->delete('students/master/(:num)', 'Api\StudentController::delete/$1');
     $routes->get('students/(:segment)/ledger', 'Api\StudentFinanceController::ledger/$1');
     $routes->post('students/(:segment)/collect', 'Api\StudentFinanceController::collect/$1');
     $routes->get('verify/receipt/(:segment)', 'Api\VerifyController::receipt/$1');

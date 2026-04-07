@@ -7,6 +7,7 @@ import { LoginComponent } from './features/login/login.component';
 import { AdmissionCrmComponent } from './features/admission-crm/admission-crm.component';
 import { CertificateCenterComponent } from './features/certificate-center/certificate-center.component';
 import { StudentLedgerComponent } from './features/student-ledger/student-ledger.component';
+import { StudentMasterComponent } from './features/student-master/student-master.component';
 import { ThemeStudioComponent } from './features/theme-studio/theme-studio.component';
 import { UserManagementComponent } from './features/user-management/user-management.component';
 
@@ -45,6 +46,12 @@ export const routes: Routes = [
     component: CertificateCenterComponent,
     canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'])],
     title: 'Certificate Center',
+  },
+  {
+    path: 'students',
+    component: StudentMasterComponent,
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK'])],
+    title: 'Student Master',
   },
   {
     path: 'institute-header',

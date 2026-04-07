@@ -263,6 +263,7 @@ export class App {
     { label: 'Admission CRM', route: '/admissions', icon: '🧾', roles: ['SUPER_ADMIN', 'CLERK'] },
     { label: 'User Management', route: '/users', icon: '👥', roles: ['SUPER_ADMIN'] },
     { label: 'Certificate Center', route: '/certificates', icon: '📜', roles: ['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'] },
+    { label: 'Student Master', route: '/students', icon: '🎓', roles: ['SUPER_ADMIN', 'CLERK'] },
     { label: 'Institute Header', route: '/institute-header', icon: '🏫', roles: ['SUPER_ADMIN'] },
     { label: 'Student Ledger', route: '/student-ledger', icon: '📒', roles: ['SUPER_ADMIN', 'ACCOUNTANT'] },
     { label: 'Theme Studio', route: '/theme-studio', icon: '🎨', roles: ['SUPER_ADMIN'] },
