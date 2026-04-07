@@ -112,6 +112,7 @@
 .section-card p,
 .carousel-copy p {
   color: #475569;
+  margin: 0px;
 }
 
 .primary-btn,
@@ -164,31 +165,90 @@
 .main-menu-bar {
   position: sticky;
   top: 0.35rem;
-  z-index: 8;
-  display: flex;
+  z-index: 12;
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.8rem 1rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.96), rgba(49, 46, 129, 0.92));
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.18);
+  backdrop-filter: blur(12px);
+}
+
+.menu-toggle {
+  display: none;
+  width: fit-content;
   gap: 0.55rem;
-  overflow-x: auto;
-  white-space: nowrap;
-  padding: 0.35rem 0.1rem 0.55rem;
-  scrollbar-width: thin;
-  background: linear-gradient(180deg, rgba(248, 251, 255, 0.92), rgba(248, 251, 255, 0.72));
-  backdrop-filter: blur(10px);
+  padding: 0.75rem 1rem;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+  font-weight: 800;
 }
 
-.main-menu-bar button {
-  flex: 0 0 auto;
-  padding: 0.6rem 0.95rem;
-  border: 1px solid rgba(79, 70, 229, 0.18);
-  background: rgba(255, 255, 255, 0.95);
-  color: #312e81;
+.main-menu-shell {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: stretch;
+}
+
+.nav-item {
+  position: relative;
+}
+
+.nav-trigger {
+  min-width: 132px;
+  padding: 0.75rem 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
   font-weight: 700;
+  justify-content: space-between;
+  gap: 0.7rem;
+  border-radius: 14px;
 }
 
-.main-menu-bar button.active,
+.nav-caret {
+  font-size: 0.82rem;
+  transition: transform 0.18s ease;
+}
+
+.nav-item.open .nav-caret {
+  transform: rotate(180deg);
+}
+
+.dropdown-panel {
+  position: absolute;
+  top: calc(100% + 0.55rem);
+  left: 0;
+  min-width: 220px;
+  display: grid;
+  gap: 0.4rem;
+  padding: 0.65rem;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(148, 163, 184, 0.28);
+  box-shadow: 0 20px 34px rgba(15, 23, 42, 0.16);
+}
+
+.dropdown-link {
+  width: 100%;
+  padding: 0.6rem 0.75rem;
+  justify-content: flex-start;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: #f8fafc;
+  color: #0f172a;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.nav-item.active .nav-trigger,
+.nav-item.open .nav-trigger,
 .sidebar-links button.active,
 .carousel-dots button.active {
-  background: rgba(79, 70, 229, 0.12);
-  border-color: rgba(79, 70, 229, 0.35);
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(255, 255, 255, 0.4);
   color: #312e81;
 }
 
@@ -456,6 +516,41 @@
   .carousel-actions {
     display: grid;
     grid-template-columns: 1fr;
+  }
+
+  .main-menu-bar {
+    padding: 0.75rem;
+  }
+
+  .menu-toggle {
+    display: inline-flex;
+  }
+
+  .main-menu-shell {
+    display: none;
+    grid-template-columns: 1fr;
+  }
+
+  .main-menu-shell.open {
+    display: grid;
+  }
+
+  .nav-item,
+  .nav-trigger,
+  .dropdown-panel {
+    width: 100%;
+  }
+
+  .dropdown-panel {
+    position: static;
+    min-width: 0;
+    box-shadow: none;
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+  }
+
+  .dropdown-link {
+    background: rgba(255, 255, 255, 0.96);
   }
 
   .sidebar-links button,

@@ -16,6 +16,13 @@ interface PageSectionLink {
   label: string;
 }
 
+interface PublicNavLink {
+  label: string;
+  page: WebsitePage | null;
+  sectionId?: string;
+  children?: PublicNavLink[];
+}
+
 @Component({
   selector: 'app-public-website',
   standalone: true,
@@ -49,26 +56,50 @@ interface PageSectionLink {
             }
 
             <div class="brand-copy">
-              <p class="eyebrow">Institute website</p>
+              
               <h1>{{ site.institute.header_title || site.institute.name }}</h1>
               <p class="hero-text">{{ site.institute.header_subtitle || 'Transparent admissions, academic services, student support, and quality-focused public information.' }}</p>
             </div>
           </div>
 
           <div class="site-actions">
-            <a class="primary-btn" href="/login">ERP Login</a>
-            @if (site.institute.website_url) {
-              <a class="ghost-btn" [href]="site.institute.website_url" target="_blank" rel="noreferrer">Official URL</a>
-            }
+            <a class="primary-btn" href="/login">Login</a>
+           
           </div>
         </header>
 
         <nav class="main-menu-bar">
-          @for (group of menuGroups(); track group.label) {
-            <button type="button" [class.active]="activeMenuGroup() === group.label" (click)="openMenuGroup(group)">
-              {{ group.label }}
-            </button>
-          }
+          <button type="button" class="menu-toggle" [class.open]="mobileMenuOpen()" (click)="toggleMobileMenu()">
+            <span>☰</span>
+            <span>{{ mobileMenuOpen() ? 'Close Menu' : 'Menu' }}</span>
+          </button>
+
+          <div class="main-menu-shell" [class.open]="mobileMenuOpen()">
+            @for (item of primaryNav(); track item.label) {
+              <div class="nav-item" [class.active]="isNavActive(item)" [class.open]="openDropdownLabel() === item.label">
+                <button
+                  type="button"
+                  class="nav-trigger"
+                  [attr.aria-expanded]="item.children?.length ? openDropdownLabel() === item.label : null"
+                  (click)="handleNavClick(item)">
+                  <span>{{ item.label }}</span>
+                  @if (item.children?.length) {
+                    <span class="nav-caret">▾</span>
+                  }
+                </button>
+
+                @if (item.children?.length && openDropdownLabel() === item.label) {
+                  <div class="dropdown-panel">
+                    @for (child of item.children ?? []; track child.label) {
+                      <button type="button" class="dropdown-link" (click)="openNavLink(child)">
+                        {{ child.label }}
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
         </nav>
 
         <div class="public-layout">
@@ -291,6 +322,8 @@ export class PublicWebsiteComponent {
   protected readonly siteError = signal<string | null>(null);
   protected readonly activeSlideIndex = signal(0);
   protected readonly currentSection = signal('');
+  protected readonly mobileMenuOpen = signal(false);
+  protected readonly openDropdownLabel = signal('');
 
   protected readonly menuGroups = computed<PublicMenuGroup[]>(() => {
     const site = this.siteData();
@@ -319,6 +352,92 @@ export class PublicWebsiteComponent {
   });
 
   protected readonly homePage = computed(() => (this.siteData()?.pages ?? []).find((page) => page.slug === 'home') ?? this.siteData()?.pages?.[0] ?? null);
+  protected readonly primaryNav = computed<PublicNavLink[]>(() => {
+    const pages = this.siteData()?.pages ?? [];
+    const findBySlug = (...slugs: string[]): WebsitePage | null => {
+      for (const slug of slugs) {
+        const match = pages.find((page) => page.slug === slug);
+        if (match) {
+          return match;
+        }
+      }
+
+      return null;
+    };
+
+    const about = findBySlug('about');
+    const academics = findBySlug('academics');
+    const admissions = findBySlug('admissions');
+    const departments = findBySlug('departments');
+    const facilities = findBySlug('facilities');
+    const library = findBySlug('library');
+    const gallery = findBySlug('gallery');
+    const students = findBySlug('alumni-students');
+    const downloads = findBySlug('downloads');
+    const iqac = findBySlug('iqac');
+    const ssr = findBySlug('ssr');
+    const feedback = findBySlug('feedback');
+    const mou = findBySlug('mou');
+    const notices = findBySlug('notices');
+    const rti = findBySlug('rti');
+    const contact = findBySlug('contact');
+
+    return [
+      { label: 'Home', page: this.homePage() },
+      {
+        label: 'About',
+        page: about,
+        children: [
+          { label: 'About College', page: about },
+          { label: 'Institute Profile', page: about, sectionId: 'institution-profile' },
+          { label: 'Mission & Vision', page: about, sectionId: 'vision-mission' },
+          { label: 'Principal', page: about, sectionId: 'principal-message' },
+        ],
+      },
+      {
+        label: 'Academics',
+        page: academics ?? admissions ?? departments,
+        children: [
+          { label: 'Admissions', page: admissions },
+          { label: 'Academic Programs', page: academics, sectionId: 'courses' },
+          { label: 'Academic Support', page: academics, sectionId: 'student-support' },
+          { label: 'Departments', page: departments },
+        ],
+      },
+      {
+        label: 'Departments',
+        page: departments ?? facilities ?? library,
+        children: [
+          { label: 'All Departments', page: departments },
+          { label: 'Campus Facilities', page: facilities },
+          { label: 'Library', page: library ?? facilities, sectionId: library ? '' : 'library' },
+        ],
+      },
+      {
+        label: 'College Cells',
+        page: students ?? notices ?? gallery,
+        children: [
+          { label: 'Students & Alumni', page: students },
+          { label: 'Gallery', page: gallery },
+          { label: 'Downloads', page: downloads },
+          { label: 'Notices', page: notices },
+        ],
+      },
+      {
+        label: 'IQAC / NAAC',
+        page: iqac ?? ssr ?? rti,
+        children: [
+          { label: 'IQAC', page: iqac },
+          { label: 'SSR', page: ssr ?? iqac, sectionId: ssr ? '' : 'naac-support' },
+          { label: 'Feedback', page: feedback },
+          { label: 'MOU', page: mou },
+          { label: 'RTI', page: rti },
+          { label: 'Notices', page: notices },
+        ],
+      },
+      { label: 'Contact', page: contact },
+    ].filter((item) => item.page || item.children?.some((child) => child.page));
+  });
   protected readonly activeMenuGroup = computed(() => this.selectedPage()?.menu_group?.trim() || this.menuGroups()[0]?.label || 'Home');
   protected readonly isHomePage = computed(() => (this.selectedPage()?.slug ?? 'home') === (this.homePage()?.slug ?? 'home'));
   protected readonly activeGroupPages = computed(() => this.menuGroups().find((group) => group.label === this.activeMenuGroup())?.pages ?? []);
@@ -376,8 +495,46 @@ export class PublicWebsiteComponent {
     }
   }
 
+  protected toggleMobileMenu(): void {
+    const nextState = !this.mobileMenuOpen();
+    this.mobileMenuOpen.set(nextState);
+    if (!nextState) {
+      this.openDropdownLabel.set('');
+    }
+  }
+
+  protected handleNavClick(item: PublicNavLink): void {
+    if (item.children?.length) {
+      this.openDropdownLabel.update((current) => current === item.label ? '' : item.label);
+      return;
+    }
+
+    this.openNavLink(item);
+  }
+
+  protected openNavLink(item: PublicNavLink): void {
+    if (!item.page) {
+      return;
+    }
+
+    this.mobileMenuOpen.set(false);
+    this.openDropdownLabel.set('');
+    this.openPage(item.page, item.sectionId || '');
+  }
+
+  protected isNavActive(item: PublicNavLink): boolean {
+    const selected = this.selectedPage();
+    if (!selected) {
+      return false;
+    }
+
+    return item.page?.id === selected.id || !!item.children?.some((child) => child.page?.id === selected.id);
+  }
+
   protected openPage(page: WebsitePage, sectionId = ''): void {
     this.selectedPage.set(page);
+    this.mobileMenuOpen.set(false);
+    this.openDropdownLabel.set('');
     this.currentSection.set(sectionId);
     void this.router.navigate([], {
       relativeTo: this.route,
