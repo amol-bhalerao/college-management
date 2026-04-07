@@ -5,6 +5,7 @@ import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { InstituteHeaderComponent } from './features/institute-header/institute-header.component';
 import { LoginComponent } from './features/login/login.component';
 import { AdmissionCrmComponent } from './features/admission-crm/admission-crm.component';
+import { CertificateCenterComponent } from './features/certificate-center/certificate-center.component';
 import { StudentLedgerComponent } from './features/student-ledger/student-ledger.component';
 import { ThemeStudioComponent } from './features/theme-studio/theme-studio.component';
 import { UserManagementComponent } from './features/user-management/user-management.component';
@@ -38,6 +39,12 @@ export const routes: Routes = [
     component: UserManagementComponent,
     canActivate: [authGuard],
     title: 'User Management',
+  },
+  {
+    path: 'certificates',
+    component: CertificateCenterComponent,
+    canActivate: [authGuard],
+    title: 'Certificate Center',
   },
   {
     path: 'institute-header',

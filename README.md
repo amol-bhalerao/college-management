@@ -38,7 +38,13 @@ Open: `http://127.0.0.1:8080/`
 ```powershell
 powershell -ExecutionPolicy Bypass -File .\scripts\setup-test-db.ps1
 ```
-This rebuilds the local SQLite database and seeds demo data automatically.
+This rebuilds the local development database configured in `backend/.env` and seeds demo data automatically.
+
+### One-command MySQL/phpMyAdmin setup
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-mysql-test-db.ps1
+```
+This imports `database/mysql/001_college_management_setup.sql` into the local `college_management` database.
 
 ## Demo Login Credentials
 > Change these before production use.
@@ -59,6 +65,7 @@ Implemented so far:
 - executive dashboard
 - admission CRM (enquiries and conversion flow)
 - user management for super admin
+- certificate center with issue/verification flow
 - institute header manager for graphical print branding edits
 - theme studio UI
 - student ledger screen

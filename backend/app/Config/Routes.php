@@ -23,6 +23,10 @@ $routes->group('api', static function ($routes): void {
     $routes->get('enquiries', 'Api\EnquiryController::index');
     $routes->get('enquiries/(:num)', 'Api\EnquiryController::index/$1');
     $routes->post('enquiries/(:num)/convert', 'Api\EnquiryController::convert/$1');
+    $routes->get('certificates/summary', 'Api\CertificateController::summary');
+    $routes->get('certificates/summary/(:num)', 'Api\CertificateController::summary/$1');
+    $routes->get('certificates/(:num)', 'Api\CertificateController::index/$1');
+    $routes->post('certificates/(:num)/issue', 'Api\CertificateController::issue/$1');
     $routes->get('settings/app', 'Api\SettingsController::app');
     $routes->get('settings/theme', 'Api\SettingsController::theme');
     $routes->get('students/(:segment)/ledger', 'Api\StudentFinanceController::ledger/$1');

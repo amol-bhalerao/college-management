@@ -180,5 +180,11 @@ class DemoSeeder extends Seeder
             'created_at' => $now,
             'updated_at' => $now,
         ]);
+
+        $db->table('certificate_requests')->ignore(true)->insertBatch([
+            ['id' => 1, 'student_id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'request_number' => 'CERT-JC-0001', 'certificate_type' => 'bonafide', 'purpose' => 'Bank account opening for scholarship process.', 'status' => 'issued', 'verification_token' => 'CERT-JC-2026-0001', 'issued_on' => '2026-04-07', 'requested_by' => 'Clerk Desk', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'student_id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'request_number' => 'CERT-JC-0002', 'certificate_type' => 'transfer_certificate', 'purpose' => 'Migration to another college after relocation.', 'status' => 'requested', 'verification_token' => null, 'issued_on' => null, 'requested_by' => 'Admissions Team', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 3, 'student_id' => 3, 'institute_id' => 2, 'academic_year_id' => 2, 'request_number' => 'CERT-DC-0001', 'certificate_type' => 'no_dues', 'purpose' => 'Internship and library clearance requirement.', 'status' => 'verified', 'verification_token' => 'CERT-DC-2026-0001', 'issued_on' => '2026-04-06', 'requested_by' => 'Account Office', 'created_at' => $now, 'updated_at' => $now],
+        ]);
     }
 }

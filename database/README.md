@@ -1,7 +1,7 @@
 # Database Setup
 
 ## Option 1: Local test database (recommended for current dev setup)
-This project currently uses a local SQLite database for quick testing.
+This project supports a quick local database setup for testing using the database configured in `backend/.env` (SQLite fallback or MySQL).
 
 Run:
 ```powershell
@@ -21,6 +21,11 @@ This will:
 
 ## Option 2: MySQL setup script
 For Hostinger or MySQL-based testing, run:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-mysql-test-db.ps1
+```
+
+Or import manually:
 - `database/mysql/001_college_management_setup.sql`
 
 This script uses:

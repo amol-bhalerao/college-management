@@ -175,6 +175,25 @@ CREATE TABLE IF NOT EXISTS `admissions` (
   UNIQUE KEY `uq_admissions_admission_number` (`admission_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `certificate_requests` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `student_id` INT UNSIGNED NOT NULL,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `academic_year_id` INT UNSIGNED NOT NULL,
+  `request_number` VARCHAR(50) NOT NULL,
+  `certificate_type` VARCHAR(60) NOT NULL,
+  `purpose` TEXT DEFAULT NULL,
+  `status` VARCHAR(30) NOT NULL DEFAULT 'requested',
+  `verification_token` VARCHAR(80) DEFAULT NULL,
+  `issued_on` DATE DEFAULT NULL,
+  `requested_by` VARCHAR(120) DEFAULT NULL,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_certificate_requests_request_number` (`request_number`),
+  UNIQUE KEY `uq_certificate_requests_verification_token` (`verification_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT IGNORE INTO `organizations` (`id`, `name`, `code`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Demo Education Trust', 'DET', 'active', NOW(), NOW());
 
@@ -232,3 +251,8 @@ INSERT IGNORE INTO `enquiries` (`id`, `institute_id`, `academic_year_id`, `enqui
 
 INSERT IGNORE INTO `admissions` (`id`, `enquiry_id`, `student_id`, `institute_id`, `academic_year_id`, `admission_number`, `status`, `admitted_on`, `remarks`, `created_at`, `updated_at`) VALUES
 (1, 3, NULL, 1, 1, 'ADM-2026-0003', 'confirmed', '2026-04-08', 'Converted from enquiry after counselling and document verification.', NOW(), NOW());
+
+INSERT IGNORE INTO `certificate_requests` (`id`, `student_id`, `institute_id`, `academic_year_id`, `request_number`, `certificate_type`, `purpose`, `status`, `verification_token`, `issued_on`, `requested_by`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 1, 'CERT-JC-0001', 'bonafide', 'Bank account opening for scholarship process.', 'issued', 'CERT-JC-2026-0001', '2026-04-07', 'Clerk Desk', NOW(), NOW()),
+(2, 2, 1, 1, 'CERT-JC-0002', 'transfer_certificate', 'Migration to another college after relocation.', 'requested', NULL, NULL, 'Admissions Team', NOW(), NOW()),
+(3, 3, 2, 2, 'CERT-DC-0001', 'no_dues', 'Internship and library clearance requirement.', 'verified', 'CERT-DC-2026-0001', '2026-04-06', 'Account Office', NOW(), NOW());
