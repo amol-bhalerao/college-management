@@ -109,87 +109,158 @@ interface PageSectionLink {
           </aside>
 
           <div class="content-stack">
-            <section class="carousel-card">
-              @if (currentSlide(); as slide) {
-                <div class="carousel-visual" [style.background-image]="slideBackground(slide)">
-                  <div class="carousel-copy">
-                    <span class="seo-chip">{{ slide.menu_group || 'Home' }}</span>
-                    <h2>{{ slide.hero_title || slide.title }}</h2>
-                    <p>{{ slide.summary_text || slide.hero_subtitle || slide.seo_description || 'Dynamic public content managed by super admin.' }}</p>
-                    <div class="carousel-actions">
-                      <button type="button" class="primary-btn" (click)="openPage(slide)">Open section</button>
-                      <button type="button" class="ghost-btn" (click)="nextSlide(1)">Next slide</button>
+            @if (isHomePage()) {
+              <section class="carousel-card">
+                @if (currentSlide(); as slide) {
+                  <div class="carousel-visual" [style.background-image]="slideBackground(slide)">
+                    <div class="carousel-copy">
+                      <span class="seo-chip">{{ slide.menu_group || 'Home' }}</span>
+                      <h2>{{ slide.hero_title || slide.title }}</h2>
+                      <p>{{ slide.summary_text || slide.hero_subtitle || slide.seo_description || 'Dynamic public content managed by super admin.' }}</p>
+                      <div class="carousel-actions">
+                        <button type="button" class="primary-btn" (click)="openPage(slide)">Open section</button>
+                        <button type="button" class="ghost-btn" (click)="nextSlide(1)">Next slide</button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div class="carousel-dots">
-                  @for (item of featuredPages(); track item.id; let i = $index) {
-                    <button type="button" [class.active]="activeSlideIndex() === i" (click)="openSlide(i)">
-                      {{ pageLabel(item) }}
-                    </button>
-                  }
-                </div>
+                  <div class="carousel-dots">
+                    @for (item of featuredPages(); track item.id; let i = $index) {
+                      <button type="button" [class.active]="activeSlideIndex() === i" (click)="openSlide(i)">
+                        {{ pageLabel(item) }}
+                      </button>
+                    }
+                  </div>
+                }
+              </section>
+
+              @if (noticePages().length) {
+                <section class="notice-strip">
+                  <strong>Latest notices</strong>
+                  <div class="notice-scroll">
+                    @for (item of noticePages(); track item.id) {
+                      <button type="button" class="notice-chip" (click)="openPage(item)">
+                        {{ pageLabel(item) }}
+                      </button>
+                    }
+                  </div>
+                </section>
               }
-            </section>
 
-            <section class="cards-grid">
-              @for (card of homeCards(); track card.id) {
-                <article class="info-card">
-                  @if (card.cover_image_url) {
-                    <img class="card-image" [src]="card.cover_image_url" [alt]="card.title" />
-                  }
-                  <span>{{ card.menu_group || 'Section' }}</span>
-                  <strong>{{ card.hero_title || card.title }}</strong>
-                  <p>{{ pageSummary(card) }}</p>
-                  <button type="button" class="mini-link" (click)="openPage(card)">View more</button>
-                </article>
+              <section class="cards-grid">
+                @for (card of homeCards(); track card.id) {
+                  <article class="info-card animate-card">
+                    @if (card.cover_image_url) {
+                      <img class="card-image" [src]="card.cover_image_url" [alt]="card.title" />
+                    }
+                    <span>{{ card.menu_group || 'Section' }}</span>
+                    <strong>{{ card.hero_title || card.title }}</strong>
+                    <p>{{ pageSummary(card) }}</p>
+                    <button type="button" class="mini-link" (click)="openPage(card)">View more</button>
+                  </article>
+                }
+              </section>
+
+              @if (selectedPage(); as page) {
+                <section class="page-surface">
+                  <article class="content-card">
+                    <div class="content-meta">
+                      <span>/{{ page.slug }}</span>
+                      <strong>{{ page.title }}</strong>
+                      <small>{{ page.menu_group || 'General' }} · {{ sharePath() }}</small>
+                    </div>
+                    <div class="html-body" [innerHTML]="page.body_html || '<p>No content added yet.</p>'"></div>
+                  </article>
+
+                  <aside class="right-rail">
+                    <div class="sidebar-panel">
+                      <h3>Principal's Desk</h3>
+                      <strong>{{ site.institute.principal_name || 'Principal' }}</strong>
+                      <p>{{ site.institute.footer_note || 'Academic quality, discipline, and student support remain our focus.' }}</p>
+                    </div>
+
+                    <div class="sidebar-panel">
+                      <h3>Downloads & resources</h3>
+                      <div class="sidebar-links">
+                        @for (item of resourcePages(); track item.id) {
+                          <button type="button" class="mini-link" (click)="openPage(item)">{{ pageLabel(item) }}</button>
+                        }
+                      </div>
+                    </div>
+
+                    <div class="sidebar-panel">
+                      <h3>Quality & governance</h3>
+                      <div class="sidebar-links">
+                        @for (item of governancePages(); track item.id) {
+                          <button type="button" class="mini-link" (click)="openPage(item)">{{ pageLabel(item) }}</button>
+                        }
+                      </div>
+                    </div>
+                  </aside>
+                </section>
               }
-            </section>
 
-            @if (selectedPage(); as page) {
+              <section class="section-grid">
+                @for (group of menuGroups().slice(0, 8); track group.label) {
+                  <article class="section-card">
+                    <span>{{ group.label }}</span>
+                    <strong>{{ group.pages.length }} page{{ group.pages.length > 1 ? 's' : '' }}</strong>
+                    <p>{{ pageSummary(group.pages[0]) }}</p>
+                    <button type="button" class="link-chip" (click)="openPage(group.pages[0])">Open {{ group.label }}</button>
+                  </article>
+                }
+              </section>
+            } @else if (selectedPage(); as page) {
+              <section class="page-hero-card">
+                <div class="page-hero-card__image" [style.background-image]="slideBackground(page)"></div>
+                <div class="page-hero-card__content">
+                  <span class="page-badge">{{ page.menu_group || 'General' }}</span>
+                  <h2>{{ page.hero_title || page.title }}</h2>
+                  <p>{{ page.summary_text || page.hero_subtitle || page.seo_description || 'Dynamic page managed by super admin.' }}</p>
+                  <div class="carousel-actions">
+                    @if (pageSections().length) {
+                      <button type="button" class="primary-btn" (click)="goToSection(pageSections()[0].id)">Jump to first section</button>
+                    }
+                    @if (homePage(); as rootPage) {
+                      <button type="button" class="ghost-btn" (click)="openPage(rootPage)">Back to home</button>
+                    }
+                  </div>
+                </div>
+              </section>
+
               <section class="page-surface">
                 <article class="content-card">
                   <div class="content-meta">
                     <span>/{{ page.slug }}</span>
                     <strong>{{ page.title }}</strong>
-                    <small>{{ page.menu_group || 'General' }} · {{ sharePath() }}</small>
+                    <small>{{ page.menu_group || 'General' }} · {{ sharePath(currentSection()) }}</small>
                   </div>
                   <div class="html-body" [innerHTML]="page.body_html || '<p>No content added yet.</p>'"></div>
                 </article>
 
                 <aside class="right-rail">
                   <div class="sidebar-panel">
+                    <h3>Share this page</h3>
+                    <small class="share-note">{{ sharePath(currentSection()) }}</small>
+                  </div>
+
+                  <div class="sidebar-panel">
+                    <h3>Related pages</h3>
+                    <div class="sidebar-links">
+                      @for (item of importantPages(); track item.id) {
+                        <button type="button" class="mini-link" (click)="openPage(item)">{{ pageLabel(item) }}</button>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="sidebar-panel">
                     <h3>Contact & info</h3>
                     <p>{{ site.institute.header_address || 'Address will appear here.' }}</p>
                     <small>{{ site.institute.contact_phone || 'Phone pending' }} · {{ site.institute.contact_email || 'Email pending' }}</small>
                   </div>
-
-                  <div class="sidebar-panel">
-                    <h3>Principal's Desk</h3>
-                    <strong>{{ site.institute.principal_name || 'Principal' }}</strong>
-                    <p>{{ site.institute.footer_note || 'Academic quality, discipline, and student support remain our focus.' }}</p>
-                  </div>
-
-                  <div class="sidebar-panel">
-                    <h3>SEO preview</h3>
-                    <strong>{{ page.seo_title || page.title }}</strong>
-                    <p>{{ page.seo_description || 'SEO description not added yet.' }}</p>
-                  </div>
                 </aside>
               </section>
             }
-
-            <section class="section-grid">
-              @for (group of menuGroups().slice(0, 6); track group.label) {
-                <article class="section-card">
-                  <span>{{ group.label }}</span>
-                  <strong>{{ group.pages.length }} page{{ group.pages.length > 1 ? 's' : '' }}</strong>
-                  <p>{{ pageSummary(group.pages[0]) }}</p>
-                  <button type="button" class="link-chip" (click)="openPage(group.pages[0])">Open {{ group.label }}</button>
-                </article>
-              }
-            </section>
           </div>
         </div>
 
@@ -227,7 +298,7 @@ export class PublicWebsiteComponent {
       return [];
     }
 
-    const order = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'IQAC', 'Library', 'Alumni', 'Students', 'Contact', 'General'];
+    const order = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'Quality', 'Governance', 'Gallery', 'Downloads', 'Notices', 'Students', 'Contact', 'General'];
     const grouped = new Map<string, WebsitePage[]>();
 
     for (const page of site.pages) {
@@ -247,7 +318,9 @@ export class PublicWebsiteComponent {
       }));
   });
 
+  protected readonly homePage = computed(() => (this.siteData()?.pages ?? []).find((page) => page.slug === 'home') ?? this.siteData()?.pages?.[0] ?? null);
   protected readonly activeMenuGroup = computed(() => this.selectedPage()?.menu_group?.trim() || this.menuGroups()[0]?.label || 'Home');
+  protected readonly isHomePage = computed(() => (this.selectedPage()?.slug ?? 'home') === (this.homePage()?.slug ?? 'home'));
   protected readonly activeGroupPages = computed(() => this.menuGroups().find((group) => group.label === this.activeMenuGroup())?.pages ?? []);
   protected readonly featuredPages = computed(() => {
     const site = this.siteData();
@@ -271,6 +344,9 @@ export class PublicWebsiteComponent {
     const selectedId = this.selectedPage()?.id;
     return (this.siteData()?.pages ?? []).filter((page) => page.id !== selectedId).slice(0, 8);
   });
+  protected readonly noticePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Notices', 'Downloads'].includes((page.menu_group || '').trim())).slice(0, 6));
+  protected readonly resourcePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Downloads', 'Gallery', 'Facilities', 'Contact'].includes((page.menu_group || '').trim())).slice(0, 6));
+  protected readonly governancePages = computed(() => (this.siteData()?.pages ?? []).filter((page) => ['Quality', 'Governance'].includes((page.menu_group || '').trim())).slice(0, 6));
   protected readonly pageSections = computed<PageSectionLink[]>(() => this.extractSections(this.selectedPage()?.body_html ?? ''));
 
   constructor() {

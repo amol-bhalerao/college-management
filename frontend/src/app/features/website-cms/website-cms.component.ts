@@ -29,7 +29,7 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
           <div class="panel__header">
             <div>
               <h2>Page list</h2>
-              <p>Home, About, Admissions, Facilities, and other SEO-ready pages.</p>
+              <p>Home, About, Notices, Downloads, Gallery, RTI, SSR, MOU, and other SEO-ready pages.</p>
             </div>
             <span class="tag">Published website</span>
           </div>
@@ -197,7 +197,7 @@ export class WebsiteCmsComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
 
-  protected readonly menuGroupOptions = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'IQAC', 'Library', 'Alumni', 'Students', 'Contact', 'General'];
+  protected readonly menuGroupOptions = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'Quality', 'Governance', 'Gallery', 'Downloads', 'Notices', 'Students', 'Contact', 'General'];
 
   protected form: WebsitePagePayload = this.createEmptyForm();
 

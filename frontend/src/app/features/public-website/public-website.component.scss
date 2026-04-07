@@ -54,7 +54,9 @@
 .sidebar-panel,
 .info-card,
 .section-card,
-.state-card {
+.state-card,
+.page-hero-card,
+.notice-strip {
   background: rgba(255, 255, 255, 0.97);
   border-radius: 20px;
   box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
@@ -280,6 +282,30 @@
   gap: 1rem;
 }
 
+.notice-strip {
+  display: grid;
+  gap: 0.75rem;
+  padding: 0.9rem 1rem;
+}
+
+.notice-scroll {
+  display: flex;
+  gap: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.15rem;
+}
+
+.notice-chip {
+  flex: 0 0 auto;
+  border: 1px solid rgba(14, 116, 144, 0.18);
+  background: rgba(240, 249, 255, 0.95);
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 0.5rem 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
 .cards-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
@@ -289,6 +315,10 @@
   display: grid;
   gap: 0.7rem;
   padding: 0.9rem;
+}
+
+.animate-card {
+  animation: fadeUp 0.45s ease both;
 }
 
 .card-image {
@@ -303,6 +333,41 @@
 .content-meta span {
   color: #4338ca;
   font-weight: 700;
+}
+
+.page-hero-card {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(0, 1.2fr);
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.page-hero-card__image {
+  min-height: 220px;
+  background-size: cover;
+  background-position: center;
+}
+
+.page-hero-card__content {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem 1.1rem;
+  align-content: center;
+}
+
+.page-hero-card__content h2 {
+  margin: 0;
+}
+
+.page-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: rgba(79, 70, 229, 0.12);
+  color: #312e81;
+  font-size: 0.82rem;
+  font-weight: 800;
 }
 
 .page-surface {
@@ -361,6 +426,18 @@
   padding: 0.2rem 0 0.4rem;
 }
 
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @media (max-width: 1200px) {
   .cards-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -372,6 +449,7 @@
   .brand-wrap,
   .site-actions,
   .public-layout,
+  .page-hero-card,
   .page-surface,
   .cards-grid,
   .section-grid,
