@@ -1,73 +1,79 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
 import { AppContextService } from './core/services/context.service';
+import { AuthService } from './core/services/auth.service';
 import { ThemeService } from './core/services/theme.service';
 
 @Component({
   selector: 'app-root',
   imports: [FormsModule, RouterLink, RouterLinkActive, RouterOutlet],
   template: `
-    <div class="shell">
-      <aside class="sidebar">
-        <div class="brand-block">
-          <div class="brand-mark">CM</div>
-          <div>
-            <strong>College ERP</strong>
-            <small>IQAC-ready multi-institute suite</small>
+    @if (auth.isAuthenticated()) {
+      <div class="shell">
+        <aside class="sidebar">
+          <div class="brand-block">
+            <div class="brand-mark">CM</div>
+            <div>
+              <strong>College ERP</strong>
+              <small>IQAC-ready multi-institute suite</small>
+            </div>
           </div>
+
+          <nav class="nav-list">
+            @for (item of navItems; track item.route) {
+              <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+                <span>{{ item.icon }}</span>
+                <span>{{ item.label }}</span>
+              </a>
+            }
+          </nav>
+
+          <div class="sidebar-note">
+            <span>Logged in as</span>
+            <strong>{{ auth.currentUser()?.fullName }}</strong>
+            <small>{{ auth.currentUser()?.role }} · institute-aware access is active.</small>
+          </div>
+        </aside>
+
+        <div class="workspace">
+          <header class="topbar">
+            <div class="context-bar">
+              <label>
+                Institute
+                <select [(ngModel)]="selectedInstituteId" (ngModelChange)="onInstituteChange($event)">
+                  @for (institute of context.institutes; track institute.id) {
+                    <option [value]="institute.id">{{ institute.name }}</option>
+                  }
+                </select>
+              </label>
+
+              <label>
+                Academic Year
+                <select [(ngModel)]="selectedAcademicYear" (ngModelChange)="onAcademicYearChange($event)">
+                  @for (year of context.academicYears; track year) {
+                    <option [value]="year">{{ year }}</option>
+                  }
+                </select>
+              </label>
+            </div>
+
+            <div class="topbar-meta">
+              <span class="chip chip--primary">{{ context.activeInstitute().code }}</span>
+              <span class="chip">{{ auth.currentUser()?.username }}</span>
+              <button type="button" class="logout-btn" (click)="logout()">Logout</button>
+            </div>
+          </header>
+
+          <main class="page-area">
+            <router-outlet></router-outlet>
+          </main>
         </div>
-
-        <nav class="nav-list">
-          @for (item of navItems; track item.route) {
-            <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
-              <span>{{ item.icon }}</span>
-              <span>{{ item.label }}</span>
-            </a>
-          }
-        </nav>
-
-        <div class="sidebar-note">
-          <span>Current focus</span>
-          <strong>Foundation sprint</strong>
-          <small>Auth, institute context, theme studio, dashboard, and API base are now in progress.</small>
-        </div>
-      </aside>
-
-      <div class="workspace">
-        <header class="topbar">
-          <div class="context-bar">
-            <label>
-              Institute
-              <select [(ngModel)]="selectedInstituteId" (ngModelChange)="onInstituteChange($event)">
-                @for (institute of context.institutes; track institute.id) {
-                  <option [value]="institute.id">{{ institute.name }}</option>
-                }
-              </select>
-            </label>
-
-            <label>
-              Academic Year
-              <select [(ngModel)]="selectedAcademicYear" (ngModelChange)="onAcademicYearChange($event)">
-                @for (year of context.academicYears; track year) {
-                  <option [value]="year">{{ year }}</option>
-                }
-              </select>
-            </label>
-          </div>
-
-          <div class="topbar-meta">
-            <span class="chip chip--primary">{{ context.activeInstitute().code }}</span>
-            <span class="chip">Super Admin Preview</span>
-          </div>
-        </header>
-
-        <main class="page-area">
-          <router-outlet></router-outlet>
-        </main>
       </div>
-    </div>
+    } @else {
+      <router-outlet></router-outlet>
+    }
   `,
   styles: [
     `
@@ -215,6 +221,15 @@ import { ThemeService } from './core/services/theme.service';
         color: var(--primary-color);
       }
 
+      .logout-btn {
+        padding: 0.55rem 0.85rem;
+        border: 0;
+        border-radius: 999px;
+        background: linear-gradient(135deg, var(--header-start), var(--header-end));
+        color: #fff;
+        cursor: pointer;
+      }
+
       .page-area {
         padding: 1.25rem;
       }
@@ -238,6 +253,9 @@ import { ThemeService } from './core/services/theme.service';
 })
 export class App {
   protected readonly context = inject(AppContextService);
+  protected readonly auth = inject(AuthService);
+
+  private readonly router = inject(Router);
   private readonly themeService = inject(ThemeService);
 
   protected readonly navItems = [
@@ -259,5 +277,10 @@ export class App {
 
   protected onAcademicYearChange(value: string): void {
     this.context.selectAcademicYear(value);
+  }
+
+  protected async logout(): Promise<void> {
+    this.auth.logout();
+    await this.router.navigateByUrl('/login');
   }
 }

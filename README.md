@@ -17,4 +17,45 @@ A multi-institute, IQAC/NAAC-aware college ERP + website platform planned for `A
 - Scholarship, IQAC/NAAC, and report-heavy operations
 - SEO-ready public website and QR-based public verification
 
+## Local Development Quick Start
+### Frontend
+```bash
+cd frontend
+npm install
+npm start
+```
+Open: `http://127.0.0.1:4200/login`
+
+### Backend
+```bash
+cd backend
+composer install
+php spark migrate
+php spark db:seed DemoSeeder
+php spark serve --host 127.0.0.1 --port 8080
+```
+Open: `http://127.0.0.1:8080/`
+
+## Demo Login Credentials
+> Change these before production use.
+
+- **Super Admin**
+  - User ID: `superadmin`
+  - Password: `Password@123`
+- **Clerk**
+  - User ID: `clerk01`
+  - Password: `Password@123`
+- **Accountant**
+  - User ID: `accounts01`
+  - Password: `Password@123`
+
+## Current Foundation Status
+Implemented so far:
+- login flow with local mock auth
+- executive dashboard
+- theme studio UI
+- student ledger screen
+- mock data seeders and institute records
+- QR/public verification API base
+
 See `docs/development-plan.md` for the detailed blueprint and development stages.

@@ -186,6 +186,10 @@ class CreateFoundationTables extends Migration
                     'unsigned' => true,
                     'null' => true,
                 ],
+                'username' => [
+                    'type' => 'VARCHAR',
+                    'constraint' => 60,
+                ],
                 'full_name' => [
                     'type' => 'VARCHAR',
                     'constraint' => 160,
@@ -217,13 +221,94 @@ class CreateFoundationTables extends Migration
                 'updated_at' => ['type' => 'DATETIME', 'null' => true],
             ]);
             $this->forge->addKey('id', true);
+            $this->forge->addUniqueKey('username');
             $this->forge->addUniqueKey('email');
             $this->forge->createTable('users', true);
+        }
+
+        if (! $this->db->tableExists('students')) {
+            $this->forge->addField([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+                'institute_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'academic_year_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'gr_number' => ['type' => 'VARCHAR', 'constraint' => 40],
+                'first_name' => ['type' => 'VARCHAR', 'constraint' => 80],
+                'last_name' => ['type' => 'VARCHAR', 'constraint' => 80],
+                'gender' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
+                'category' => ['type' => 'VARCHAR', 'constraint' => 40, 'null' => true],
+                'current_class' => ['type' => 'VARCHAR', 'constraint' => 40, 'null' => true],
+                'division' => ['type' => 'VARCHAR', 'constraint' => 10, 'null' => true],
+                'mobile_number' => ['type' => 'VARCHAR', 'constraint' => 30, 'null' => true],
+                'status' => ['type' => 'VARCHAR', 'constraint' => 20, 'default' => 'active'],
+                'created_at' => ['type' => 'DATETIME', 'null' => true],
+                'updated_at' => ['type' => 'DATETIME', 'null' => true],
+            ]);
+            $this->forge->addKey('id', true);
+            $this->forge->addUniqueKey('gr_number');
+            $this->forge->createTable('students', true);
+        }
+
+        if (! $this->db->tableExists('scholarship_applications')) {
+            $this->forge->addField([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+                'student_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'institute_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'academic_year_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'scheme_name' => ['type' => 'VARCHAR', 'constraint' => 160],
+                'status' => ['type' => 'VARCHAR', 'constraint' => 30, 'default' => 'pending'],
+                'is_eligible' => ['type' => 'BOOLEAN', 'default' => true],
+                'expected_amount' => ['type' => 'DECIMAL', 'constraint' => '12,2', 'default' => 0],
+                'created_at' => ['type' => 'DATETIME', 'null' => true],
+                'updated_at' => ['type' => 'DATETIME', 'null' => true],
+            ]);
+            $this->forge->addKey('id', true);
+            $this->forge->createTable('scholarship_applications', true);
+        }
+
+        if (! $this->db->tableExists('student_ledger_entries')) {
+            $this->forge->addField([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+                'student_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'institute_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'academic_year_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'entry_date' => ['type' => 'DATE'],
+                'reference' => ['type' => 'VARCHAR', 'constraint' => 160],
+                'mode' => ['type' => 'VARCHAR', 'constraint' => 40, 'null' => true],
+                'debit' => ['type' => 'DECIMAL', 'constraint' => '12,2', 'default' => 0],
+                'credit' => ['type' => 'DECIMAL', 'constraint' => '12,2', 'default' => 0],
+                'balance' => ['type' => 'DECIMAL', 'constraint' => '12,2', 'default' => 0],
+                'note' => ['type' => 'TEXT', 'null' => true],
+                'created_at' => ['type' => 'DATETIME', 'null' => true],
+                'updated_at' => ['type' => 'DATETIME', 'null' => true],
+            ]);
+            $this->forge->addKey('id', true);
+            $this->forge->createTable('student_ledger_entries', true);
+        }
+
+        if (! $this->db->tableExists('dashboard_targets')) {
+            $this->forge->addField([
+                'id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true, 'auto_increment' => true],
+                'institute_id' => ['type' => 'INT', 'constraint' => 11, 'unsigned' => true],
+                'module' => ['type' => 'VARCHAR', 'constraint' => 120],
+                'target' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
+                'achieved' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
+                'pending' => ['type' => 'INT', 'constraint' => 11, 'default' => 0],
+                'owner' => ['type' => 'VARCHAR', 'constraint' => 120, 'null' => true],
+                'trend' => ['type' => 'VARCHAR', 'constraint' => 20, 'null' => true],
+                'created_at' => ['type' => 'DATETIME', 'null' => true],
+                'updated_at' => ['type' => 'DATETIME', 'null' => true],
+            ]);
+            $this->forge->addKey('id', true);
+            $this->forge->createTable('dashboard_targets', true);
         }
     }
 
     public function down(): void
     {
+        $this->forge->dropTable('dashboard_targets', true);
+        $this->forge->dropTable('student_ledger_entries', true);
+        $this->forge->dropTable('scholarship_applications', true);
+        $this->forge->dropTable('students', true);
         $this->forge->dropTable('users', true);
         $this->forge->dropTable('theme_profiles', true);
         $this->forge->dropTable('academic_years', true);

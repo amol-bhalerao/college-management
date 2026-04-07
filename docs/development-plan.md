@@ -439,3 +439,20 @@ Suggested commit style:
 - ensure print layouts are stable and professional
 - maintain IQAC/NAAC evidence-readiness in every module
 - use migration-safe SQL (`IF NOT EXISTS`, additive changes, versioned scripts)
+
+---
+
+## 16. Current Development Snapshot
+Completed in the working foundation phase:
+- Angular app shell with institute and academic-year selectors
+- login screen and auth guard flow
+- seeded demo users and mock institute/student data
+- super admin test credentials: `superadmin / Password@123`
+- executive dashboard prototype
+- theme studio prototype for non-technical super admin
+- student ledger prototype for accountant
+- CodeIgniter API endpoints for auth, dashboard summary, ledger, settings, and QR verification
+
+### Verified local URLs
+- Frontend: `http://127.0.0.1:4200/login`
+- Backend: `http://127.0.0.1:8080/`
