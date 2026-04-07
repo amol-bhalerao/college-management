@@ -189,6 +189,8 @@ class MasterDataController extends BaseController
                 'meta_json' => $row['meta_json'] ?? null,
                 'parent_value' => $meta['parent_value'] ?? null,
                 'note' => $meta['note'] ?? null,
+                'next_value' => $meta['next_value'] ?? null,
+                'year_order' => isset($meta['year_order']) ? (int) $meta['year_order'] : null,
             ];
         }
 

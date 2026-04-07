@@ -137,11 +137,16 @@ class WebsiteController extends BaseController
         ]);
     }
 
-    public function publicSite(string $code): ResponseInterface
+    public function publicSite(?string $code = null): ResponseInterface
     {
         $instituteModel = new InstituteModel();
         $pageModel = new WebsitePageModel();
-        $institute = $instituteModel->where('LOWER(code)', strtolower($code))->first();
+
+        if ($code !== null && trim($code) !== '') {
+            $institute = $instituteModel->where('LOWER(code)', strtolower($code))->first();
+        } else {
+            $institute = $instituteModel->where('status', 'active')->orderBy('id', 'ASC')->first();
+        }
 
         if (! is_array($institute)) {
             return $this->response->setStatusCode(404)->setJSON([

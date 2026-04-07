@@ -20,6 +20,34 @@ class StudentController extends BaseController
             $builder->where('s.institute_id', $instituteId);
         }
 
+        $search = trim((string) ($this->request->getGet('search') ?? ''));
+        $className = trim((string) ($this->request->getGet('class') ?? ''));
+        $category = trim((string) ($this->request->getGet('category') ?? ''));
+        $status = trim((string) ($this->request->getGet('status') ?? ''));
+
+        if ($className !== '') {
+            $builder->where('s.current_class', $className);
+        }
+
+        if ($category !== '') {
+            $builder->where('s.category', $category);
+        }
+
+        if ($status !== '') {
+            $builder->where('s.status', $status);
+        }
+
+        if ($search !== '') {
+            $builder->groupStart()
+                ->like('s.gr_number', $search)
+                ->orLike('s.first_name', $search)
+                ->orLike('s.last_name', $search)
+                ->orLike('s.guardian_name', $search)
+                ->orLike('s.mother_name', $search)
+                ->orLike('s.mobile_number', $search)
+                ->groupEnd();
+        }
+
         return $this->response->setJSON([
             'students' => $builder->get()->getResultArray(),
         ]);
@@ -152,6 +180,44 @@ class StudentController extends BaseController
         return $this->response->setJSON([
             'message' => 'Student master updated successfully.',
             'student' => $model->find($id),
+        ]);
+    }
+
+    public function promote(): ResponseInterface
+    {
+        $model = new StudentModel();
+        $payload = $this->request->getJSON(true) ?? $this->request->getPost();
+        $studentIds = array_values(array_filter(array_map('intval', (array) ($payload['student_ids'] ?? []))));
+        $targetClass = trim((string) ($payload['target_class'] ?? ''));
+        $targetDivision = trim((string) ($payload['target_division'] ?? ''));
+
+        if ($studentIds === [] || $targetClass === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Student selection and target class are required for promotion.',
+            ]);
+        }
+
+        $students = $model->whereIn('id', $studentIds)->findAll();
+
+        if ($students === []) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'No student records were found for promotion.',
+            ]);
+        }
+
+        foreach ($students as $student) {
+            $model->update((int) $student['id'], [
+                'current_class' => $targetClass,
+                'division' => $targetDivision !== '' ? $targetDivision : (string) ($student['division'] ?? ''),
+                'class_last_attended' => trim((string) ($student['current_class'] ?? '')) ?: $targetClass,
+                'progress_status' => trim((string) ($payload['progress_status'] ?? 'Promoted')),
+            ]);
+        }
+
+        return $this->response->setJSON([
+            'message' => 'Selected students promoted successfully.',
+            'updated_count' => count($students),
+            'target_class' => $targetClass,
         ]);
     }
 

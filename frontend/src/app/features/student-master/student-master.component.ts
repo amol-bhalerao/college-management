@@ -1,10 +1,11 @@
 import { CommonModule, CurrencyPipe } from '@angular/common';
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AgGridAngular } from 'ag-grid-angular';
-import { ColDef } from 'ag-grid-community';
+import { ColDef, GridApi, GridReadyEvent, SelectionChangedEvent } from 'ag-grid-community';
 import Swal from 'sweetalert2';
 
+import { AuthService } from '../../core/services/auth.service';
 import { AppContextService } from '../../core/services/context.service';
 import {
   StudentMasterPayload,
@@ -25,7 +26,15 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
           <h1>Student Master</h1>
           <p>Maintain the central student register with profile, class, contact, and admission details.</p>
         </div>
-        <button type="button" class="primary-btn" (click)="openCreate()">+ Add student</button>
+        <div class="page-actions">
+          <button type="button" class="secondary-btn" (click)="exportStudents()">Export CSV</button>
+          @if (canManageStudents()) {
+            <button type="button" class="secondary-btn" (click)="promoteSelected()" [disabled]="selectedStudentIds().length === 0">Promote selected</button>
+            <button type="button" class="primary-btn" (click)="openCreate()">+ Add student</button>
+          } @else {
+            <span class="tag">Read-only admin view</span>
+          }
+        </div>
       </div>
 
       <div class="stats-grid">
@@ -61,6 +70,25 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
               (ngModelChange)="searchText.set($event)"
               placeholder="Search GR no, student, class..."
             />
+            <select [(ngModel)]="filters.current_class">
+              <option value="">All classes</option>
+              @for (option of optionValues('class'); track option.id) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <select [(ngModel)]="filters.category">
+              <option value="">All categories</option>
+              @for (option of optionValues('caste_category'); track option.id) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+            <select [(ngModel)]="filters.status">
+              <option value="">All status</option>
+              <option value="active">active</option>
+              <option value="inactive">inactive</option>
+            </select>
+            <button type="button" class="ghost-btn" (click)="applyFilters()">Search DB</button>
+            <button type="button" class="ghost-btn" (click)="resetFilters()">Reset</button>
             <span class="tag">Institute-aware directory</span>
           </div>
         </div>
@@ -71,9 +99,13 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
           [quickFilterText]="searchText()"
+          [rowSelection]="'multiple'"
+          [suppressRowClickSelection]="true"
           [pagination]="true"
           [paginationPageSize]="8"
           [animateRows]="true"
+          (gridReady)="onGridReady($event)"
+          (selectionChanged)="onSelectionChanged($event)"
           (cellClicked)="handleGridClick($event)"
         ></ag-grid-angular>
       </article>
@@ -168,7 +200,12 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
               </label>
               <label>
                 Religion
-                <input type="text" name="religion" [(ngModel)]="form.religion" />
+                <select name="religion" [(ngModel)]="form.religion">
+                  <option value="">Select</option>
+                  @for (option of optionValues('religion'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Caste / sub-caste
@@ -312,7 +349,9 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
             </div>
 
             <div class="actions">
-              <button type="button" class="primary-btn" (click)="openEdit(student)">Edit student</button>
+              @if (canManageStudents()) {
+                <button type="button" class="primary-btn" (click)="openEdit(student)">Edit student</button>
+              }
               <button type="button" class="ghost-btn" (click)="copyGrNumber(student.gr_number)">Copy GR number</button>
             </div>
           </div>
@@ -324,6 +363,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
 })
 export class StudentMasterComponent {
   protected readonly context = inject(AppContextService);
+  protected readonly auth = inject(AuthService);
   private readonly studentService = inject(StudentMasterService);
   private readonly masterService = inject(MasterDataService);
 
@@ -334,10 +374,30 @@ export class StudentMasterComponent {
   protected readonly editingStudentId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
   protected readonly searchText = signal('');
+  protected readonly selectedStudentIds = signal<number[]>([]);
+  protected readonly canManageStudents = computed(() => this.auth.currentUser()?.role === 'CLERK');
+
+  protected filters = {
+    current_class: '',
+    category: '',
+    status: '',
+  };
 
   protected form: StudentMasterPayload = this.createEmptyForm();
 
+  private gridApi: GridApi<StudentMasterRow> | null = null;
+
   protected readonly columnDefs: ColDef<StudentMasterRow>[] = [
+    {
+      headerName: '',
+      checkboxSelection: true,
+      headerCheckboxSelection: true,
+      maxWidth: 56,
+      pinned: 'left',
+      sortable: false,
+      filter: false,
+      resizable: false,
+    },
     { field: 'gr_number', headerName: 'GR No', minWidth: 140 },
     {
       headerName: 'Student',
@@ -356,13 +416,19 @@ export class StudentMasterComponent {
       sortable: false,
       filter: false,
       pinned: 'right',
-      cellRenderer: () => `
-        <div class="grid-actions">
-          <button type="button" class="grid-action" data-action="view">View</button>
-          <button type="button" class="grid-action" data-action="edit">Edit</button>
-          <button type="button" class="grid-action grid-action--danger" data-action="delete">Delete</button>
-        </div>
-      `,
+      cellRenderer: () => this.canManageStudents()
+        ? `
+          <div class="grid-actions">
+            <button type="button" class="grid-action" data-action="view">View</button>
+            <button type="button" class="grid-action" data-action="edit">Edit</button>
+            <button type="button" class="grid-action grid-action--danger" data-action="delete">Delete</button>
+          </div>
+        `
+        : `
+          <div class="grid-actions">
+            <button type="button" class="grid-action" data-action="view">View</button>
+          </div>
+        `,
     },
   ];
 
@@ -413,6 +479,179 @@ export class StudentMasterComponent {
     return filtered.length ? filtered : divisions;
   }
 
+  protected applyFilters(): void {
+    void this.loadStudents(this.context.activeInstitute().id);
+  }
+
+  protected resetFilters(): void {
+    this.searchText.set('');
+    this.filters = {
+      current_class: '',
+      category: '',
+      status: '',
+    };
+    this.selectedStudentIds.set([]);
+    void this.loadStudents(this.context.activeInstitute().id);
+  }
+
+  protected onGridReady(event: GridReadyEvent<StudentMasterRow>): void {
+    this.gridApi = event.api;
+  }
+
+  protected onSelectionChanged(event: SelectionChangedEvent<StudentMasterRow>): void {
+    this.selectedStudentIds.set(event.api.getSelectedRows().map((row) => Number(row.id)));
+  }
+
+  protected exportStudents(): void {
+    this.gridApi?.exportDataAsCsv({
+      fileName: `${this.context.activeInstitute().code.toLowerCase()}-student-master.csv`,
+    });
+  }
+
+  protected async promoteSelected(): Promise<void> {
+    if (!this.canManageStudents() || this.selectedStudentIds().length === 0) {
+      return;
+    }
+
+    const selectedRows = this.students().filter((student) => this.selectedStudentIds().includes(Number(student.id)));
+    const classNames = Array.from(new Set(selectedRows.map((student) => (student.current_class || '').trim()).filter(Boolean)));
+
+    if (classNames.length !== 1) {
+      await Swal.fire({
+        icon: 'warning',
+        title: 'Select same class students',
+        text: 'Please select students from the same current class before promotion.',
+      });
+      return;
+    }
+
+    const currentClass = classNames[0];
+    const targetOptions = this.promotionTargetsFor(currentClass);
+
+    if (targetOptions.length === 0) {
+      await Swal.fire({
+        icon: 'info',
+        title: 'Next class not configured',
+        text: `Add the next progression value in Master Entries for ${currentClass} to use bulk promotion.`,
+      });
+      return;
+    }
+
+    const targetResult = await Swal.fire({
+      title: `Promote ${selectedRows.length} students`,
+      text: `Current class: ${currentClass}`,
+      input: 'select',
+      inputOptions: Object.fromEntries(targetOptions.map((value) => [value, value])),
+      inputValue: targetOptions[0],
+      inputPlaceholder: 'Select target class',
+      showCancelButton: true,
+      confirmButtonText: 'Continue',
+    });
+
+    if (!targetResult.isConfirmed || !targetResult.value) {
+      return;
+    }
+
+    const targetClass = String(targetResult.value);
+    const divisions = this.divisionOptions(targetClass);
+    let targetDivision = '';
+
+    if (divisions.length) {
+      const divisionResult = await Swal.fire({
+        title: 'Select target division',
+        input: 'select',
+        inputOptions: Object.fromEntries([['', 'Keep current division'], ...divisions.map((item) => [item.value, item.label])]),
+        inputValue: '',
+        showCancelButton: true,
+        confirmButtonText: 'Promote',
+      });
+
+      if (!divisionResult.isConfirmed) {
+        return;
+      }
+
+      targetDivision = String(divisionResult.value || '');
+    }
+
+    try {
+      await this.studentService.promoteStudents(this.selectedStudentIds(), targetClass, targetDivision);
+      await Swal.fire({
+        icon: 'success',
+        title: 'Promotion complete',
+        text: `${selectedRows.length} students promoted to ${targetClass}.`,
+      });
+      this.selectedStudentIds.set([]);
+      await this.loadStudents(this.context.activeInstitute().id);
+    } catch (error: any) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Promotion failed',
+        text: error?.error?.message || 'Unable to promote the selected students right now.',
+      });
+    }
+  }
+
+  private promotionTargetsFor(currentClass: string): string[] {
+    const classOptions = this.optionValues('class');
+    const currentOption = classOptions.find((option) => option.value === currentClass);
+    const currentMeta = this.parseOptionMeta(currentOption?.meta_json);
+    const targets = new Set<string>();
+
+    if (currentOption?.next_value) {
+      targets.add(currentOption.next_value);
+    }
+
+    if (currentMeta.next_value) {
+      targets.add(currentMeta.next_value);
+    }
+
+    const derived = this.deriveNextClass(currentClass);
+    if (derived) {
+      targets.add(derived);
+    }
+
+    const parentValue = (currentOption?.parent_value || currentMeta.parent_value || '').trim();
+    if (parentValue) {
+      classOptions
+        .filter((option) => (option.parent_value || this.parseOptionMeta(option.meta_json).parent_value || '').trim() === parentValue && option.value !== currentClass)
+        .sort((a, b) => Number(a.year_order || this.parseOptionMeta(a.meta_json).year_order || 0) - Number(b.year_order || this.parseOptionMeta(b.meta_json).year_order || 0))
+        .forEach((option) => targets.add(option.value));
+    }
+
+    return Array.from(targets).filter((value) => value && value !== currentClass);
+  }
+
+  private deriveNextClass(currentClass: string): string | null {
+    const replacements: Array<[string, string]> = [
+      ['FY ', 'SY '],
+      ['SY ', 'TY '],
+      ['FYJC', 'SYJC'],
+      ['First Year ', 'Second Year '],
+      ['Second Year ', 'Third Year '],
+    ];
+
+    for (const [from, to] of replacements) {
+      if (currentClass.startsWith(from)) {
+        return currentClass.replace(from, to);
+      }
+    }
+
+    return null;
+  }
+
+  private parseOptionMeta(metaJson?: string | null): { parent_value?: string; next_value?: string; year_order?: number } {
+    if (!metaJson) {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(metaJson);
+      return typeof parsed === 'object' && parsed ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
   protected onStudentClassChange(className: string): void {
     this.form.current_class = className;
     const divisions = this.divisionOptions(className);
@@ -437,16 +676,22 @@ export class StudentMasterComponent {
     }
 
     if (action === 'edit') {
-      this.openEdit(event.data);
+      if (this.canManageStudents()) {
+        this.openEdit(event.data);
+      }
       return;
     }
 
-    if (action === 'delete') {
+    if (action === 'delete' && this.canManageStudents()) {
       void this.deleteStudent(event.data);
     }
   }
 
   protected openCreate(): void {
+    if (!this.canManageStudents()) {
+      return;
+    }
+
     this.editingStudentId.set(null);
     this.form = this.createEmptyForm();
     this.showModal.set(true);
@@ -513,6 +758,10 @@ export class StudentMasterComponent {
   }
 
   protected async saveStudent(): Promise<void> {
+    if (!this.canManageStudents()) {
+      return;
+    }
+
     this.isSaving.set(true);
 
     try {
@@ -592,6 +841,10 @@ export class StudentMasterComponent {
   }
 
   private async deleteStudent(student: StudentMasterRow): Promise<void> {
+    if (!this.canManageStudents()) {
+      return;
+    }
+
     const result = await Swal.fire({
       icon: 'warning',
       title: 'Delete student?',
@@ -621,7 +874,12 @@ export class StudentMasterComponent {
 
   private async loadStudents(instituteId: number): Promise<void> {
     const [students, options] = await Promise.all([
-      this.studentService.getStudents(instituteId),
+      this.studentService.getStudents(instituteId, {
+        search: this.searchText(),
+        current_class: this.filters.current_class,
+        category: this.filters.category,
+        status: this.filters.status,
+      }),
       this.masterService.getOptions(instituteId),
     ]);
 

@@ -66,7 +66,8 @@ export class WebsiteCmsService {
     await firstValueFrom(this.http.delete(`${environment.apiBaseUrl}/website/pages/${id}`));
   }
 
-  async getPublicSite(code: string): Promise<PublicSiteResponse> {
-    return firstValueFrom(this.http.get<PublicSiteResponse>(`${environment.apiBaseUrl}/public/site/${code}`));
+  async getPublicSite(code = ''): Promise<PublicSiteResponse> {
+    const suffix = code ? `/${code}` : '';
+    return firstValueFrom(this.http.get<PublicSiteResponse>(`${environment.apiBaseUrl}/public/site${suffix}`));
   }
 }

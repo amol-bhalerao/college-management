@@ -80,14 +80,39 @@ export interface StudentMasterPayload {
   admission_status?: string;
 }
 
+export interface StudentMasterFilters {
+  search?: string;
+  current_class?: string;
+  category?: string;
+  status?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class StudentMasterService {
   private readonly http = inject(HttpClient);
 
-  async getStudents(instituteId: number): Promise<StudentMasterRow[]> {
-    const response = await firstValueFrom(
-      this.http.get<{ students: StudentMasterRow[] }>(`${environment.apiBaseUrl}/students/master/${instituteId}`),
-    );
+  async getStudents(instituteId: number, filters: StudentMasterFilters = {}): Promise<StudentMasterRow[]> {
+    const params = new URLSearchParams();
+
+    if (filters.search?.trim()) {
+      params.set('search', filters.search.trim());
+    }
+
+    if (filters.current_class?.trim()) {
+      params.set('class', filters.current_class.trim());
+    }
+
+    if (filters.category?.trim()) {
+      params.set('category', filters.category.trim());
+    }
+
+    if (filters.status?.trim()) {
+      params.set('status', filters.status.trim());
+    }
+
+    const query = params.toString();
+    const url = `${environment.apiBaseUrl}/students/master/${instituteId}${query ? `?${query}` : ''}`;
+    const response = await firstValueFrom(this.http.get<{ students: StudentMasterRow[] }>(url));
 
     return response.students;
   }
@@ -102,5 +127,13 @@ export class StudentMasterService {
 
   async deleteStudent(id: number): Promise<void> {
     await firstValueFrom(this.http.delete(`${environment.apiBaseUrl}/students/master/${id}`));
+  }
+
+  async promoteStudents(studentIds: number[], targetClass: string, targetDivision = ''): Promise<void> {
+    await firstValueFrom(this.http.post(`${environment.apiBaseUrl}/students/master/promote`, {
+      student_ids: studentIds,
+      target_class: targetClass,
+      target_division: targetDivision,
+    }));
   }
 }

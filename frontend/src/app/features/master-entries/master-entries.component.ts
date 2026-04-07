@@ -145,6 +145,16 @@ import {
                 <input type="text" name="dependency_note" [(ngModel)]="dependencyNote" placeholder="Optional helper note" />
               </label>
 
+              <label>
+                Next progression value
+                <input type="text" name="progression_value" [(ngModel)]="progressionValue" [placeholder]="progressionHint()" />
+              </label>
+
+              <label>
+                Year order
+                <input type="number" min="0" name="progression_order" [(ngModel)]="progressionOrder" />
+              </label>
+
               <label class="full-span">
                 Description
                 <textarea rows="3" name="description" [(ngModel)]="form.description"></textarea>
@@ -206,10 +216,14 @@ export class MasterEntriesComponent {
 
   protected dependencyValue = '';
   protected dependencyNote = '';
+  protected progressionValue = '';
+  protected progressionOrder = 0;
 
   protected readonly masterTypes = [
     { value: 'caste_category', label: 'Caste / Category' },
-    { value: 'class', label: 'Class' },
+    { value: 'religion', label: 'Religion' },
+    { value: 'program', label: 'Program / Course' },
+    { value: 'class', label: 'Class / Year' },
     { value: 'division', label: 'Division' },
     { value: 'fee_head', label: 'Fee Head' },
     { value: 'form_type', label: 'Form Type' },
@@ -271,14 +285,32 @@ export class MasterEntriesComponent {
   }
 
   protected dependencyHint(): string {
-    return this.form.master_type === 'division'
-      ? 'Example: FYJC Science'
-      : 'Optional parent value';
+    if (this.form.master_type === 'division') {
+      return 'Example: FY BCA';
+    }
+
+    if (this.form.master_type === 'class') {
+      return 'Program name e.g. BCA';
+    }
+
+    return 'Optional parent value';
+  }
+
+  protected progressionHint(): string {
+    return this.form.master_type === 'class'
+      ? 'Example: SY BCA'
+      : 'Optional next value';
   }
 
   protected dependencySummary(entry: MasterEntryRow): string {
     const meta = this.parseMeta(entry.meta_json);
-    return meta.parent_value || 'Independent value';
+    const parts = [meta.parent_value || 'Independent value'];
+
+    if (meta.next_value) {
+      parts.push(`Next: ${meta.next_value}`);
+    }
+
+    return parts.join(' · ');
   }
 
   protected handleGridClick(event: { data?: MasterEntryRow; event?: Event | null }): void {
@@ -311,6 +343,8 @@ export class MasterEntriesComponent {
     };
     this.dependencyValue = '';
     this.dependencyNote = '';
+    this.progressionValue = '';
+    this.progressionOrder = 0;
     this.showModal.set(true);
   }
 
@@ -329,6 +363,8 @@ export class MasterEntriesComponent {
     const meta = this.parseMeta(entry.meta_json);
     this.dependencyValue = meta.parent_value || '';
     this.dependencyNote = meta.note || '';
+    this.progressionValue = meta.next_value || '';
+    this.progressionOrder = Number(meta.year_order || 0);
     this.showModal.set(true);
   }
 
@@ -337,6 +373,8 @@ export class MasterEntriesComponent {
     this.form = this.createEmptyForm();
     this.dependencyValue = '';
     this.dependencyNote = '';
+    this.progressionValue = '';
+    this.progressionOrder = 0;
   }
 
   protected closeDetails(): void {
@@ -386,7 +424,7 @@ export class MasterEntriesComponent {
     };
   }
 
-  private parseMeta(metaJson?: string | null): { parent_value?: string; note?: string } {
+  private parseMeta(metaJson?: string | null): { parent_value?: string; note?: string; next_value?: string; year_order?: number } {
     if (!metaJson) {
       return {};
     }
@@ -400,7 +438,7 @@ export class MasterEntriesComponent {
   }
 
   private buildMetaJson(): string {
-    const payload: Record<string, string> = {};
+    const payload: Record<string, string | number> = {};
 
     if (this.dependencyValue.trim()) {
       payload['parent_value'] = this.dependencyValue.trim();
@@ -408,6 +446,14 @@ export class MasterEntriesComponent {
 
     if (this.dependencyNote.trim()) {
       payload['note'] = this.dependencyNote.trim();
+    }
+
+    if (this.progressionValue.trim()) {
+      payload['next_value'] = this.progressionValue.trim();
+    }
+
+    if (Number(this.progressionOrder) > 0) {
+      payload['year_order'] = Number(this.progressionOrder);
     }
 
     return Object.keys(payload).length ? JSON.stringify(payload) : '';

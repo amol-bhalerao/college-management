@@ -77,6 +77,7 @@ $routes->group('api', static function ($routes): void {
     $routes->post('website/pages', 'Api\WebsiteController::create');
     $routes->put('website/pages/(:num)', 'Api\WebsiteController::update/$1');
     $routes->delete('website/pages/(:num)', 'Api\WebsiteController::delete/$1');
+    $routes->get('public/site', 'Api\WebsiteController::publicSite');
     $routes->get('public/site/(:segment)', 'Api\WebsiteController::publicSite/$1');
     $routes->get('settings/app', 'Api\SettingsController::app');
     $routes->get('settings/theme', 'Api\SettingsController::theme');
@@ -84,6 +85,7 @@ $routes->group('api', static function ($routes): void {
     $routes->get('fees/summary/(:num)', 'Api\StudentFinanceController::counterSummary/$1');
     $routes->get('students/master', 'Api\StudentController::index');
     $routes->get('students/master/(:num)', 'Api\StudentController::index/$1');
+    $routes->post('students/master/promote', 'Api\StudentController::promote');
     $routes->post('students/master', 'Api\StudentController::create');
     $routes->put('students/master/(:num)', 'Api\StudentController::update/$1');
     $routes->delete('students/master/(:num)', 'Api\StudentController::delete/$1');

@@ -21,8 +21,9 @@ import { WebsiteCmsComponent } from './features/website-cms/website-cms.componen
 export const routes: Routes = [
   {
     path: '',
+    component: PublicWebsiteComponent,
     pathMatch: 'full',
-    redirectTo: 'dashboard',
+    title: 'Institute Website',
   },
   {
     path: 'login',

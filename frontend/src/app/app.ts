@@ -260,14 +260,14 @@ export class App {
 
   protected readonly navItems = [
     { label: 'Executive Dashboard', route: '/dashboard', icon: '📊', roles: ['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'] },
-    { label: 'Admission CRM', route: '/admissions', icon: '🧾', roles: ['SUPER_ADMIN', 'CLERK'] },
+    { label: 'Admission CRM', route: '/admissions', icon: '🧾', roles: ['CLERK'] },
     { label: 'User Management', route: '/users', icon: '👥', roles: ['SUPER_ADMIN'] },
     { label: 'Certificate Center', route: '/certificates', icon: '📜', roles: ['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'] },
-    { label: 'Student Master', route: '/students', icon: '🎓', roles: ['SUPER_ADMIN', 'CLERK'] },
+    { label: 'Student Master', route: '/students', icon: '🎓', roles: ['CLERK'] },
     { label: 'Master Entries', route: '/masters', icon: '🗂️', roles: ['SUPER_ADMIN', 'CLERK'] },
     { label: 'Staff HR & Attendance', route: '/staff-hr', icon: '🧑‍🏫', roles: ['SUPER_ADMIN'] },
-    { label: 'Exam & Results', route: '/exams', icon: '📝', roles: ['SUPER_ADMIN', 'CLERK'] },
-    { label: 'Scholarship Workflow', route: '/scholarships', icon: '💸', roles: ['SUPER_ADMIN', 'CLERK'] },
+    { label: 'Exam & Results', route: '/exams', icon: '📝', roles: ['CLERK'] },
+    { label: 'Scholarship Workflow', route: '/scholarships', icon: '💸', roles: ['CLERK'] },
     { label: 'IQAC / NAAC Tracker', route: '/iqac-tracker', icon: '📋', roles: ['SUPER_ADMIN'] },
     { label: 'Website CMS', route: '/website-cms', icon: '🌐', roles: ['SUPER_ADMIN'] },
     { label: 'Institute Header', route: '/institute-header', icon: '🏫', roles: ['SUPER_ADMIN'] },
