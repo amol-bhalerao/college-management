@@ -194,6 +194,26 @@ CREATE TABLE IF NOT EXISTS `certificate_requests` (
   UNIQUE KEY `uq_certificate_requests_verification_token` (`verification_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `fee_receipts` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `student_id` INT UNSIGNED NOT NULL,
+  `ledger_entry_id` INT UNSIGNED DEFAULT NULL,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `academic_year_id` INT UNSIGNED NOT NULL,
+  `receipt_number` VARCHAR(50) NOT NULL,
+  `receipt_date` DATE NOT NULL,
+  `amount` DECIMAL(12,2) NOT NULL DEFAULT 0,
+  `payment_mode` VARCHAR(40) DEFAULT NULL,
+  `received_by` VARCHAR(120) DEFAULT NULL,
+  `remarks` TEXT DEFAULT NULL,
+  `verification_token` VARCHAR(80) DEFAULT NULL,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_fee_receipts_receipt_number` (`receipt_number`),
+  UNIQUE KEY `uq_fee_receipts_verification_token` (`verification_token`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 INSERT IGNORE INTO `organizations` (`id`, `name`, `code`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Demo Education Trust', 'DET', 'active', NOW(), NOW());
 
@@ -236,6 +256,10 @@ INSERT IGNORE INTO `student_ledger_entries` (`id`, `student_id`, `institute_id`,
 (2, 1, 1, 1, '2026-04-05', 'Admission fee receipt', 'Cash', 0, 12000, 42000, 'Receipt JC-R-0001', NOW(), NOW()),
 (3, 1, 1, 1, '2026-04-10', 'Scholarship expected', 'MahaDBT', 0, 8000, 34000, 'Expected reimbursement', NOW(), NOW()),
 (4, 1, 1, 1, '2026-04-17', 'Tuition fee receipt', 'UPI', 0, 15500, 18500, 'Receipt JC-R-0002', NOW(), NOW());
+
+INSERT IGNORE INTO `fee_receipts` (`id`, `student_id`, `ledger_entry_id`, `institute_id`, `academic_year_id`, `receipt_number`, `receipt_date`, `amount`, `payment_mode`, `received_by`, `remarks`, `verification_token`, `created_at`, `updated_at`) VALUES
+(1, 1, 2, 1, 1, 'JC-R-0001', '2026-04-05', 12000, 'Cash', 'Account Office', 'Admission fee collected at counter.', 'RCPT-JC-2026-0001', NOW(), NOW()),
+(2, 1, 4, 1, 1, 'JC-R-0002', '2026-04-17', 15500, 'UPI', 'Account Office', 'Second installment received through UPI.', 'RCPT-JC-2026-0002', NOW(), NOW());
 
 INSERT IGNORE INTO `dashboard_targets` (`id`, `institute_id`, `module`, `target`, `achieved`, `pending`, `owner`, `trend`, `created_at`, `updated_at`) VALUES
 (1, 1, 'Scholarship follow-up', 120, 92, 28, 'Clerk Desk', 'Up', NOW(), NOW()),

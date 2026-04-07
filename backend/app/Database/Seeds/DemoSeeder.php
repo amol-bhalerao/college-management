@@ -153,6 +153,11 @@ class DemoSeeder extends Seeder
             ['id' => 4, 'student_id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'entry_date' => '2026-04-17', 'reference' => 'Tuition fee receipt', 'mode' => 'UPI', 'debit' => 0, 'credit' => 15500, 'balance' => 18500, 'note' => 'Receipt JC-R-0002', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
+        $db->table('fee_receipts')->ignore(true)->insertBatch([
+            ['id' => 1, 'student_id' => 1, 'ledger_entry_id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'receipt_number' => 'JC-R-0001', 'receipt_date' => '2026-04-05', 'amount' => 12000, 'payment_mode' => 'Cash', 'received_by' => 'Account Office', 'remarks' => 'Admission fee collected at counter.', 'verification_token' => 'RCPT-JC-2026-0001', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'student_id' => 1, 'ledger_entry_id' => 4, 'institute_id' => 1, 'academic_year_id' => 1, 'receipt_number' => 'JC-R-0002', 'receipt_date' => '2026-04-17', 'amount' => 15500, 'payment_mode' => 'UPI', 'received_by' => 'Account Office', 'remarks' => 'Second installment received through UPI.', 'verification_token' => 'RCPT-JC-2026-0002', 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
         $db->table('dashboard_targets')->ignore(true)->insertBatch([
             ['id' => 1, 'institute_id' => 1, 'module' => 'Scholarship follow-up', 'target' => 120, 'achieved' => 92, 'pending' => 28, 'owner' => 'Clerk Desk', 'trend' => 'Up', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 2, 'institute_id' => 1, 'module' => 'Admission conversion', 'target' => 220, 'achieved' => 163, 'pending' => 57, 'owner' => 'Admissions Team', 'trend' => 'Up', 'created_at' => $now, 'updated_at' => $now],

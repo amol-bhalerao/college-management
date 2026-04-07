@@ -454,9 +454,9 @@ Completed in the working foundation phase:
 - certificate center prototype with issue + verification flow
 - institute header manager for institute-specific receipt/certificate branding
 - theme studio prototype for non-technical super admin
-- student ledger prototype for accountant
+- student ledger + fee collection + A5 receipt preview for accountant
 - ready-to-run database setup scripts for local and MySQL testing
-- CodeIgniter API endpoints for auth, dashboard summary, ledger, user management, institute settings, admissions/enquiries, certificates, and QR verification
+- CodeIgniter API endpoints for auth, dashboard summary, ledger, receipt collection, user management, institute settings, admissions/enquiries, certificates, and QR verification
 
 ### Verified local URLs
 - Frontend: `http://127.0.0.1:4200/login`

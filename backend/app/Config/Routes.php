@@ -8,6 +8,10 @@ use CodeIgniter\Router\RouteCollection;
 $routes->get('/', 'Home::index');
 
 $routes->group('api', static function ($routes): void {
+    $routes->options('(:any)', static fn () => service('response')->setStatusCode(204));
+    $routes->options('(:any)/(:any)', static fn () => service('response')->setStatusCode(204));
+    $routes->options('(:any)/(:any)/(:any)', static fn () => service('response')->setStatusCode(204));
+
     $routes->get('health', 'Api\HealthController::index');
     $routes->post('auth/login', 'Api\AuthController::login');
     $routes->get('dashboard/summary', 'Api\DashboardController::summary');
@@ -30,6 +34,7 @@ $routes->group('api', static function ($routes): void {
     $routes->get('settings/app', 'Api\SettingsController::app');
     $routes->get('settings/theme', 'Api\SettingsController::theme');
     $routes->get('students/(:segment)/ledger', 'Api\StudentFinanceController::ledger/$1');
+    $routes->post('students/(:segment)/collect', 'Api\StudentFinanceController::collect/$1');
     $routes->get('verify/receipt/(:segment)', 'Api\VerifyController::receipt/$1');
     $routes->get('verify/certificate/(:segment)', 'Api\VerifyController::certificate/$1');
 });
