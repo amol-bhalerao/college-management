@@ -32,6 +32,9 @@ export interface MasterOption {
   value: string;
   description?: string | null;
   sort_order: number;
+  meta_json?: string | null;
+  parent_value?: string | null;
+  note?: string | null;
 }
 
 export type MasterOptionsMap = Record<string, MasterOption[]>;

@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
 import { NgApexchartsModule } from 'ng-apexcharts';
@@ -25,7 +26,7 @@ interface TargetRow {
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule, AgGridAngular, NgApexchartsModule],
+  imports: [CommonModule, FormsModule, AgGridAngular, NgApexchartsModule],
   template: `
     <section class="dashboard-page">
       <div class="page-intro">
@@ -116,7 +117,16 @@ interface TargetRow {
             <h2>Target vs outcome workboard</h2>
             <p>AG Grid foundation for advanced filtering, export, and institute-wise reporting.</p>
           </div>
-          <span class="tag tag--accent">AG Grid</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search module, owner, trend..."
+            />
+            <span class="tag tag--accent">AG Grid</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -124,6 +134,7 @@ interface TargetRow {
           [rowData]="rowData"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="5"
           [animateRows]="true"
@@ -191,6 +202,7 @@ export class DashboardComponent {
 
   protected readonly institute = this.context.activeInstitute;
   protected readonly year = this.context.activeAcademicYear;
+  protected readonly searchText = signal('');
 
   protected readonly kpis: KpiCard[] = [
     {

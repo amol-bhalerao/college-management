@@ -42,7 +42,16 @@ import { StudentMasterRow, StudentMasterService } from '../../core/services/stud
             <h2>Scholarship register</h2>
             <p>Manage MahaDBT / freeship-style tracking against student master records.</p>
           </div>
-          <span class="tag">Eligibility desk</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search scheme, student, GR no..."
+            />
+            <span class="tag">Eligibility desk</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -50,6 +59,7 @@ import { StudentMasterRow, StudentMasterService } from '../../core/services/stud
           [rowData]="applications()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="7"
           [animateRows]="true"
@@ -156,6 +166,7 @@ export class ScholarshipWorkflowComponent {
   protected readonly showModal = signal(false);
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
+  protected readonly searchText = signal('');
 
   protected form: ScholarshipPayload = this.createEmptyForm();
 

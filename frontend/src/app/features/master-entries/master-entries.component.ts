@@ -61,7 +61,16 @@ import {
             <h2>Master register</h2>
             <p>These values are shown in forms and dropdowns across the ERP.</p>
           </div>
-          <span class="tag">Dropdown-ready</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search type, label, code..."
+            />
+            <span class="tag">Dropdown-ready</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -69,6 +78,7 @@ import {
           [rowData]="entries()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="8"
           [animateRows]="true"
@@ -120,6 +130,21 @@ import {
                 </select>
               </label>
 
+              <label>
+                Depends on value
+                <input
+                  type="text"
+                  name="dependency_value"
+                  [(ngModel)]="dependencyValue"
+                  [placeholder]="dependencyHint()"
+                />
+              </label>
+
+              <label>
+                Dependency note
+                <input type="text" name="dependency_note" [(ngModel)]="dependencyNote" placeholder="Optional helper note" />
+              </label>
+
               <label class="full-span">
                 Description
                 <textarea rows="3" name="description" [(ngModel)]="form.description"></textarea>
@@ -149,7 +174,7 @@ import {
             <div class="detail-grid">
               <article><span>Type</span><strong>{{ typeLabel(entry.master_type) }}</strong><small>{{ entry.master_type }}</small></article>
               <article><span>Status</span><strong>{{ entry.status }}</strong><small>Sort: {{ entry.sort_order }}</small></article>
-              <article><span>Institute</span><strong>{{ context.activeInstitute().name }}</strong><small>Dropdown value ready</small></article>
+              <article><span>Dependency</span><strong>{{ dependencySummary(entry) }}</strong><small>{{ context.activeInstitute().name }}</small></article>
             </div>
 
             <div class="info-box">
@@ -177,6 +202,10 @@ export class MasterEntriesComponent {
   protected readonly showModal = signal(false);
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
+  protected readonly searchText = signal('');
+
+  protected dependencyValue = '';
+  protected dependencyNote = '';
 
   protected readonly masterTypes = [
     { value: 'caste_category', label: 'Caste / Category' },
@@ -241,6 +270,17 @@ export class MasterEntriesComponent {
     return this.masterTypes.find((item) => item.value === type)?.label ?? type;
   }
 
+  protected dependencyHint(): string {
+    return this.form.master_type === 'division'
+      ? 'Example: FYJC Science'
+      : 'Optional parent value';
+  }
+
+  protected dependencySummary(entry: MasterEntryRow): string {
+    const meta = this.parseMeta(entry.meta_json);
+    return meta.parent_value || 'Independent value';
+  }
+
   protected handleGridClick(event: { data?: MasterEntryRow; event?: Event | null }): void {
     if (!event.data) {
       return;
@@ -269,6 +309,8 @@ export class MasterEntriesComponent {
       ...this.createEmptyForm(),
       master_type: masterType,
     };
+    this.dependencyValue = '';
+    this.dependencyNote = '';
     this.showModal.set(true);
   }
 
@@ -283,12 +325,18 @@ export class MasterEntriesComponent {
       status: entry.status,
       meta_json: entry.meta_json || '',
     };
+
+    const meta = this.parseMeta(entry.meta_json);
+    this.dependencyValue = meta.parent_value || '';
+    this.dependencyNote = meta.note || '';
     this.showModal.set(true);
   }
 
   protected closeModal(): void {
     this.showModal.set(false);
     this.form = this.createEmptyForm();
+    this.dependencyValue = '';
+    this.dependencyNote = '';
   }
 
   protected closeDetails(): void {
@@ -302,6 +350,7 @@ export class MasterEntriesComponent {
       const payload: MasterEntryPayload = {
         ...this.form,
         institute_id: this.context.activeInstitute().id,
+        meta_json: this.buildMetaJson(),
       };
 
       if (this.editingId()) {
@@ -335,6 +384,33 @@ export class MasterEntriesComponent {
       status: 'active',
       meta_json: '',
     };
+  }
+
+  private parseMeta(metaJson?: string | null): { parent_value?: string; note?: string } {
+    if (!metaJson) {
+      return {};
+    }
+
+    try {
+      const parsed = JSON.parse(metaJson);
+      return typeof parsed === 'object' && parsed ? parsed : {};
+    } catch {
+      return {};
+    }
+  }
+
+  private buildMetaJson(): string {
+    const payload: Record<string, string> = {};
+
+    if (this.dependencyValue.trim()) {
+      payload['parent_value'] = this.dependencyValue.trim();
+    }
+
+    if (this.dependencyNote.trim()) {
+      payload['note'] = this.dependencyNote.trim();
+    }
+
+    return Object.keys(payload).length ? JSON.stringify(payload) : '';
   }
 
   private async deleteEntry(entry: MasterEntryRow): Promise<void> {

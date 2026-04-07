@@ -49,7 +49,16 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
             <h2>Staff register</h2>
             <p>Use row actions to edit staff profiles or mark attendance for {{ attendanceDate }}.</p>
           </div>
-          <span class="tag">Attendance-ready</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search employee, department, designation..."
+            />
+            <span class="tag">Attendance-ready</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -57,6 +66,7 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
           [rowData]="rows()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="8"
           [animateRows]="true"
@@ -490,6 +500,7 @@ export class StaffHrComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
   protected readonly isAttendanceSaving = signal(false);
+  protected readonly searchText = signal('');
 
   protected attendanceDate = new Date().toISOString().slice(0, 10);
   protected staffForm: StaffPayload = this.createEmptyStaffForm();

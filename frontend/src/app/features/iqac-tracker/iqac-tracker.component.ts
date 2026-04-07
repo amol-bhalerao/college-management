@@ -36,7 +36,16 @@ import { IqacMetricPayload, IqacMetricRow, IqacService, IqacSummary } from '../.
             <h2>Criterion workboard</h2>
             <p>Keep accreditation tasks, owners, and evidence status visible to the team.</p>
           </div>
-          <span class="tag">NAAC-ready tracker</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search criterion, owner, status..."
+            />
+            <span class="tag">NAAC-ready tracker</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -44,6 +53,7 @@ import { IqacMetricPayload, IqacMetricRow, IqacService, IqacSummary } from '../.
           [rowData]="metrics()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="7"
           [animateRows]="true"
@@ -160,6 +170,7 @@ export class IqacTrackerComponent {
   protected readonly showModal = signal(false);
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
+  protected readonly searchText = signal('');
 
   protected form: IqacMetricPayload = this.createEmptyForm();
 

@@ -19,11 +19,29 @@ export interface StudentDirectoryItem {
   first_name: string | null;
   last_name: string | null;
   guardian_name: string | null;
+  mother_name: string | null;
   current_class: string | null;
   division: string | null;
+  category: string | null;
+  nationality: string | null;
+  religion: string | null;
+  caste_subcaste: string | null;
   mobile_number: string | null;
   email: string | null;
   dob: string | null;
+  date_of_birth_words: string | null;
+  place_of_birth: string | null;
+  birth_taluka: string | null;
+  birth_district: string | null;
+  birth_state: string | null;
+  previous_school: string | null;
+  date_of_admission: string | null;
+  date_of_leaving: string | null;
+  class_last_attended: string | null;
+  progress_status: string | null;
+  conduct: string | null;
+  reason_for_leaving: string | null;
+  tc_remarks: string | null;
   address: string | null;
 }
 

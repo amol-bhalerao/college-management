@@ -82,13 +82,30 @@ CREATE TABLE IF NOT EXISTS `students` (
   `first_name` VARCHAR(80) NOT NULL,
   `last_name` VARCHAR(80) NOT NULL,
   `guardian_name` VARCHAR(160) DEFAULT NULL,
+  `mother_name` VARCHAR(160) DEFAULT NULL,
   `gender` VARCHAR(20) DEFAULT NULL,
   `category` VARCHAR(40) DEFAULT NULL,
-  `current_class` VARCHAR(40) DEFAULT NULL,
+  `nationality` VARCHAR(80) DEFAULT NULL,
+  `religion` VARCHAR(80) DEFAULT NULL,
+  `caste_subcaste` VARCHAR(120) DEFAULT NULL,
+  `current_class` VARCHAR(80) DEFAULT NULL,
   `division` VARCHAR(10) DEFAULT NULL,
   `mobile_number` VARCHAR(30) DEFAULT NULL,
   `email` VARCHAR(160) DEFAULT NULL,
   `dob` DATE DEFAULT NULL,
+  `date_of_birth_words` VARCHAR(180) DEFAULT NULL,
+  `place_of_birth` VARCHAR(120) DEFAULT NULL,
+  `birth_taluka` VARCHAR(120) DEFAULT NULL,
+  `birth_district` VARCHAR(120) DEFAULT NULL,
+  `birth_state` VARCHAR(120) DEFAULT NULL,
+  `previous_school` VARCHAR(180) DEFAULT NULL,
+  `date_of_admission` DATE DEFAULT NULL,
+  `date_of_leaving` DATE DEFAULT NULL,
+  `class_last_attended` VARCHAR(80) DEFAULT NULL,
+  `progress_status` VARCHAR(80) DEFAULT NULL,
+  `conduct` VARCHAR(80) DEFAULT NULL,
+  `reason_for_leaving` VARCHAR(180) DEFAULT NULL,
+  `tc_remarks` TEXT DEFAULT NULL,
   `address` TEXT DEFAULT NULL,
   `status` VARCHAR(20) NOT NULL DEFAULT 'active',
   `admission_status` VARCHAR(30) NOT NULL DEFAULT 'active',
@@ -361,11 +378,100 @@ INSERT IGNORE INTO `users` (`id`, `institute_id`, `username`, `full_name`, `emai
 (5, 3, 'accounts02', 'B.Ed Accounts', 'accounts02@example.edu', 'ACCOUNTANT', '$2y$10$BYjHvOhTUUEK5IenbB.Zv.mYxq3Lx3dMLlddQX6g0lh9KnE6AEsAK', '9876543204', 'active', NOW(), NOW());
 
 INSERT IGNORE INTO `students` (`id`, `institute_id`, `academic_year_id`, `gr_number`, `first_name`, `last_name`, `guardian_name`, `gender`, `category`, `current_class`, `division`, `mobile_number`, `email`, `dob`, `address`, `status`, `admission_status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'JC2025001', 'Aarav', 'Patil', 'Mahesh Patil', 'Male', 'OBC', 'FYJC', 'A', '9000000001', 'aarav.patil@example.edu', '2008-01-12', 'Main Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
-(2, 1, 1, 'JC2025002', 'Sakshi', 'Jadhav', 'Anita Jadhav', 'Female', 'SC', 'FYJC', 'A', '9000000002', 'sakshi.jadhav@example.edu', '2008-03-25', 'CIDCO, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
+(1, 1, 1, 'JC2025001', 'Aarav', 'Patil', 'Mahesh Patil', 'Male', 'OBC', 'FYJC Science', 'A', '9000000001', 'aarav.patil@example.edu', '2008-01-12', 'Main Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
+(2, 1, 1, 'JC2025002', 'Sakshi', 'Jadhav', 'Anita Jadhav', 'Female', 'SC', 'FYJC Commerce', 'B', '9000000002', 'sakshi.jadhav@example.edu', '2008-03-25', 'CIDCO, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
 (3, 2, 2, 'DC2025001', 'Rohit', 'Kale', 'Sanjay Kale', 'Male', 'Open', 'B.Com I', 'B', '9000000003', 'rohit.kale@example.edu', '2006-08-17', 'Jalna Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
 (4, 2, 2, 'DC2025002', 'Fatima', 'Shaikh', 'Yusuf Shaikh', 'Female', 'Minority', 'B.A I', 'A', '9000000004', 'fatima.shaikh@example.edu', '2006-10-09', 'Roshan Gate, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
 (5, 3, 3, 'BED2025001', 'Neha', 'More', 'Shubhangi More', 'Female', 'EWS', 'B.Ed I', 'A', '9000000005', 'neha.more@example.edu', '2004-07-14', 'Paithan Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW());
+
+UPDATE `students` SET
+  `mother_name` = 'Sunita Patil',
+  `nationality` = 'Indian',
+  `religion` = 'Hindu',
+  `caste_subcaste` = 'Kunbi',
+  `date_of_birth_words` = 'Twelfth January Two Thousand Eight',
+  `place_of_birth` = 'Aurangabad',
+  `birth_taluka` = 'Aurangabad',
+  `birth_district` = 'Chhatrapati Sambhajinagar',
+  `birth_state` = 'Maharashtra',
+  `previous_school` = 'Zilla Parishad School, Aurangabad',
+  `date_of_admission` = '2025-06-15',
+  `class_last_attended` = 'FYJC Science',
+  `progress_status` = 'Good',
+  `conduct` = 'Good',
+  `tc_remarks` = 'Record ready for bonafide and transfer certificate issue.'
+WHERE `id` = 1;
+
+UPDATE `students` SET
+  `mother_name` = 'Anita Jadhav',
+  `nationality` = 'Indian',
+  `religion` = 'Hindu',
+  `caste_subcaste` = 'Jadhav',
+  `date_of_birth_words` = 'Twenty Fifth March Two Thousand Eight',
+  `place_of_birth` = 'Aurangabad',
+  `birth_taluka` = 'Aurangabad',
+  `birth_district` = 'Chhatrapati Sambhajinagar',
+  `birth_state` = 'Maharashtra',
+  `previous_school` = 'Saraswati Vidyalaya, Aurangabad',
+  `date_of_admission` = '2025-06-16',
+  `date_of_leaving` = '2026-04-12',
+  `class_last_attended` = 'FYJC Commerce',
+  `progress_status` = 'Satisfactory',
+  `conduct` = 'Good',
+  `reason_for_leaving` = 'Parent relocation to Pune',
+  `tc_remarks` = 'Transfer requested by parent for relocation.'
+WHERE `id` = 2;
+
+UPDATE `students` SET
+  `mother_name` = 'Meena Kale',
+  `nationality` = 'Indian',
+  `religion` = 'Hindu',
+  `caste_subcaste` = 'Maratha',
+  `date_of_birth_words` = 'Seventeenth August Two Thousand Six',
+  `place_of_birth` = 'Jalna',
+  `birth_taluka` = 'Jalna',
+  `birth_district` = 'Jalna',
+  `birth_state` = 'Maharashtra',
+  `previous_school` = 'Model Junior College, Jalna',
+  `date_of_admission` = '2025-06-20',
+  `class_last_attended` = 'B.Com I',
+  `progress_status` = 'Good',
+  `conduct` = 'Good'
+WHERE `id` = 3;
+
+UPDATE `students` SET
+  `mother_name` = 'Rukhsana Shaikh',
+  `nationality` = 'Indian',
+  `religion` = 'Muslim',
+  `caste_subcaste` = 'Shaikh',
+  `date_of_birth_words` = 'Ninth October Two Thousand Six',
+  `place_of_birth` = 'Aurangabad',
+  `birth_taluka` = 'Aurangabad',
+  `birth_district` = 'Chhatrapati Sambhajinagar',
+  `birth_state` = 'Maharashtra',
+  `previous_school` = 'City Girls Junior College',
+  `date_of_admission` = '2025-06-18',
+  `class_last_attended` = 'B.A I',
+  `progress_status` = 'Very Good',
+  `conduct` = 'Good'
+WHERE `id` = 4;
+
+UPDATE `students` SET
+  `mother_name` = 'Shubhangi More',
+  `nationality` = 'Indian',
+  `religion` = 'Hindu',
+  `caste_subcaste` = 'More',
+  `date_of_birth_words` = 'Fourteenth July Two Thousand Four',
+  `place_of_birth` = 'Paithan',
+  `birth_taluka` = 'Paithan',
+  `birth_district` = 'Chhatrapati Sambhajinagar',
+  `birth_state` = 'Maharashtra',
+  `previous_school` = 'Education College, Paithan',
+  `date_of_admission` = '2025-06-21',
+  `class_last_attended` = 'B.Ed I',
+  `progress_status` = 'Good',
+  `conduct` = 'Excellent'
+WHERE `id` = 5;
 
 INSERT IGNORE INTO `master_entries` (`id`, `institute_id`, `master_type`, `code`, `label`, `description`, `sort_order`, `status`, `meta_json`, `created_at`, `updated_at`) VALUES
 (1, 1, 'caste_category', 'OPEN', 'Open', 'General category admissions', 1, 'active', NULL, NOW(), NOW()),
@@ -375,8 +481,8 @@ INSERT IGNORE INTO `master_entries` (`id`, `institute_id`, `master_type`, `code`
 (5, 1, 'class', 'FYJC_SCI', 'FYJC Science', 'Science stream first year', 1, 'active', NULL, NOW(), NOW()),
 (6, 1, 'class', 'FYJC_COM', 'FYJC Commerce', 'Commerce stream first year', 2, 'active', NULL, NOW(), NOW()),
 (7, 1, 'class', 'FYJC_ARTS', 'FYJC Arts', 'Arts stream first year', 3, 'active', NULL, NOW(), NOW()),
-(8, 1, 'division', 'A', 'A', 'Division A', 1, 'active', NULL, NOW(), NOW()),
-(9, 1, 'division', 'B', 'B', 'Division B', 2, 'active', NULL, NOW(), NOW()),
+(8, 1, 'division', 'A', 'A', 'Division A', 1, 'active', '{"parent_value":"FYJC Science","note":"Science batch division A"}', NOW(), NOW()),
+(9, 1, 'division', 'B', 'B', 'Division B', 2, 'active', '{"parent_value":"FYJC Commerce","note":"Commerce batch division B"}', NOW(), NOW()),
 (10, 1, 'fee_head', 'ADMISSION_FEE', 'Admission Fee', 'One-time admission collection', 1, 'active', NULL, NOW(), NOW()),
 (11, 1, 'fee_head', 'TUITION_FEE', 'Tuition Fee', 'Regular tuition installment', 2, 'active', NULL, NOW(), NOW()),
 (12, 1, 'form_type', 'ADMISSION_FORM', 'Admission Form', 'Primary student admission form', 1, 'active', NULL, NOW(), NOW()),
@@ -386,7 +492,11 @@ INSERT IGNORE INTO `master_entries` (`id`, `institute_id`, `master_type`, `code`
 (16, 1, 'enquiry_source', 'REFERENCE', 'Reference', 'Lead from existing student or parent reference', 3, 'active', NULL, NOW(), NOW()),
 (17, 2, 'class', 'BCOM_I', 'B.Com I', 'First year B.Com class', 1, 'active', NULL, NOW(), NOW()),
 (18, 2, 'class', 'BA_I', 'B.A I', 'First year B.A class', 2, 'active', NULL, NOW(), NOW()),
-(19, 3, 'class', 'BED_I', 'B.Ed I', 'First year B.Ed class', 1, 'active', NULL, NOW(), NOW());
+(19, 3, 'class', 'BED_I', 'B.Ed I', 'First year B.Ed class', 1, 'active', NULL, NOW(), NOW()),
+(20, 1, 'division', 'C', 'C', 'Division C', 3, 'active', '{"parent_value":"FYJC Arts","note":"Arts batch division C"}', NOW(), NOW()),
+(21, 2, 'division', 'A', 'A', 'Division A', 1, 'active', '{"parent_value":"B.A I","note":"Degree arts division A"}', NOW(), NOW()),
+(22, 2, 'division', 'B', 'B', 'Division B', 2, 'active', '{"parent_value":"B.Com I","note":"Degree commerce division B"}', NOW(), NOW()),
+(23, 3, 'division', 'A', 'A', 'Division A', 1, 'active', '{"parent_value":"B.Ed I","note":"B.Ed division A"}', NOW(), NOW());
 
 INSERT IGNORE INTO `staff_profiles` (`id`, `institute_id`, `employee_code`, `full_name`, `department`, `designation`, `mobile_number`, `email`, `joining_date`, `employment_type`, `status`, `created_at`, `updated_at`) VALUES
 (1, 1, 'JC-STF-001', 'Priya Deshpande', 'Admissions', 'Admissions Officer', '9800000001', 'priya.deshpande@example.edu', '2024-06-15', 'full-time', 'active', NOW(), NOW()),

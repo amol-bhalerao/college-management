@@ -166,6 +166,19 @@ class MasterDataController extends BaseController
         foreach ($rows as $row) {
             $type = (string) ($row['master_type'] ?? 'general');
             $grouped[$type] ??= [];
+            $meta = [];
+
+            if (! empty($row['meta_json'])) {
+                try {
+                    $decoded = json_decode((string) $row['meta_json'], true, 512, JSON_THROW_ON_ERROR);
+                    if (is_array($decoded)) {
+                        $meta = $decoded;
+                    }
+                } catch (\Throwable) {
+                    $meta = [];
+                }
+            }
+
             $grouped[$type][] = [
                 'id' => (int) ($row['id'] ?? 0),
                 'code' => $row['code'] ?? null,
@@ -173,6 +186,9 @@ class MasterDataController extends BaseController
                 'value' => $row['label'] ?? '',
                 'description' => $row['description'] ?? null,
                 'sort_order' => (int) ($row['sort_order'] ?? 1),
+                'meta_json' => $row['meta_json'] ?? null,
+                'parent_value' => $meta['parent_value'] ?? null,
+                'note' => $meta['note'] ?? null,
             ];
         }
 

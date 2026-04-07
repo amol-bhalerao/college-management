@@ -51,7 +51,16 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
             <h2>Exam register</h2>
             <p>Start with the exam session, then enter marks against students in the selected class.</p>
           </div>
-          <span class="tag">Result-ready</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="examSearchText()"
+              (ngModelChange)="examSearchText.set($event)"
+              placeholder="Search exam, class, subject..."
+            />
+            <span class="tag">Result-ready</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -59,6 +68,7 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
           [rowData]="exams()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="examSearchText()"
           [pagination]="true"
           [paginationPageSize]="8"
           [animateRows]="true"
@@ -74,6 +84,13 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
               <p>{{ exam.class_name }} · {{ exam.subject_name }} · Max {{ exam.max_marks }}</p>
             </div>
             <div class="page-actions">
+              <input
+                class="search-field"
+                type="search"
+                [ngModel]="markSearchText()"
+                (ngModelChange)="markSearchText.set($event)"
+                placeholder="Search GR no, student, result..."
+              />
               <button type="button" class="secondary-btn" (click)="printResultSheet('A4')">Print A4</button>
               <button type="button" class="secondary-btn" (click)="printResultSheet('A5')">Print A5</button>
               <button type="button" class="primary-btn" (click)="openMarkModal(exam)">+ Add / update mark</button>
@@ -171,6 +188,7 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
             [rowData]="marks()"
             [columnDefs]="markColumnDefs"
             [defaultColDef]="defaultColDef"
+            [quickFilterText]="markSearchText()"
             [pagination]="true"
             [paginationPageSize]="6"
             [animateRows]="true"
@@ -309,6 +327,8 @@ export class ExamResultsComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
   protected readonly isMarkSaving = signal(false);
+  protected readonly examSearchText = signal('');
+  protected readonly markSearchText = signal('');
 
   protected examForm: ExamPayload = this.createEmptyExamForm();
   protected markForm: ExamMarkPayload = this.createEmptyMarkForm();

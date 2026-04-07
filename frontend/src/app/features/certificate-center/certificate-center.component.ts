@@ -57,6 +57,15 @@ import {
             <h2>Certificate requests</h2>
             <p>Use row actions to view, update, delete, and print student-linked certificates.</p>
           </div>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search request no, student, certificate..."
+            />
+          </div>
         </div>
 
         <ag-grid-angular
@@ -64,6 +73,7 @@ import {
           [rowData]="requests()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="6"
           [animateRows]="true"
@@ -205,18 +215,26 @@ import {
                 }
                 @case ('transfer_certificate') {
                   <section class="print-template letter-template">
-                    <p class="template-label">Transfer Certificate</p>
-                    <h3>To whom it may concern</h3>
+                    <p class="template-label">School Leaving / Transfer Certificate</p>
+                    <h3>Student particulars</h3>
+
+                    <div class="detail-grid">
+                      <article><span>Student</span><strong>{{ request.first_name }} {{ request.last_name }}</strong><small>GR: {{ request.gr_number || '—' }}</small></article>
+                      <article><span>Mother / Guardian</span><strong>{{ request.mother_name || request.guardian_name || '—' }}</strong><small>{{ request.nationality || 'Indian' }}</small></article>
+                      <article><span>DOB / Birth place</span><strong>{{ request.dob || '—' }}</strong><small>{{ request.place_of_birth || '—' }}, {{ request.birth_district || '—' }}</small></article>
+                      <article><span>Religion / Category</span><strong>{{ request.religion || '—' }}</strong><small>{{ request.category || '—' }} · {{ request.caste_subcaste || '—' }}</small></article>
+                      <article><span>Date of admission</span><strong>{{ request.date_of_admission || '—' }}</strong><small>Previous school: {{ request.previous_school || '—' }}</small></article>
+                      <article><span>Leaving details</span><strong>{{ request.date_of_leaving || '—' }}</strong><small>{{ request.reason_for_leaving || request.purpose || 'Further academic transition.' }}</small></article>
+                      <article><span>Class last attended</span><strong>{{ request.class_last_attended || request.current_class || '—' }}</strong><small>Division {{ request.division || '—' }}</small></article>
+                      <article><span>Progress / Conduct</span><strong>{{ request.progress_status || 'Good' }}</strong><small>{{ request.conduct || 'Good' }}</small></article>
+                    </div>
+
                     <p>
-                      This is to certify that <strong>{{ request.first_name }} {{ request.last_name }}</strong>
-                      bearing GR No. <strong>{{ request.gr_number || '—' }}</strong> studied in
-                      <strong>{{ request.current_class || '—' }}</strong> at <strong>{{ request.institute_name }}</strong>
-                      during the academic year <strong>{{ context.activeAcademicYear() }}</strong>.
+                      Certified that <strong>{{ request.first_name }} {{ request.last_name }}</strong> was a bonafide student of
+                      <strong>{{ request.institute_name }}</strong>. The above particulars are recorded for issuing the transfer certificate
+                      in the standard school leaving format commonly used in Maharashtra institutions.
                     </p>
-                    <p>
-                      The student has requested transfer for the following purpose:
-                      <strong>{{ request.purpose || 'Further academic transition.' }}</strong>
-                    </p>
+                    <p><strong>Remarks:</strong> {{ request.tc_remarks || 'No adverse remarks.' }}</p>
                     <p class="signature-row">Principal / Office Seal</p>
                   </section>
                 }
@@ -285,6 +303,7 @@ export class CertificateCenterComponent {
   protected readonly editingRequestId = signal<number | null>(null);
   protected readonly isBusy = signal(false);
   protected readonly isSaving = signal(false);
+  protected readonly searchText = signal('');
 
   protected readonly certificateTypes = ['bonafide', 'transfer_certificate', 'id_card', 'no_dues'];
   protected readonly statusOptions = ['requested', 'verified', 'issued'];

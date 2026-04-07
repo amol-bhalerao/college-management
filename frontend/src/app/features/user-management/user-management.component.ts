@@ -48,7 +48,16 @@ import { AppUserRow, UserManagementService } from '../../core/services/user-mana
             <h2>Institute users</h2>
             <p>Use row actions to view, update, or delete user records quickly.</p>
           </div>
-          <span class="tag">Default password for new user: Password@123</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search name, user ID, role..."
+            />
+            <span class="tag">Default password for new user: Password@123</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -56,6 +65,7 @@ import { AppUserRow, UserManagementService } from '../../core/services/user-mana
           [rowData]="users()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="6"
           [animateRows]="true"
@@ -145,6 +155,7 @@ export class UserManagementComponent {
   protected readonly showModal = signal(false);
   protected readonly isSaving = signal(false);
   protected readonly editingUserId = signal<number | null>(null);
+  protected readonly searchText = signal('');
 
   protected readonly roles = ['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'];
 

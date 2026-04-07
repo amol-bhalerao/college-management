@@ -67,7 +67,16 @@ import {
             <h2>Counter activity board</h2>
             <p>Recent receipt register from the live API response for the selected institute.</p>
           </div>
-          <span class="tag">AG Grid</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="counterSearchText()"
+              (ngModelChange)="counterSearchText.set($event)"
+              placeholder="Search receipt, student, payment mode..."
+            />
+            <span class="tag">AG Grid</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -75,6 +84,7 @@ import {
           [rowData]="counterSummary().recentReceipts"
           [columnDefs]="counterColumnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="counterSearchText()"
           [pagination]="true"
           [paginationPageSize]="5"
         ></ag-grid-angular>
@@ -109,7 +119,16 @@ import {
                   <h2>Ledger timeline</h2>
                   <p>{{ currentLedger.academicYear }} · All fee assignments, receipts, and adjustments.</p>
                 </div>
-                <span class="tag">Accountant view</span>
+                <div class="grid-toolbar">
+                  <input
+                    class="search-field"
+                    type="search"
+                    [ngModel]="ledgerSearchText()"
+                    (ngModelChange)="ledgerSearchText.set($event)"
+                    placeholder="Search reference, date, mode..."
+                  />
+                  <span class="tag">Accountant view</span>
+                </div>
               </div>
 
               <ag-grid-angular
@@ -117,6 +136,7 @@ import {
                 [rowData]="currentLedger.entries"
                 [columnDefs]="columnDefs"
                 [defaultColDef]="defaultColDef"
+                [quickFilterText]="ledgerSearchText()"
                 [pagination]="true"
                 [paginationPageSize]="6"
               ></ag-grid-angular>
@@ -256,6 +276,8 @@ export class StudentLedgerComponent {
   });
   protected readonly showCollectModal = signal(false);
   protected readonly isSaving = signal(false);
+  protected readonly counterSearchText = signal('');
+  protected readonly ledgerSearchText = signal('');
   protected studentSearch = 'JC2025001';
 
   protected readonly collectForm = {

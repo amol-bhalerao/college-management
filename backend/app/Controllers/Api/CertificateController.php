@@ -34,7 +34,7 @@ class CertificateController extends BaseController
     public function students(?int $instituteId = null): ResponseInterface
     {
         $builder = db_connect()->table('students')
-            ->select('id, institute_id, academic_year_id, gr_number, first_name, last_name, guardian_name, current_class, division, mobile_number, email, dob, address')
+            ->select('id, institute_id, academic_year_id, gr_number, first_name, last_name, guardian_name, mother_name, current_class, division, category, nationality, religion, caste_subcaste, mobile_number, email, dob, date_of_birth_words, place_of_birth, birth_taluka, birth_district, birth_state, previous_school, date_of_admission, date_of_leaving, class_last_attended, progress_status, conduct, reason_for_leaving, tc_remarks, address')
             ->orderBy('first_name', 'ASC');
 
         if ($instituteId !== null) {
@@ -50,7 +50,7 @@ class CertificateController extends BaseController
     {
         $db = db_connect();
         $builder = $db->table('certificate_requests c')
-            ->select('c.id, c.student_id, c.institute_id, c.academic_year_id, c.request_number, c.certificate_type, c.purpose, c.status, c.verification_token, c.issued_on, c.requested_by, s.gr_number, s.first_name, s.last_name, s.guardian_name, s.current_class, s.division, s.mobile_number, s.email, s.dob, s.address, i.name AS institute_name')
+            ->select('c.id, c.student_id, c.institute_id, c.academic_year_id, c.request_number, c.certificate_type, c.purpose, c.status, c.verification_token, c.issued_on, c.requested_by, s.gr_number, s.first_name, s.last_name, s.guardian_name, s.mother_name, s.current_class, s.division, s.category, s.nationality, s.religion, s.caste_subcaste, s.mobile_number, s.email, s.dob, s.date_of_birth_words, s.place_of_birth, s.birth_taluka, s.birth_district, s.birth_state, s.previous_school, s.date_of_admission, s.date_of_leaving, s.class_last_attended, s.progress_status, s.conduct, s.reason_for_leaving, s.tc_remarks, s.address, i.name AS institute_name')
             ->join('students s', 's.id = c.student_id', 'left')
             ->join('institutes i', 'i.id = c.institute_id', 'left')
             ->orderBy('c.id', 'DESC');

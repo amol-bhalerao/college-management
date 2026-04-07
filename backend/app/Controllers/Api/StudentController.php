@@ -11,7 +11,7 @@ class StudentController extends BaseController
     public function index(?int $instituteId = null): ResponseInterface
     {
         $builder = db_connect()->table('students s')
-            ->select("s.id, s.institute_id, s.academic_year_id, s.gr_number, s.first_name, s.last_name, s.guardian_name, s.gender, s.category, s.current_class, s.division, s.mobile_number, s.email, s.dob, s.address, s.status, s.admission_status, i.name AS institute_name, ay.label AS academic_year_label, COALESCE((SELECT sle.balance FROM student_ledger_entries sle WHERE sle.student_id = s.id ORDER BY sle.entry_date DESC, sle.id DESC LIMIT 1), 0) AS outstanding_amount", false)
+            ->select("s.id, s.institute_id, s.academic_year_id, s.gr_number, s.first_name, s.last_name, s.guardian_name, s.mother_name, s.gender, s.category, s.nationality, s.religion, s.caste_subcaste, s.current_class, s.division, s.mobile_number, s.email, s.dob, s.date_of_birth_words, s.place_of_birth, s.birth_taluka, s.birth_district, s.birth_state, s.previous_school, s.date_of_admission, s.date_of_leaving, s.class_last_attended, s.progress_status, s.conduct, s.reason_for_leaving, s.tc_remarks, s.address, s.status, s.admission_status, i.name AS institute_name, ay.label AS academic_year_label, COALESCE((SELECT sle.balance FROM student_ledger_entries sle WHERE sle.student_id = s.id ORDER BY sle.entry_date DESC, sle.id DESC LIMIT 1), 0) AS outstanding_amount", false)
             ->join('institutes i', 'i.id = s.institute_id', 'left')
             ->join('academic_years ay', 'ay.id = s.academic_year_id', 'left')
             ->orderBy('s.id', 'DESC');
@@ -60,13 +60,30 @@ class StudentController extends BaseController
             'first_name' => $firstName,
             'last_name' => $lastName,
             'guardian_name' => trim((string) ($payload['guardian_name'] ?? '')),
+            'mother_name' => trim((string) ($payload['mother_name'] ?? '')),
             'gender' => trim((string) ($payload['gender'] ?? '')),
             'category' => trim((string) ($payload['category'] ?? '')),
+            'nationality' => trim((string) ($payload['nationality'] ?? 'Indian')),
+            'religion' => trim((string) ($payload['religion'] ?? '')),
+            'caste_subcaste' => trim((string) ($payload['caste_subcaste'] ?? '')),
             'current_class' => trim((string) ($payload['current_class'] ?? '')),
             'division' => trim((string) ($payload['division'] ?? 'A')),
             'mobile_number' => trim((string) ($payload['mobile_number'] ?? '')),
             'email' => trim((string) ($payload['email'] ?? '')),
             'dob' => ($payload['dob'] ?? '') !== '' ? (string) $payload['dob'] : null,
+            'date_of_birth_words' => trim((string) ($payload['date_of_birth_words'] ?? '')),
+            'place_of_birth' => trim((string) ($payload['place_of_birth'] ?? '')),
+            'birth_taluka' => trim((string) ($payload['birth_taluka'] ?? '')),
+            'birth_district' => trim((string) ($payload['birth_district'] ?? '')),
+            'birth_state' => trim((string) ($payload['birth_state'] ?? '')),
+            'previous_school' => trim((string) ($payload['previous_school'] ?? '')),
+            'date_of_admission' => ($payload['date_of_admission'] ?? '') !== '' ? (string) $payload['date_of_admission'] : null,
+            'date_of_leaving' => ($payload['date_of_leaving'] ?? '') !== '' ? (string) $payload['date_of_leaving'] : null,
+            'class_last_attended' => trim((string) ($payload['class_last_attended'] ?? ($payload['current_class'] ?? ''))),
+            'progress_status' => trim((string) ($payload['progress_status'] ?? 'Good')),
+            'conduct' => trim((string) ($payload['conduct'] ?? 'Good')),
+            'reason_for_leaving' => trim((string) ($payload['reason_for_leaving'] ?? '')),
+            'tc_remarks' => trim((string) ($payload['tc_remarks'] ?? '')),
             'address' => trim((string) ($payload['address'] ?? '')),
             'status' => trim((string) ($payload['status'] ?? 'active')) ?: 'active',
             'admission_status' => trim((string) ($payload['admission_status'] ?? 'confirmed')) ?: 'confirmed',
@@ -103,14 +120,16 @@ class StudentController extends BaseController
             );
         }
 
-        foreach (['gr_number', 'first_name', 'last_name', 'guardian_name', 'gender', 'category', 'current_class', 'division', 'mobile_number', 'email', 'address', 'status', 'admission_status'] as $field) {
+        foreach (['gr_number', 'first_name', 'last_name', 'guardian_name', 'mother_name', 'gender', 'category', 'nationality', 'religion', 'caste_subcaste', 'current_class', 'division', 'mobile_number', 'email', 'date_of_birth_words', 'place_of_birth', 'birth_taluka', 'birth_district', 'birth_state', 'previous_school', 'class_last_attended', 'progress_status', 'conduct', 'reason_for_leaving', 'tc_remarks', 'address', 'status', 'admission_status'] as $field) {
             if (isset($payload[$field])) {
                 $updates[$field] = trim((string) $payload[$field]);
             }
         }
 
-        if (array_key_exists('dob', $payload)) {
-            $updates['dob'] = ($payload['dob'] ?? '') !== '' ? (string) $payload['dob'] : null;
+        foreach (['dob', 'date_of_admission', 'date_of_leaving'] as $dateField) {
+            if (array_key_exists($dateField, $payload)) {
+                $updates[$dateField] = ($payload[$dateField] ?? '') !== '' ? (string) $payload[$dateField] : null;
+            }
         }
 
         if (isset($updates['gr_number']) && $updates['gr_number'] !== '') {

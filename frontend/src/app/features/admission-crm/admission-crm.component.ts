@@ -61,7 +61,16 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
             <h2>Lead register</h2>
             <p>Use row actions to view, edit, delete, or start the admission wizard from the same grid.</p>
           </div>
-          <span class="tag">Wizard-ready</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="enquirySearchText()"
+              (ngModelChange)="enquirySearchText.set($event)"
+              placeholder="Search enquiry, student, source..."
+            />
+            <span class="tag">Wizard-ready</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -69,6 +78,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
           [rowData]="rowData()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="enquirySearchText()"
           [pagination]="true"
           [paginationPageSize]="6"
           [animateRows]="true"
@@ -82,7 +92,16 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
             <h2>Recent confirmed admissions</h2>
             <p>Student master and admission records created through the admissions desk.</p>
           </div>
-          <span class="tag tag--accent">Student master</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="admissionSearchText()"
+              (ngModelChange)="admissionSearchText.set($event)"
+              placeholder="Search admission no, student, course..."
+            />
+            <span class="tag tag--accent">Student master</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -90,6 +109,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
           [rowData]="recentAdmissions()"
           [columnDefs]="admissionColumnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="admissionSearchText()"
           [pagination]="true"
           [paginationPageSize]="5"
           [animateRows]="true"
@@ -289,7 +309,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
               <div class="form-grid">
                 <label>
                   Course / class
-                  <select name="current_class" [(ngModel)]="wizardForm.current_class">
+                  <select name="current_class" [(ngModel)]="wizardForm.current_class" (ngModelChange)="onWizardClassChange($event)">
                     <option value="">Select</option>
                     @for (option of optionValues('class'); track option.id) {
                       <option [value]="option.value">{{ option.label }}</option>
@@ -300,7 +320,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
                   Division
                   <select name="division" [(ngModel)]="wizardForm.division">
                     <option value="">Select</option>
-                    @for (option of optionValues('division'); track option.id) {
+                    @for (option of divisionOptions(wizardForm.current_class || ''); track option.id) {
                       <option [value]="option.value">{{ option.label }}</option>
                     }
                   </select>
@@ -355,6 +375,8 @@ export class AdmissionCrmComponent {
   protected readonly isSaving = signal(false);
   protected readonly isEnquirySaving = signal(false);
   protected readonly editingEnquiryId = signal<number | null>(null);
+  protected readonly enquirySearchText = signal('');
+  protected readonly admissionSearchText = signal('');
 
   protected wizardForm: AdmissionWizardPayload = this.createEmptyForm();
   protected enquiryForm: EnquiryPayload = this.createEmptyEnquiryForm();
@@ -411,6 +433,33 @@ export class AdmissionCrmComponent {
 
   protected optionValues(type: string) {
     return this.masterOptions()[type] ?? [];
+  }
+
+  protected divisionOptions(className: string) {
+    const divisions = this.optionValues('division');
+    const key = className.trim().toLowerCase();
+
+    if (!key) {
+      return divisions;
+    }
+
+    const filtered = divisions.filter((option) => {
+      const parent = (option.parent_value ?? '').trim().toLowerCase();
+      return !parent || parent === key;
+    });
+
+    return filtered.length ? filtered : divisions;
+  }
+
+  protected onWizardClassChange(className: string): void {
+    this.wizardForm.current_class = className;
+    const divisions = this.divisionOptions(className);
+
+    if (this.wizardForm.division && divisions.some((option) => option.value === this.wizardForm.division)) {
+      return;
+    }
+
+    this.wizardForm.division = divisions[0]?.value ?? '';
   }
 
   protected handleGridClick(event: { data?: EnquiryRow; event?: Event | null }): void {
@@ -493,6 +542,7 @@ export class AdmissionCrmComponent {
 
     this.selectedEnquiry.set(enquiry);
     this.wizardForm = this.createFormFromEnquiry(enquiry);
+    this.onWizardClassChange(this.wizardForm.current_class || '');
     this.wizardStep.set(1);
     this.showWizard.set(true);
   }

@@ -53,7 +53,16 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
             <h2>Student register</h2>
             <p>Use row actions to view, update, or delete student master entries.</p>
           </div>
-          <span class="tag">Institute-aware directory</span>
+          <div class="grid-toolbar">
+            <input
+              class="search-field"
+              type="search"
+              [ngModel]="searchText()"
+              (ngModelChange)="searchText.set($event)"
+              placeholder="Search GR no, student, class..."
+            />
+            <span class="tag">Institute-aware directory</span>
+          </div>
         </div>
 
         <ag-grid-angular
@@ -61,6 +70,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
           [rowData]="students()"
           [columnDefs]="columnDefs"
           [defaultColDef]="defaultColDef"
+          [quickFilterText]="searchText()"
           [pagination]="true"
           [paginationPageSize]="8"
           [animateRows]="true"
@@ -97,6 +107,10 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
                 <input type="text" name="guardian_name" [(ngModel)]="form.guardian_name" />
               </label>
               <label>
+                Mother name
+                <input type="text" name="mother_name" [(ngModel)]="form.mother_name" />
+              </label>
+              <label>
                 Gender
                 <select name="gender" [(ngModel)]="form.gender">
                   <option value="">Select</option>
@@ -116,7 +130,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
               </label>
               <label>
                 Course / class
-                <select name="current_class" [(ngModel)]="form.current_class">
+                <select name="current_class" [(ngModel)]="form.current_class" (ngModelChange)="onStudentClassChange($event)">
                   <option value="">Select</option>
                   @for (option of optionValues('class'); track option.id) {
                     <option [value]="option.value">{{ option.label }}</option>
@@ -127,7 +141,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
                 Division
                 <select name="division" [(ngModel)]="form.division">
                   <option value="">Select</option>
-                  @for (option of optionValues('division'); track option.id) {
+                  @for (option of divisionOptions(form.current_class || ''); track option.id) {
                     <option [value]="option.value">{{ option.label }}</option>
                   }
                 </select>
@@ -145,6 +159,38 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
                 <input type="date" name="dob" [(ngModel)]="form.dob" />
               </label>
               <label>
+                DOB in words
+                <input type="text" name="date_of_birth_words" [(ngModel)]="form.date_of_birth_words" placeholder="Example: Twelfth January Two Thousand Eight" />
+              </label>
+              <label>
+                Nationality
+                <input type="text" name="nationality" [(ngModel)]="form.nationality" placeholder="Indian" />
+              </label>
+              <label>
+                Religion
+                <input type="text" name="religion" [(ngModel)]="form.religion" />
+              </label>
+              <label>
+                Caste / sub-caste
+                <input type="text" name="caste_subcaste" [(ngModel)]="form.caste_subcaste" />
+              </label>
+              <label>
+                Place of birth
+                <input type="text" name="place_of_birth" [(ngModel)]="form.place_of_birth" />
+              </label>
+              <label>
+                Birth taluka
+                <input type="text" name="birth_taluka" [(ngModel)]="form.birth_taluka" />
+              </label>
+              <label>
+                Birth district
+                <input type="text" name="birth_district" [(ngModel)]="form.birth_district" />
+              </label>
+              <label>
+                Birth state
+                <input type="text" name="birth_state" [(ngModel)]="form.birth_state" />
+              </label>
+              <label>
                 Status
                 <select name="status" [(ngModel)]="form.status">
                   <option value="active">active</option>
@@ -159,6 +205,38 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
                   <option value="cancelled">cancelled</option>
                   <option value="active">active</option>
                 </select>
+              </label>
+              <label>
+                Date of admission
+                <input type="date" name="date_of_admission" [(ngModel)]="form.date_of_admission" />
+              </label>
+              <label>
+                Date of leaving
+                <input type="date" name="date_of_leaving" [(ngModel)]="form.date_of_leaving" />
+              </label>
+              <label>
+                Class last attended
+                <input type="text" name="class_last_attended" [(ngModel)]="form.class_last_attended" />
+              </label>
+              <label>
+                Progress
+                <input type="text" name="progress_status" [(ngModel)]="form.progress_status" placeholder="Good" />
+              </label>
+              <label>
+                Conduct
+                <input type="text" name="conduct" [(ngModel)]="form.conduct" placeholder="Good" />
+              </label>
+              <label class="full-span">
+                Previous school / college
+                <input type="text" name="previous_school" [(ngModel)]="form.previous_school" />
+              </label>
+              <label class="full-span">
+                Reason for leaving
+                <textarea rows="2" name="reason_for_leaving" [(ngModel)]="form.reason_for_leaving"></textarea>
+              </label>
+              <label class="full-span">
+                TC remarks
+                <textarea rows="2" name="tc_remarks" [(ngModel)]="form.tc_remarks"></textarea>
               </label>
               <label class="full-span">
                 Address
@@ -210,7 +288,7 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
               <article>
                 <span>Academic year</span>
                 <strong>{{ student.academic_year_label || context.activeAcademicYear() }}</strong>
-                <small>{{ student.category || 'Category not saved' }}</small>
+                <small>{{ student.category || 'Category not saved' }} · {{ student.nationality || 'Nationality not saved' }}</small>
               </article>
               <article>
                 <span>Outstanding</span>
@@ -222,6 +300,15 @@ import { MasterDataService, MasterOptionsMap } from '../../core/services/master-
             <div class="info-box">
               <strong>Address</strong>
               <p>{{ student.address || 'Address not added yet.' }}</p>
+            </div>
+
+            <div class="info-box">
+              <strong>Transfer certificate profile</strong>
+              <p>
+                Mother: {{ student.mother_name || '—' }} · Birth: {{ student.place_of_birth || '—' }}
+                · Admission: {{ student.date_of_admission || '—' }} · Leaving: {{ student.date_of_leaving || '—' }}
+                · Conduct: {{ student.conduct || 'Good' }}
+              </p>
             </div>
 
             <div class="actions">
@@ -246,6 +333,7 @@ export class StudentMasterComponent {
   protected readonly showModal = signal(false);
   protected readonly editingStudentId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
+  protected readonly searchText = signal('');
 
   protected form: StudentMasterPayload = this.createEmptyForm();
 
@@ -309,6 +397,33 @@ export class StudentMasterComponent {
     return this.masterOptions()[type] ?? [];
   }
 
+  protected divisionOptions(className: string) {
+    const divisions = this.optionValues('division');
+    const key = className.trim().toLowerCase();
+
+    if (!key) {
+      return divisions;
+    }
+
+    const filtered = divisions.filter((option) => {
+      const parent = (option.parent_value ?? '').trim().toLowerCase();
+      return !parent || parent === key;
+    });
+
+    return filtered.length ? filtered : divisions;
+  }
+
+  protected onStudentClassChange(className: string): void {
+    this.form.current_class = className;
+    const divisions = this.divisionOptions(className);
+
+    if (this.form.division && divisions.some((option) => option.value === this.form.division)) {
+      return;
+    }
+
+    this.form.division = divisions[0]?.value ?? '';
+  }
+
   protected handleGridClick(event: { data?: StudentMasterRow; event?: Event | null }): void {
     if (!event.data) {
       return;
@@ -350,17 +465,35 @@ export class StudentMasterComponent {
       first_name: student.first_name,
       last_name: student.last_name,
       guardian_name: student.guardian_name || '',
+      mother_name: student.mother_name || '',
       gender: student.gender || '',
       category: student.category || '',
+      nationality: student.nationality || 'Indian',
+      religion: student.religion || '',
+      caste_subcaste: student.caste_subcaste || '',
       current_class: student.current_class || '',
       division: student.division || '',
       mobile_number: student.mobile_number || '',
       email: student.email || '',
       dob: student.dob || '',
+      date_of_birth_words: student.date_of_birth_words || '',
+      place_of_birth: student.place_of_birth || '',
+      birth_taluka: student.birth_taluka || '',
+      birth_district: student.birth_district || '',
+      birth_state: student.birth_state || '',
+      previous_school: student.previous_school || '',
+      date_of_admission: student.date_of_admission || '',
+      date_of_leaving: student.date_of_leaving || '',
+      class_last_attended: student.class_last_attended || student.current_class || '',
+      progress_status: student.progress_status || 'Good',
+      conduct: student.conduct || 'Good',
+      reason_for_leaving: student.reason_for_leaving || '',
+      tc_remarks: student.tc_remarks || '',
       address: student.address || '',
       status: student.status,
       admission_status: student.admission_status,
     };
+    this.onStudentClassChange(this.form.current_class || '');
     this.showModal.set(true);
   }
 
@@ -428,13 +561,30 @@ export class StudentMasterComponent {
       first_name: '',
       last_name: '',
       guardian_name: '',
+      mother_name: '',
       gender: '',
       category: '',
+      nationality: 'Indian',
+      religion: '',
+      caste_subcaste: '',
       current_class: '',
       division: 'A',
       mobile_number: '',
       email: '',
       dob: '',
+      date_of_birth_words: '',
+      place_of_birth: '',
+      birth_taluka: '',
+      birth_district: '',
+      birth_state: '',
+      previous_school: '',
+      date_of_admission: '',
+      date_of_leaving: '',
+      class_last_attended: '',
+      progress_status: 'Good',
+      conduct: 'Good',
+      reason_for_leaving: '',
+      tc_remarks: '',
       address: '',
       status: 'active',
       admission_status: 'confirmed',

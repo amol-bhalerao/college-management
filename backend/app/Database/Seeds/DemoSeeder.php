@@ -136,11 +136,109 @@ class DemoSeeder extends Seeder
         ]);
 
         $db->table('students')->ignore(true)->insertBatch([
-            ['id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'gr_number' => 'JC2025001', 'first_name' => 'Aarav', 'last_name' => 'Patil', 'guardian_name' => 'Mahesh Patil', 'gender' => 'Male', 'category' => 'OBC', 'current_class' => 'FYJC', 'division' => 'A', 'mobile_number' => '9000000001', 'email' => 'aarav.patil@example.edu', 'dob' => '2008-01-12', 'address' => 'Main Road, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
-            ['id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'gr_number' => 'JC2025002', 'first_name' => 'Sakshi', 'last_name' => 'Jadhav', 'guardian_name' => 'Anita Jadhav', 'gender' => 'Female', 'category' => 'SC', 'current_class' => 'FYJC', 'division' => 'A', 'mobile_number' => '9000000002', 'email' => 'sakshi.jadhav@example.edu', 'dob' => '2008-03-25', 'address' => 'CIDCO, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'gr_number' => 'JC2025001', 'first_name' => 'Aarav', 'last_name' => 'Patil', 'guardian_name' => 'Mahesh Patil', 'gender' => 'Male', 'category' => 'OBC', 'current_class' => 'FYJC Science', 'division' => 'A', 'mobile_number' => '9000000001', 'email' => 'aarav.patil@example.edu', 'dob' => '2008-01-12', 'address' => 'Main Road, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'gr_number' => 'JC2025002', 'first_name' => 'Sakshi', 'last_name' => 'Jadhav', 'guardian_name' => 'Anita Jadhav', 'gender' => 'Female', 'category' => 'SC', 'current_class' => 'FYJC Commerce', 'division' => 'B', 'mobile_number' => '9000000002', 'email' => 'sakshi.jadhav@example.edu', 'dob' => '2008-03-25', 'address' => 'CIDCO, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 3, 'institute_id' => 2, 'academic_year_id' => 2, 'gr_number' => 'DC2025001', 'first_name' => 'Rohit', 'last_name' => 'Kale', 'guardian_name' => 'Sanjay Kale', 'gender' => 'Male', 'category' => 'Open', 'current_class' => 'B.Com I', 'division' => 'B', 'mobile_number' => '9000000003', 'email' => 'rohit.kale@example.edu', 'dob' => '2006-08-17', 'address' => 'Jalna Road, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 4, 'institute_id' => 2, 'academic_year_id' => 2, 'gr_number' => 'DC2025002', 'first_name' => 'Fatima', 'last_name' => 'Shaikh', 'guardian_name' => 'Yusuf Shaikh', 'gender' => 'Female', 'category' => 'Minority', 'current_class' => 'B.A I', 'division' => 'A', 'mobile_number' => '9000000004', 'email' => 'fatima.shaikh@example.edu', 'dob' => '2006-10-09', 'address' => 'Roshan Gate, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 5, 'institute_id' => 3, 'academic_year_id' => 3, 'gr_number' => 'BED2025001', 'first_name' => 'Neha', 'last_name' => 'More', 'guardian_name' => 'Shubhangi More', 'gender' => 'Female', 'category' => 'EWS', 'current_class' => 'B.Ed I', 'division' => 'A', 'mobile_number' => '9000000005', 'email' => 'neha.more@example.edu', 'dob' => '2004-07-14', 'address' => 'Paithan Road, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
+        ]);
+
+        $db->table('students')->where('id', 1)->update([
+            'current_class' => 'FYJC Science',
+            'division' => 'A',
+            'mother_name' => 'Sunita Patil',
+            'nationality' => 'Indian',
+            'religion' => 'Hindu',
+            'caste_subcaste' => 'Kunbi',
+            'date_of_birth_words' => 'Twelfth January Two Thousand Eight',
+            'place_of_birth' => 'Aurangabad',
+            'birth_taluka' => 'Aurangabad',
+            'birth_district' => 'Chhatrapati Sambhajinagar',
+            'birth_state' => 'Maharashtra',
+            'previous_school' => 'Zilla Parishad School, Aurangabad',
+            'date_of_admission' => '2025-06-15',
+            'class_last_attended' => 'FYJC Science',
+            'progress_status' => 'Good',
+            'conduct' => 'Good',
+            'tc_remarks' => 'Record ready for bonafide and transfer certificate issue.',
+            'updated_at' => $now,
+        ]);
+
+        $db->table('students')->where('id', 2)->update([
+            'current_class' => 'FYJC Commerce',
+            'division' => 'B',
+            'mother_name' => 'Anita Jadhav',
+            'nationality' => 'Indian',
+            'religion' => 'Hindu',
+            'caste_subcaste' => 'Jadhav',
+            'date_of_birth_words' => 'Twenty Fifth March Two Thousand Eight',
+            'place_of_birth' => 'Aurangabad',
+            'birth_taluka' => 'Aurangabad',
+            'birth_district' => 'Chhatrapati Sambhajinagar',
+            'birth_state' => 'Maharashtra',
+            'previous_school' => 'Saraswati Vidyalaya, Aurangabad',
+            'date_of_admission' => '2025-06-16',
+            'date_of_leaving' => '2026-04-12',
+            'class_last_attended' => 'FYJC Commerce',
+            'progress_status' => 'Satisfactory',
+            'conduct' => 'Good',
+            'reason_for_leaving' => 'Parent relocation to Pune',
+            'tc_remarks' => 'Transfer requested by parent for relocation.',
+            'updated_at' => $now,
+        ]);
+
+        $db->table('students')->where('id', 3)->update([
+            'mother_name' => 'Meena Kale',
+            'nationality' => 'Indian',
+            'religion' => 'Hindu',
+            'caste_subcaste' => 'Maratha',
+            'date_of_birth_words' => 'Seventeenth August Two Thousand Six',
+            'place_of_birth' => 'Jalna',
+            'birth_taluka' => 'Jalna',
+            'birth_district' => 'Jalna',
+            'birth_state' => 'Maharashtra',
+            'previous_school' => 'Model Junior College, Jalna',
+            'date_of_admission' => '2025-06-20',
+            'class_last_attended' => 'B.Com I',
+            'progress_status' => 'Good',
+            'conduct' => 'Good',
+            'updated_at' => $now,
+        ]);
+
+        $db->table('students')->where('id', 4)->update([
+            'mother_name' => 'Rukhsana Shaikh',
+            'nationality' => 'Indian',
+            'religion' => 'Muslim',
+            'caste_subcaste' => 'Shaikh',
+            'date_of_birth_words' => 'Ninth October Two Thousand Six',
+            'place_of_birth' => 'Aurangabad',
+            'birth_taluka' => 'Aurangabad',
+            'birth_district' => 'Chhatrapati Sambhajinagar',
+            'birth_state' => 'Maharashtra',
+            'previous_school' => 'City Girls Junior College',
+            'date_of_admission' => '2025-06-18',
+            'class_last_attended' => 'B.A I',
+            'progress_status' => 'Very Good',
+            'conduct' => 'Good',
+            'updated_at' => $now,
+        ]);
+
+        $db->table('students')->where('id', 5)->update([
+            'mother_name' => 'Shubhangi More',
+            'nationality' => 'Indian',
+            'religion' => 'Hindu',
+            'caste_subcaste' => 'More',
+            'date_of_birth_words' => 'Fourteenth July Two Thousand Four',
+            'place_of_birth' => 'Paithan',
+            'birth_taluka' => 'Paithan',
+            'birth_district' => 'Chhatrapati Sambhajinagar',
+            'birth_state' => 'Maharashtra',
+            'previous_school' => 'Education College, Paithan',
+            'date_of_admission' => '2025-06-21',
+            'class_last_attended' => 'B.Ed I',
+            'progress_status' => 'Good',
+            'conduct' => 'Excellent',
+            'updated_at' => $now,
         ]);
 
         if ($db->tableExists('master_entries')) {
@@ -152,8 +250,8 @@ class DemoSeeder extends Seeder
                 ['id' => 5, 'institute_id' => 1, 'master_type' => 'class', 'code' => 'FYJC_SCI', 'label' => 'FYJC Science', 'description' => 'Science stream first year', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 6, 'institute_id' => 1, 'master_type' => 'class', 'code' => 'FYJC_COM', 'label' => 'FYJC Commerce', 'description' => 'Commerce stream first year', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 7, 'institute_id' => 1, 'master_type' => 'class', 'code' => 'FYJC_ARTS', 'label' => 'FYJC Arts', 'description' => 'Arts stream first year', 'sort_order' => 3, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
-                ['id' => 8, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'A', 'label' => 'A', 'description' => 'Division A', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
-                ['id' => 9, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'B', 'label' => 'B', 'description' => 'Division B', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 8, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'A', 'label' => 'A', 'description' => 'Division A', 'sort_order' => 1, 'status' => 'active', 'meta_json' => json_encode(['parent_value' => 'FYJC Science', 'note' => 'Science batch division A'], JSON_THROW_ON_ERROR), 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 9, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'B', 'label' => 'B', 'description' => 'Division B', 'sort_order' => 2, 'status' => 'active', 'meta_json' => json_encode(['parent_value' => 'FYJC Commerce', 'note' => 'Commerce batch division B'], JSON_THROW_ON_ERROR), 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 10, 'institute_id' => 1, 'master_type' => 'fee_head', 'code' => 'ADMISSION_FEE', 'label' => 'Admission Fee', 'description' => 'One-time admission collection', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 11, 'institute_id' => 1, 'master_type' => 'fee_head', 'code' => 'TUITION_FEE', 'label' => 'Tuition Fee', 'description' => 'Regular tuition installment', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 12, 'institute_id' => 1, 'master_type' => 'form_type', 'code' => 'ADMISSION_FORM', 'label' => 'Admission Form', 'description' => 'Primary student admission form', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
@@ -164,6 +262,19 @@ class DemoSeeder extends Seeder
                 ['id' => 17, 'institute_id' => 2, 'master_type' => 'class', 'code' => 'BCOM_I', 'label' => 'B.Com I', 'description' => 'First year B.Com class', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 18, 'institute_id' => 2, 'master_type' => 'class', 'code' => 'BA_I', 'label' => 'B.A I', 'description' => 'First year B.A class', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
                 ['id' => 19, 'institute_id' => 3, 'master_type' => 'class', 'code' => 'BED_I', 'label' => 'B.Ed I', 'description' => 'First year B.Ed class', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 20, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'C', 'label' => 'C', 'description' => 'Division C', 'sort_order' => 3, 'status' => 'active', 'meta_json' => json_encode(['parent_value' => 'FYJC Arts', 'note' => 'Arts batch division C'], JSON_THROW_ON_ERROR), 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 21, 'institute_id' => 2, 'master_type' => 'division', 'code' => 'A', 'label' => 'A', 'description' => 'Division A', 'sort_order' => 1, 'status' => 'active', 'meta_json' => json_encode(['parent_value' => 'B.A I', 'note' => 'Degree arts division A'], JSON_THROW_ON_ERROR), 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 22, 'institute_id' => 2, 'master_type' => 'division', 'code' => 'B', 'label' => 'B', 'description' => 'Division B', 'sort_order' => 2, 'status' => 'active', 'meta_json' => json_encode(['parent_value' => 'B.Com I', 'note' => 'Degree commerce division B'], JSON_THROW_ON_ERROR), 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 23, 'institute_id' => 3, 'master_type' => 'division', 'code' => 'A', 'label' => 'A', 'description' => 'Division A', 'sort_order' => 1, 'status' => 'active', 'meta_json' => json_encode(['parent_value' => 'B.Ed I', 'note' => 'B.Ed division A'], JSON_THROW_ON_ERROR), 'created_at' => $now, 'updated_at' => $now],
+            ]);
+
+            $db->table('master_entries')->where('id', 8)->update([
+                'meta_json' => json_encode(['parent_value' => 'FYJC Science', 'note' => 'Science batch division A'], JSON_THROW_ON_ERROR),
+                'updated_at' => $now,
+            ]);
+            $db->table('master_entries')->where('id', 9)->update([
+                'meta_json' => json_encode(['parent_value' => 'FYJC Commerce', 'note' => 'Commerce batch division B'], JSON_THROW_ON_ERROR),
+                'updated_at' => $now,
             ]);
         }
 
