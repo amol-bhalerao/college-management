@@ -127,6 +127,8 @@ class DemoSeeder extends Seeder
             ['id' => 1, 'institute_id' => 1, 'username' => 'superadmin', 'full_name' => 'Super Admin', 'email' => 'superadmin@example.edu', 'role_code' => 'SUPER_ADMIN', 'password_hash' => $passwordHash, 'whatsapp_number' => '9876543200', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 2, 'institute_id' => 1, 'username' => 'clerk01', 'full_name' => 'Clerk User', 'email' => 'clerk01@example.edu', 'role_code' => 'CLERK', 'password_hash' => $passwordHash, 'whatsapp_number' => '9876543201', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 3, 'institute_id' => 1, 'username' => 'accounts01', 'full_name' => 'Account User', 'email' => 'accounts01@example.edu', 'role_code' => 'ACCOUNTANT', 'password_hash' => $passwordHash, 'whatsapp_number' => '9876543202', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 4, 'institute_id' => 2, 'username' => 'clerk02', 'full_name' => 'Degree Clerk', 'email' => 'clerk02@example.edu', 'role_code' => 'CLERK', 'password_hash' => $passwordHash, 'whatsapp_number' => '9876543203', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+            ['id' => 5, 'institute_id' => 3, 'username' => 'accounts02', 'full_name' => 'B.Ed Accounts', 'email' => 'accounts02@example.edu', 'role_code' => 'ACCOUNTANT', 'password_hash' => $passwordHash, 'whatsapp_number' => '9876543204', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
         $db->table('students')->ignore(true)->insertBatch([

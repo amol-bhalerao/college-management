@@ -15,6 +15,9 @@ $routes->group('api', static function ($routes): void {
     $routes->get('institutes', 'Api\InstituteController::index');
     $routes->get('institutes/(:num)/settings', 'Api\InstituteController::settings/$1');
     $routes->put('institutes/(:num)/settings', 'Api\InstituteController::updateSettings/$1');
+    $routes->get('users', 'Api\UserManagementController::index');
+    $routes->post('users', 'Api\UserManagementController::create');
+    $routes->put('users/(:num)', 'Api\UserManagementController::update/$1');
     $routes->get('enquiries/summary', 'Api\EnquiryController::summary');
     $routes->get('enquiries/summary/(:num)', 'Api\EnquiryController::summary/$1');
     $routes->get('enquiries', 'Api\EnquiryController::index');

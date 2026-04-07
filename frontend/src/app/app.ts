@@ -261,6 +261,7 @@ export class App {
   protected readonly navItems = [
     { label: 'Executive Dashboard', route: '/dashboard', icon: '📊' },
     { label: 'Admission CRM', route: '/admissions', icon: '🧾' },
+    { label: 'User Management', route: '/users', icon: '👥' },
     { label: 'Institute Header', route: '/institute-header', icon: '🏫' },
     { label: 'Student Ledger', route: '/student-ledger', icon: '📒' },
     { label: 'Theme Studio', route: '/theme-studio', icon: '🎨' },

@@ -7,6 +7,7 @@ import { LoginComponent } from './features/login/login.component';
 import { AdmissionCrmComponent } from './features/admission-crm/admission-crm.component';
 import { StudentLedgerComponent } from './features/student-ledger/student-ledger.component';
 import { ThemeStudioComponent } from './features/theme-studio/theme-studio.component';
+import { UserManagementComponent } from './features/user-management/user-management.component';
 
 export const routes: Routes = [
   {
@@ -31,6 +32,12 @@ export const routes: Routes = [
     component: AdmissionCrmComponent,
     canActivate: [authGuard],
     title: 'Admission CRM',
+  },
+  {
+    path: 'users',
+    component: UserManagementComponent,
+    canActivate: [authGuard],
+    title: 'User Management',
   },
   {
     path: 'institute-header',

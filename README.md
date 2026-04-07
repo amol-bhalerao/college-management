@@ -30,11 +30,15 @@ Open: `http://127.0.0.1:4200/login`
 ```bash
 cd backend
 composer install
-php spark migrate
-php spark db:seed DemoSeeder
 php spark serve --host 127.0.0.1 --port 8080
 ```
 Open: `http://127.0.0.1:8080/`
+
+### One-command local test database setup
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\setup-test-db.ps1
+```
+This rebuilds the local SQLite database and seeds demo data automatically.
 
 ## Demo Login Credentials
 > Change these before production use.
@@ -54,10 +58,12 @@ Implemented so far:
 - login flow with local mock auth
 - executive dashboard
 - admission CRM (enquiries and conversion flow)
+- user management for super admin
 - institute header manager for graphical print branding edits
 - theme studio UI
 - student ledger screen
 - mock data seeders and institute records
 - QR/public verification API base
+- ready-to-run test database scripts for SQLite and MySQL setup
 
 See `docs/development-plan.md` for the detailed blueprint and development stages.
