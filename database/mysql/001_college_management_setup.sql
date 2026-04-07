@@ -199,6 +199,43 @@ CREATE TABLE IF NOT EXISTS `certificate_requests` (
   UNIQUE KEY `uq_certificate_requests_verification_token` (`verification_token`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `quality_metrics` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `academic_year_id` INT UNSIGNED DEFAULT NULL,
+  `criterion_code` VARCHAR(30) NOT NULL,
+  `title` VARCHAR(180) NOT NULL,
+  `owner` VARCHAR(120) DEFAULT NULL,
+  `target_value` INT NOT NULL DEFAULT 0,
+  `achieved_value` INT NOT NULL DEFAULT 0,
+  `status` VARCHAR(30) NOT NULL DEFAULT 'ongoing',
+  `evidence_status` VARCHAR(30) NOT NULL DEFAULT 'in-progress',
+  `next_review_date` DATE DEFAULT NULL,
+  `notes` TEXT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `website_pages` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `slug` VARCHAR(120) NOT NULL,
+  `nav_label` VARCHAR(80) DEFAULT NULL,
+  `title` VARCHAR(180) NOT NULL,
+  `hero_title` VARCHAR(200) DEFAULT NULL,
+  `hero_subtitle` TEXT DEFAULT NULL,
+  `body_html` LONGTEXT DEFAULT NULL,
+  `seo_title` VARCHAR(180) DEFAULT NULL,
+  `seo_description` TEXT DEFAULT NULL,
+  `is_published` TINYINT(1) NOT NULL DEFAULT 1,
+  `sort_order` INT NOT NULL DEFAULT 1,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_website_pages_institute_slug` (`institute_id`, `slug`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `fee_receipts` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `student_id` INT UNSIGNED NOT NULL,
@@ -271,6 +308,11 @@ INSERT IGNORE INTO `dashboard_targets` (`id`, `institute_id`, `module`, `target`
 (2, 1, 'Admission conversion', 220, 163, 57, 'Admissions Team', 'Up', NOW(), NOW()),
 (3, 1, 'Fee collection drive', 500, 428, 72, 'Account Office', 'Stable', NOW(), NOW());
 
+INSERT IGNORE INTO `quality_metrics` (`id`, `institute_id`, `academic_year_id`, `criterion_code`, `title`, `owner`, `target_value`, `achieved_value`, `status`, `evidence_status`, `next_review_date`, `notes`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'NAAC-1.4', 'Curriculum feedback cycle completion', 'IQAC Coordinator', 12, 9, 'ongoing', 'ready', '2026-04-20', 'Collect final student feedback summary and minutes.', NOW(), NOW()),
+(2, 1, 1, 'NAAC-2.5', 'Student support evidence filing', 'Student Development Cell', 20, 16, 'ongoing', 'in-progress', '2026-04-18', 'Attach scholarship and mentoring evidence files.', NOW(), NOW()),
+(3, 2, 2, 'NAAC-3.2', 'Research and extension documentation', 'Quality Cell', 10, 7, 'ongoing', 'in-progress', '2026-04-24', 'Update MoU and extension photographs.', NOW(), NOW());
+
 INSERT IGNORE INTO `enquiries` (`id`, `institute_id`, `academic_year_id`, `enquiry_number`, `student_name`, `mobile_number`, `email`, `source`, `desired_course`, `current_class`, `category`, `status`, `assigned_to`, `follow_up_date`, `notes`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 'ENQ-JC-0001', 'Pratiksha More', '9011111111', 'pratiksha@example.com', 'Website', 'FYJC Science', '10th', 'OBC', 'new', 'Clerk Desk', '2026-04-09', 'Interested in science stream and scholarship guidance.', NOW(), NOW()),
 (2, 1, 1, 'ENQ-JC-0002', 'Tanish Jadhav', '9022222222', 'tanish@example.com', 'Reference', 'FYJC Commerce', '10th', 'SC', 'follow-up', 'Admissions Team', '2026-04-10', 'Waiting for document submission and caste certificate copy.', NOW(), NOW()),
@@ -285,3 +327,8 @@ INSERT IGNORE INTO `certificate_requests` (`id`, `student_id`, `institute_id`, `
 (1, 1, 1, 1, 'CERT-JC-0001', 'bonafide', 'Bank account opening for scholarship process.', 'issued', 'CERT-JC-2026-0001', '2026-04-07', 'Clerk Desk', NOW(), NOW()),
 (2, 2, 1, 1, 'CERT-JC-0002', 'transfer_certificate', 'Migration to another college after relocation.', 'requested', NULL, NULL, 'Admissions Team', NOW(), NOW()),
 (3, 3, 2, 2, 'CERT-DC-0001', 'no_dues', 'Internship and library clearance requirement.', 'verified', 'CERT-DC-2026-0001', '2026-04-06', 'Account Office', NOW(), NOW());
+
+INSERT IGNORE INTO `website_pages` (`id`, `institute_id`, `slug`, `nav_label`, `title`, `hero_title`, `hero_subtitle`, `body_html`, `seo_title`, `seo_description`, `is_published`, `sort_order`, `created_at`, `updated_at`) VALUES
+(1, 1, 'home', 'Home', 'Junior College Home', 'Admissions Open for 2025-26', 'Scholarship-friendly, institute-aware college management with modern student services.', '<section><h2>Why choose us</h2><p>Junior College supports admissions, scholarships, fee receipts, certificates, and student mentoring in one streamlined workflow.</p></section><section><h2>Highlights</h2><ul><li>Scholarship help desk</li><li>Verified fee receipts</li><li>IQAC-ready documentation</li></ul></section>', 'Junior College Admissions, Scholarship and Student Support', 'Explore admissions, scholarships, receipts, and student support services for Junior College.', 1, 1, NOW(), NOW()),
+(2, 1, 'about', 'About', 'About Our Junior College', 'NAAC-ready teaching, guidance, and transparent student support processes.', '<section><h2>Institution Profile</h2><p>The institute focuses on quality education, scholarship support, and digital academic administration for students and parents.</p></section>', 'About Junior College and Academic Services', 'Learn about the institute profile, academic support, and student development services.', 1, 2, NOW(), NOW()),
+(3, 2, 'home', 'Home', 'Degree College Home', 'Career-focused undergraduate programs with transparent student services.', '<section><h2>Programs</h2><p>B.A., B.Com., and student service workflows are managed with institute-wise dashboards and public information pages.</p></section>', 'Degree College Programs and Admission Support', 'Degree College public information page with programs, student services, and admission updates.', 1, 1, NOW(), NOW());

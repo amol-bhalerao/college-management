@@ -1,0 +1,300 @@
+import { CommonModule } from '@angular/common';
+import { Component, effect, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import Swal from 'sweetalert2';
+
+import { AppContextService } from '../../core/services/context.service';
+import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/services/website-cms.service';
+
+@Component({
+  selector: 'app-website-cms',
+  standalone: true,
+  imports: [CommonModule, FormsModule],
+  template: `
+    <section class="page">
+      <div class="page-head">
+        <div>
+          <p class="eyebrow">Website CMS</p>
+          <h1>Public Website + SEO Pages</h1>
+          <p>Create and manage institute-wise public pages, hero text, and SEO metadata without coding.</p>
+        </div>
+        <div class="head-actions">
+          <button type="button" class="secondary-btn" (click)="previewPublicSite()">Preview public site</button>
+          <button type="button" class="primary-btn" (click)="openCreate()">+ Add page</button>
+        </div>
+      </div>
+
+      <div class="layout">
+        <article class="panel page-list-panel">
+          <div class="panel__header">
+            <div>
+              <h2>Page list</h2>
+              <p>Home, About, Admissions, Facilities, and other SEO-ready pages.</p>
+            </div>
+            <span class="tag">Published website</span>
+          </div>
+
+          <div class="page-list">
+            @for (page of pages(); track page.id) {
+              <button type="button" class="page-item" [class.active]="selectedPage()?.id === page.id" (click)="selectPage(page)">
+                <div>
+                  <strong>{{ page.nav_label || page.title }}</strong>
+                  <small>/{{ page.slug }}</small>
+                </div>
+                <span>{{ page.is_published ? 'Published' : 'Draft' }}</span>
+              </button>
+            }
+          </div>
+        </article>
+
+        <article class="panel editor-panel">
+          <div class="panel__header">
+            <div>
+              <h2>{{ selectedPage()?.title || 'Select a page' }}</h2>
+              <p>{{ selectedPage()?.seo_title || 'SEO title will appear here.' }}</p>
+            </div>
+            @if (selectedPage()) {
+              <div class="head-actions">
+                <button type="button" class="ghost-btn" (click)="openEdit(selectedPage()!)">Edit</button>
+                <button type="button" class="ghost-btn danger-btn" (click)="deletePage(selectedPage()!)">Delete</button>
+              </div>
+            }
+          </div>
+
+          @if (selectedPage(); as page) {
+            <div class="preview-card">
+              <span class="seo-chip">SEO: {{ page.seo_title || page.title }}</span>
+              <h3>{{ page.hero_title || page.title }}</h3>
+              <p>{{ page.hero_subtitle || 'Hero subtitle will appear here.' }}</p>
+              <div class="html-preview" [innerHTML]="page.body_html || '<p>No page body added yet.</p>'"></div>
+              <div class="seo-box">
+                <strong>SEO description</strong>
+                <p>{{ page.seo_description || 'No SEO description added yet.' }}</p>
+              </div>
+            </div>
+          } @else {
+            <p class="empty-state">No page selected yet.</p>
+          }
+        </article>
+      </div>
+
+      @if (showModal()) {
+        <div class="detail-modal" (click)="closeModal()">
+          <form class="detail-card detail-card--wide" (click)="$event.stopPropagation()" (ngSubmit)="savePage()">
+            <div class="panel__header">
+              <div>
+                <h2>{{ editingId() ? 'Update website page' : 'Add website page' }}</h2>
+                <p>Configure navigation label, hero content, HTML body, and SEO settings.</p>
+              </div>
+              <button type="button" class="ghost-btn" (click)="closeModal()">Close</button>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Navigation label
+                <input type="text" name="nav_label" [(ngModel)]="form.nav_label" />
+              </label>
+              <label>
+                Slug
+                <input type="text" name="slug" [(ngModel)]="form.slug" />
+              </label>
+              <label>
+                Page title
+                <input type="text" name="title" [(ngModel)]="form.title" required />
+              </label>
+              <label>
+                Sort order
+                <input type="number" min="1" name="sort_order" [(ngModel)]="form.sort_order" />
+              </label>
+              <label class="full-span">
+                Hero title
+                <input type="text" name="hero_title" [(ngModel)]="form.hero_title" />
+              </label>
+              <label class="full-span">
+                Hero subtitle
+                <textarea rows="2" name="hero_subtitle" [(ngModel)]="form.hero_subtitle"></textarea>
+              </label>
+              <label class="full-span">
+                Page body HTML
+                <textarea rows="8" name="body_html" [(ngModel)]="form.body_html"></textarea>
+              </label>
+              <label class="full-span">
+                SEO title
+                <input type="text" name="seo_title" [(ngModel)]="form.seo_title" />
+              </label>
+              <label class="full-span">
+                SEO description
+                <textarea rows="3" name="seo_description" [(ngModel)]="form.seo_description"></textarea>
+              </label>
+              <label>
+                Publish status
+                <select name="is_published" [(ngModel)]="form.is_published">
+                  <option [ngValue]="1">Published</option>
+                  <option [ngValue]="0">Draft</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="actions actions--end">
+              <button type="submit" class="primary-btn" [disabled]="isSaving()">
+                {{ isSaving() ? 'Saving...' : (editingId() ? 'Update page' : 'Create page') }}
+              </button>
+            </div>
+          </form>
+        </div>
+      }
+    </section>
+  `,
+  styleUrl: './website-cms.component.scss',
+})
+export class WebsiteCmsComponent {
+  protected readonly context = inject(AppContextService);
+  private readonly websiteService = inject(WebsiteCmsService);
+
+  protected readonly pages = signal<WebsitePage[]>([]);
+  protected readonly selectedPage = signal<WebsitePage | null>(null);
+  protected readonly showModal = signal(false);
+  protected readonly editingId = signal<number | null>(null);
+  protected readonly isSaving = signal(false);
+
+  protected form: WebsitePagePayload = this.createEmptyForm();
+
+  constructor() {
+    effect(() => {
+      void this.load(this.context.activeInstitute().id);
+    });
+  }
+
+  protected selectPage(page: WebsitePage): void {
+    this.selectedPage.set(page);
+  }
+
+  protected openCreate(): void {
+    this.editingId.set(null);
+    this.form = this.createEmptyForm();
+    this.showModal.set(true);
+  }
+
+  protected openEdit(page: WebsitePage): void {
+    this.editingId.set(page.id);
+    this.form = {
+      slug: page.slug,
+      nav_label: page.nav_label || '',
+      title: page.title,
+      hero_title: page.hero_title || '',
+      hero_subtitle: page.hero_subtitle || '',
+      body_html: page.body_html || '',
+      seo_title: page.seo_title || '',
+      seo_description: page.seo_description || '',
+      is_published: Number(page.is_published),
+      sort_order: Number(page.sort_order),
+    };
+    this.showModal.set(true);
+  }
+
+  protected closeModal(): void {
+    this.showModal.set(false);
+    this.form = this.createEmptyForm();
+  }
+
+  protected async savePage(): Promise<void> {
+    this.isSaving.set(true);
+
+    try {
+      const payload: WebsitePagePayload = {
+        ...this.form,
+        institute_id: this.context.activeInstitute().id,
+      };
+
+      if (this.editingId()) {
+        await this.websiteService.updatePage(this.editingId()!, payload);
+      } else {
+        await this.websiteService.createPage(payload);
+      }
+
+      await Swal.fire({ icon: 'success', title: 'Saved', text: 'Website page updated successfully.' });
+      this.closeModal();
+      await this.load(this.context.activeInstitute().id);
+    } catch (error: any) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Save failed',
+        text: error?.error?.message || 'Please review the page content and try again.',
+      });
+    } finally {
+      this.isSaving.set(false);
+    }
+  }
+
+  protected async deletePage(page: WebsitePage): Promise<void> {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'Delete page?',
+      text: `Remove ${page.title} from the public website?`,
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      confirmButtonColor: '#dc2626',
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    try {
+      await this.websiteService.deletePage(page.id);
+      await this.load(this.context.activeInstitute().id);
+      await Swal.fire({ icon: 'success', title: 'Deleted', text: 'Website page removed successfully.' });
+    } catch (error: any) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Delete failed',
+        text: error?.error?.message || 'Unable to delete this page right now.',
+      });
+    }
+  }
+
+  protected async previewPublicSite(): Promise<void> {
+    const code = this.context.activeInstitute().code.toLowerCase();
+    const site = await this.websiteService.getPublicSite(code);
+    const firstPage = site.pages[0];
+
+    await Swal.fire({
+      width: 900,
+      title: firstPage?.hero_title || site.institute.name,
+      html: `
+        <div style="text-align:left; display:grid; gap:12px;">
+          <div><strong>Institute:</strong> ${site.institute.name}</div>
+          <div><strong>Website URL:</strong> ${site.institute.website_url ?? 'Not set'}</div>
+          <div><strong>Published pages:</strong> ${site.pages.length}</div>
+          <div>${firstPage?.hero_subtitle ?? 'No hero subtitle available.'}</div>
+        </div>
+      `,
+      confirmButtonText: 'Close',
+    });
+  }
+
+  private createEmptyForm(): WebsitePagePayload {
+    return {
+      slug: '',
+      nav_label: '',
+      title: '',
+      hero_title: '',
+      hero_subtitle: '',
+      body_html: '<section><h2>New page</h2><p>Add your content here.</p></section>',
+      seo_title: '',
+      seo_description: '',
+      is_published: 1,
+      sort_order: 1,
+    };
+  }
+
+  private async load(instituteId: number): Promise<void> {
+    const response = await this.websiteService.getPages(instituteId);
+    this.pages.set(response.pages);
+
+    const currentId = this.selectedPage()?.id;
+    this.selectedPage.set(
+      response.pages.find((page) => page.id === currentId) ?? response.pages[0] ?? null,
+    );
+  }
+}
