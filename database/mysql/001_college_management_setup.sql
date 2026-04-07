@@ -80,12 +80,17 @@ CREATE TABLE IF NOT EXISTS `students` (
   `gr_number` VARCHAR(40) NOT NULL,
   `first_name` VARCHAR(80) NOT NULL,
   `last_name` VARCHAR(80) NOT NULL,
+  `guardian_name` VARCHAR(160) DEFAULT NULL,
   `gender` VARCHAR(20) DEFAULT NULL,
   `category` VARCHAR(40) DEFAULT NULL,
   `current_class` VARCHAR(40) DEFAULT NULL,
   `division` VARCHAR(10) DEFAULT NULL,
   `mobile_number` VARCHAR(30) DEFAULT NULL,
+  `email` VARCHAR(160) DEFAULT NULL,
+  `dob` DATE DEFAULT NULL,
+  `address` TEXT DEFAULT NULL,
   `status` VARCHAR(20) NOT NULL DEFAULT 'active',
+  `admission_status` VARCHAR(30) NOT NULL DEFAULT 'active',
   `created_at` DATETIME DEFAULT NULL,
   `updated_at` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`),
@@ -238,12 +243,12 @@ INSERT IGNORE INTO `users` (`id`, `institute_id`, `username`, `full_name`, `emai
 (4, 2, 'clerk02', 'Degree Clerk', 'clerk02@example.edu', 'CLERK', '$2y$10$BYjHvOhTUUEK5IenbB.Zv.mYxq3Lx3dMLlddQX6g0lh9KnE6AEsAK', '9876543203', 'active', NOW(), NOW()),
 (5, 3, 'accounts02', 'B.Ed Accounts', 'accounts02@example.edu', 'ACCOUNTANT', '$2y$10$BYjHvOhTUUEK5IenbB.Zv.mYxq3Lx3dMLlddQX6g0lh9KnE6AEsAK', '9876543204', 'active', NOW(), NOW());
 
-INSERT IGNORE INTO `students` (`id`, `institute_id`, `academic_year_id`, `gr_number`, `first_name`, `last_name`, `gender`, `category`, `current_class`, `division`, `mobile_number`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 1, 'JC2025001', 'Aarav', 'Patil', 'Male', 'OBC', 'FYJC', 'A', '9000000001', 'active', NOW(), NOW()),
-(2, 1, 1, 'JC2025002', 'Sakshi', 'Jadhav', 'Female', 'SC', 'FYJC', 'A', '9000000002', 'active', NOW(), NOW()),
-(3, 2, 2, 'DC2025001', 'Rohit', 'Kale', 'Male', 'Open', 'B.Com I', 'B', '9000000003', 'active', NOW(), NOW()),
-(4, 2, 2, 'DC2025002', 'Fatima', 'Shaikh', 'Female', 'Minority', 'B.A I', 'A', '9000000004', 'active', NOW(), NOW()),
-(5, 3, 3, 'BED2025001', 'Neha', 'More', 'Female', 'EWS', 'B.Ed I', 'A', '9000000005', 'active', NOW(), NOW());
+INSERT IGNORE INTO `students` (`id`, `institute_id`, `academic_year_id`, `gr_number`, `first_name`, `last_name`, `guardian_name`, `gender`, `category`, `current_class`, `division`, `mobile_number`, `email`, `dob`, `address`, `status`, `admission_status`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'JC2025001', 'Aarav', 'Patil', 'Mahesh Patil', 'Male', 'OBC', 'FYJC', 'A', '9000000001', 'aarav.patil@example.edu', '2008-01-12', 'Main Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
+(2, 1, 1, 'JC2025002', 'Sakshi', 'Jadhav', 'Anita Jadhav', 'Female', 'SC', 'FYJC', 'A', '9000000002', 'sakshi.jadhav@example.edu', '2008-03-25', 'CIDCO, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
+(3, 2, 2, 'DC2025001', 'Rohit', 'Kale', 'Sanjay Kale', 'Male', 'Open', 'B.Com I', 'B', '9000000003', 'rohit.kale@example.edu', '2006-08-17', 'Jalna Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
+(4, 2, 2, 'DC2025002', 'Fatima', 'Shaikh', 'Yusuf Shaikh', 'Female', 'Minority', 'B.A I', 'A', '9000000004', 'fatima.shaikh@example.edu', '2006-10-09', 'Roshan Gate, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
+(5, 3, 3, 'BED2025001', 'Neha', 'More', 'Shubhangi More', 'Female', 'EWS', 'B.Ed I', 'A', '9000000005', 'neha.more@example.edu', '2004-07-14', 'Paithan Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW());
 
 INSERT IGNORE INTO `scholarship_applications` (`id`, `student_id`, `institute_id`, `academic_year_id`, `scheme_name`, `status`, `is_eligible`, `expected_amount`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 1, 'Post Matric Scholarship to OBC Students', 'submitted', 1, 8000, NOW(), NOW()),

@@ -17,9 +17,15 @@ if (-not (Test-Path $dbFile)) {
 Push-Location $backendPath
 try {
     php spark migrate:refresh --all
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Database migration refresh failed.'
+    }
 
     if (-not $ResetOnly) {
         php spark db:seed DemoSeeder
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Database seed failed.'
+        }
     }
 }
 finally {

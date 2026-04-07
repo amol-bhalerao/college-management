@@ -61,9 +61,9 @@ This imports `database/mysql/001_college_management_setup.sql` into the local `c
 
 ## Current Foundation Status
 Implemented so far:
-- login flow with local mock auth
+- login flow with role-aware navigation and access control
 - executive dashboard
-- admission CRM (enquiries and conversion flow)
+- admission CRM + admission wizard + student master creation
 - user management for super admin
 - certificate center with issue/verification flow
 - institute header manager for graphical print branding edits

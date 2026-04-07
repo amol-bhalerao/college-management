@@ -17,11 +17,16 @@ class StudentModel extends Model
         'gr_number',
         'first_name',
         'last_name',
+        'guardian_name',
         'gender',
         'category',
         'current_class',
         'division',
         'mobile_number',
+        'email',
+        'dob',
+        'address',
         'status',
+        'admission_status',
     ];
 }

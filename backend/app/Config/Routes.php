@@ -27,6 +27,9 @@ $routes->group('api', static function ($routes): void {
     $routes->get('enquiries', 'Api\EnquiryController::index');
     $routes->get('enquiries/(:num)', 'Api\EnquiryController::index/$1');
     $routes->post('enquiries/(:num)/convert', 'Api\EnquiryController::convert/$1');
+    $routes->get('admissions/recent', 'Api\EnquiryController::recentAdmissions');
+    $routes->get('admissions/recent/(:num)', 'Api\EnquiryController::recentAdmissions/$1');
+    $routes->post('admissions/wizard', 'Api\EnquiryController::admitStudent');
     $routes->get('certificates/summary', 'Api\CertificateController::summary');
     $routes->get('certificates/summary/(:num)', 'Api\CertificateController::summary/$1');
     $routes->get('certificates/(:num)', 'Api\CertificateController::index/$1');

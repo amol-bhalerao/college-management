@@ -28,6 +28,34 @@ export interface EnquiryRow {
   notes: string | null;
 }
 
+export interface AdmissionRecord {
+  id: number;
+  admission_number: string;
+  status: string;
+  admitted_on: string | null;
+  remarks: string | null;
+  student_name: string;
+  gr_number: string | null;
+  desired_course: string | null;
+  institute_name: string | null;
+}
+
+export interface AdmissionWizardPayload {
+  enquiry_id: number;
+  first_name: string;
+  last_name: string;
+  guardian_name?: string;
+  gender?: string;
+  dob?: string;
+  mobile_number?: string;
+  email?: string;
+  address?: string;
+  current_class?: string;
+  division?: string;
+  category?: string;
+  remarks?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdmissionService {
   private readonly http = inject(HttpClient);
@@ -44,6 +72,20 @@ export class AdmissionService {
     );
 
     return response.enquiries;
+  }
+
+  async getRecentAdmissions(instituteId: number): Promise<AdmissionRecord[]> {
+    const response = await firstValueFrom(
+      this.http.get<{ admissions: AdmissionRecord[] }>(`${environment.apiBaseUrl}/admissions/recent/${instituteId}`),
+    );
+
+    return response.admissions;
+  }
+
+  async createAdmission(payload: AdmissionWizardPayload): Promise<{ message: string; student: unknown; admission: AdmissionRecord }> {
+    return firstValueFrom(
+      this.http.post<{ message: string; student: unknown; admission: AdmissionRecord }>(`${environment.apiBaseUrl}/admissions/wizard`, payload),
+    );
   }
 
   async convertEnquiry(enquiryId: number): Promise<void> {

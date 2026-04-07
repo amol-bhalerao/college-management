@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { authGuard, guestGuard } from './core/guards/auth.guard';
+import { authGuard, guestGuard, roleGuard } from './core/guards/auth.guard';
 import { DashboardComponent } from './features/dashboard/dashboard.component';
 import { InstituteHeaderComponent } from './features/institute-header/institute-header.component';
 import { LoginComponent } from './features/login/login.component';
@@ -31,37 +31,37 @@ export const routes: Routes = [
   {
     path: 'admissions',
     component: AdmissionCrmComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK'])],
     title: 'Admission CRM',
   },
   {
     path: 'users',
     component: UserManagementComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN'])],
     title: 'User Management',
   },
   {
     path: 'certificates',
     component: CertificateCenterComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'])],
     title: 'Certificate Center',
   },
   {
     path: 'institute-header',
     component: InstituteHeaderComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN'])],
     title: 'Institute Header Manager',
   },
   {
     path: 'theme-studio',
     component: ThemeStudioComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN'])],
     title: 'Theme Studio',
   },
   {
     path: 'student-ledger',
     component: StudentLedgerComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'ACCOUNTANT'])],
     title: 'Student Ledger',
   },
   {

@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 
@@ -22,7 +22,7 @@ import { ThemeService } from './core/services/theme.service';
           </div>
 
           <nav class="nav-list">
-            @for (item of navItems; track item.route) {
+            @for (item of visibleNavItems(); track item.route) {
               <a [routerLink]="item.route" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
                 <span>{{ item.icon }}</span>
                 <span>{{ item.label }}</span>
@@ -259,14 +259,19 @@ export class App {
   private readonly themeService = inject(ThemeService);
 
   protected readonly navItems = [
-    { label: 'Executive Dashboard', route: '/dashboard', icon: '📊' },
-    { label: 'Admission CRM', route: '/admissions', icon: '🧾' },
-    { label: 'User Management', route: '/users', icon: '👥' },
-    { label: 'Certificate Center', route: '/certificates', icon: '📜' },
-    { label: 'Institute Header', route: '/institute-header', icon: '🏫' },
-    { label: 'Student Ledger', route: '/student-ledger', icon: '📒' },
-    { label: 'Theme Studio', route: '/theme-studio', icon: '🎨' },
+    { label: 'Executive Dashboard', route: '/dashboard', icon: '📊', roles: ['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'] },
+    { label: 'Admission CRM', route: '/admissions', icon: '🧾', roles: ['SUPER_ADMIN', 'CLERK'] },
+    { label: 'User Management', route: '/users', icon: '👥', roles: ['SUPER_ADMIN'] },
+    { label: 'Certificate Center', route: '/certificates', icon: '📜', roles: ['SUPER_ADMIN', 'CLERK', 'ACCOUNTANT'] },
+    { label: 'Institute Header', route: '/institute-header', icon: '🏫', roles: ['SUPER_ADMIN'] },
+    { label: 'Student Ledger', route: '/student-ledger', icon: '📒', roles: ['SUPER_ADMIN', 'ACCOUNTANT'] },
+    { label: 'Theme Studio', route: '/theme-studio', icon: '🎨', roles: ['SUPER_ADMIN'] },
   ];
+
+  protected readonly visibleNavItems = computed(() => {
+    const role = this.auth.currentUser()?.role ?? '';
+    return this.navItems.filter((item) => item.roles.includes(role));
+  });
 
   protected selectedInstituteId = String(this.context.activeInstitute().id);
   protected selectedAcademicYear = this.context.activeAcademicYear();
