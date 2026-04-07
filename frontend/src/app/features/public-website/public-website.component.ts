@@ -1,10 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Meta, Title } from '@angular/platform-browser';
 import { combineLatest } from 'rxjs';
 
 import { WebsiteCmsService, WebsitePage } from '../../core/services/website-cms.service';
+
+interface PublicMenuGroup {
+  label: string;
+  pages: WebsitePage[];
+}
 
 @Component({
   selector: 'app-public-website',
@@ -18,41 +23,94 @@ import { WebsiteCmsService, WebsitePage } from '../../core/services/website-cms.
           <p>{{ siteError() }}</p>
         </div>
       } @else if (siteData(); as site) {
-        <header class="site-header">
-          <div>
+        <div class="top-strip">
+          <div class="top-strip__left">
+            <span>📍 {{ site.institute.header_address || 'Campus address will appear here.' }}</span>
+            <span>☎ {{ site.institute.contact_phone || 'Office phone pending' }}</span>
+            <span>✉ {{ site.institute.contact_email || 'Email pending' }}</span>
+          </div>
+          <div class="top-strip__right">
+            <span class="status-pill">{{ site.institute.code }}</span>
+            <span class="status-pill">NAAC / IQAC Ready</span>
+          </div>
+        </div>
+
+        <header class="site-header hero-panel">
+          <div class="hero-copy">
             <p class="eyebrow">Institute website</p>
             <h1>{{ site.institute.header_title || site.institute.name }}</h1>
-            <p>{{ site.institute.header_subtitle || 'Academic excellence, student support, and transparent digital services.' }}</p>
+            <p class="hero-text">{{ site.institute.header_subtitle || 'Transparent admissions, academic services, student support, and quality-focused public information.' }}</p>
+
+            <div class="site-actions">
+              <a class="primary-btn" href="/login">ERP Login</a>
+              @if (site.institute.website_url) {
+                <a class="ghost-btn" [href]="site.institute.website_url" target="_blank" rel="noreferrer">Official URL</a>
+              }
+            </div>
           </div>
 
-          <div class="site-actions">
-            <a class="ghost-btn" href="/login">ERP Login</a>
-            @if (site.institute.website_url) {
-              <a class="primary-btn" [href]="site.institute.website_url" target="_blank" rel="noreferrer">Official URL</a>
+          <div class="hero-stats">
+            @for (card of highlightCards(); track card.label) {
+              <article>
+                <span>{{ card.label }}</span>
+                <strong>{{ card.value }}</strong>
+                <small>{{ card.detail }}</small>
+              </article>
             }
           </div>
         </header>
 
         <nav class="site-nav">
-          @for (page of site.pages; track page.id) {
-            <button type="button" [class.active]="selectedPage()?.id === page.id" (click)="openPage(page)">
-              {{ page.nav_label || page.title }}
-            </button>
+          @for (group of menuGroups(); track group.label) {
+            <section class="nav-group">
+              <div class="nav-group__title" [class.active]="activeMenuGroup() === group.label">{{ group.label }}</div>
+              <div class="nav-group__links">
+                @for (page of group.pages; track page.id) {
+                  <button type="button" [class.active]="selectedPage()?.id === page.id" (click)="openPage(page)">
+                    {{ pageLabel(page) }}
+                  </button>
+                }
+              </div>
+            </section>
           }
         </nav>
 
-        @if (selectedPage(); as page) {
-          <section class="hero-card">
-            <span class="seo-chip">SEO ready</span>
-            <h2>{{ page.hero_title || page.title }}</h2>
-            <p>{{ page.hero_subtitle || page.seo_description || 'Welcome to our institute public information page.' }}</p>
-          </section>
+        <section class="spotlight-grid">
+          <article class="hero-card">
+            @if (selectedPage(); as page) {
+              <span class="seo-chip">{{ page.menu_group || 'General' }}</span>
+              <h2>{{ page.hero_title || page.title }}</h2>
+              <p>{{ page.hero_subtitle || page.seo_description || 'Welcome to our institute public information page.' }}</p>
+            } @else {
+              <span class="seo-chip">Public profile</span>
+              <h2>Explore our campus</h2>
+              <p>Browse admissions, academics, facilities, student support services, and institute updates.</p>
+            }
+          </article>
 
+          <aside class="notice-card">
+            <h3>Quick access</h3>
+            <div class="quick-links">
+              @for (link of relatedPages(); track link.id) {
+                <button type="button" class="link-chip" (click)="openPage(link)">{{ pageLabel(link) }}</button>
+              }
+            </div>
+
+            <div class="notice-box">
+              <strong>Principal's Desk</strong>
+              <p>{{ site.institute.principal_name || 'Principal information will appear here.' }}</p>
+              <small>{{ site.institute.footer_note || 'Academic quality, discipline, and student support remain our focus.' }}</small>
+            </div>
+          </aside>
+        </section>
+
+        @if (selectedPage(); as page) {
           <div class="content-layout">
             <article class="content-card">
               <div class="content-meta">
                 <span>/{{ page.slug }}</span>
                 <strong>{{ page.title }}</strong>
+                <small>{{ page.menu_group || 'General information' }}</small>
               </div>
               <div class="html-body" [innerHTML]="page.body_html || '<p>No content added yet.</p>'"></div>
             </article>
@@ -71,16 +129,29 @@ import { WebsiteCmsService, WebsitePage } from '../../core/services/website-cms.
               </div>
 
               <div>
-                <h3>Quick highlights</h3>
+                <h3>Explore sections</h3>
                 <ul>
-                  <li>Admissions & scholarship guidance</li>
-                  <li>Verified receipt and certificate support</li>
-                  <li>IQAC / NAAC aligned records</li>
+                  @for (group of featuredMenus(); track group.label) {
+                    <li>
+                      <button type="button" class="mini-link" (click)="openPage(group.pages[0])">{{ group.label }}</button>
+                    </li>
+                  }
                 </ul>
               </div>
             </aside>
           </div>
         }
+
+        <section class="section-grid">
+          @for (group of featuredMenus(); track group.label) {
+            <article class="section-card">
+              <span>{{ group.label }}</span>
+              <strong>{{ group.pages.length }} page{{ group.pages.length > 1 ? 's' : '' }}</strong>
+              <p>{{ pageSummary(group.pages[0]) }}</p>
+              <button type="button" class="link-chip" (click)="openPage(group.pages[0])">Open {{ group.label }}</button>
+            </article>
+          }
+        </section>
 
         <footer class="site-footer">
           <strong>{{ site.institute.name }}</strong>
@@ -107,10 +178,62 @@ export class PublicWebsiteComponent {
   protected readonly selectedPage = signal<WebsitePage | null>(null);
   protected readonly siteError = signal<string | null>(null);
 
+  protected readonly menuGroups = computed<PublicMenuGroup[]>(() => {
+    const site = this.siteData();
+    if (!site) {
+      return [];
+    }
+
+    const grouped = new Map<string, WebsitePage[]>();
+
+    for (const page of site.pages) {
+      const label = (page.menu_group || 'General').trim() || 'General';
+      grouped.set(label, [...(grouped.get(label) ?? []), page]);
+    }
+
+    return Array.from(grouped.entries()).map(([label, pages]) => ({
+      label,
+      pages: [...pages].sort((a, b) => Number(a.sort_order) - Number(b.sort_order) || a.title.localeCompare(b.title)),
+    }));
+  });
+
+  protected readonly activeMenuGroup = computed(() => this.selectedPage()?.menu_group?.trim() || this.menuGroups()[0]?.label || 'General');
+
+  protected readonly highlightCards = computed(() => {
+    const site = this.siteData();
+    if (!site) {
+      return [];
+    }
+
+    return [
+      { label: 'Menu Sections', value: String(this.menuGroups().length), detail: 'About, Academics, Admissions and more' },
+      { label: 'Published Pages', value: String(site.pages.length), detail: 'Public information managed from CMS' },
+      { label: 'Help Desk', value: site.institute.contact_phone || 'Office', detail: site.institute.contact_email || 'Email support available' },
+      { label: 'Campus Focus', value: 'Student First', detail: 'Scholarship, IQAC and transparent services' },
+    ];
+  });
+
+  protected readonly featuredMenus = computed(() => this.menuGroups().filter((group) => group.pages.length > 0).slice(0, 6));
+
+  protected readonly relatedPages = computed(() => {
+    const selected = this.selectedPage();
+    const groups = this.menuGroups();
+
+    if (selected) {
+      const sameGroup = groups.find((group) => group.label === (selected.menu_group || '').trim())?.pages ?? [];
+      const related = sameGroup.filter((page) => page.id !== selected.id).slice(0, 6);
+      if (related.length) {
+        return related;
+      }
+    }
+
+    return groups.flatMap((group) => group.pages).filter((page) => page.id !== selected?.id).slice(0, 6);
+  });
+
   constructor() {
     combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
-      const code = params.get('code') ?? '';
-      const slug = query.get('page') ?? '';
+      const code = query.get('site') ?? params.get('code') ?? '';
+      const slug = query.get('page') ?? 'home';
       void this.loadSite(code, slug);
     });
   }
@@ -125,13 +248,29 @@ export class PublicWebsiteComponent {
     this.applySeo(page);
   }
 
+  protected pageLabel(page: WebsitePage): string {
+    return page.nav_label || page.title;
+  }
+
+  protected pageSummary(page?: WebsitePage | null): string {
+    if (!page) {
+      return 'Public section details will appear here.';
+    }
+
+    const text = this.plainText(page.hero_subtitle || page.seo_description || page.body_html || page.title);
+    return text.length > 140 ? `${text.slice(0, 137)}...` : text;
+  }
+
   private async loadSite(code: string, slug: string): Promise<void> {
     try {
       this.siteError.set(null);
       const site = await this.websiteService.getPublicSite(code);
       this.siteData.set(site);
 
-      const selected = site.pages.find((page) => page.slug === slug) ?? site.pages[0] ?? null;
+      const selected = site.pages.find((page) => page.slug === slug)
+        ?? site.pages.find((page) => page.slug === 'home')
+        ?? site.pages[0]
+        ?? null;
       this.selectedPage.set(selected);
 
       if (selected) {
@@ -150,5 +289,9 @@ export class PublicWebsiteComponent {
   private applySeo(page: WebsitePage): void {
     this.title.setTitle(page.seo_title || page.title);
     this.meta.updateTag({ name: 'description', content: page.seo_description || page.hero_subtitle || page.title });
+  }
+
+  private plainText(value: string): string {
+    return value.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
   }
 }

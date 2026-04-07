@@ -52,6 +52,7 @@ class WebsiteController extends BaseController
             'institute_id' => $instituteId,
             'slug' => $slug,
             'nav_label' => trim((string) ($payload['nav_label'] ?? $title)),
+            'menu_group' => trim((string) ($payload['menu_group'] ?? 'General')),
             'title' => $title,
             'hero_title' => trim((string) ($payload['hero_title'] ?? $title)),
             'hero_subtitle' => trim((string) ($payload['hero_subtitle'] ?? '')),
@@ -82,7 +83,7 @@ class WebsiteController extends BaseController
         $payload = $this->request->getJSON(true) ?? $this->request->getPost();
         $updates = [];
 
-        foreach (['nav_label', 'title', 'hero_title', 'hero_subtitle', 'body_html', 'seo_title', 'seo_description'] as $field) {
+        foreach (['nav_label', 'menu_group', 'title', 'hero_title', 'hero_subtitle', 'body_html', 'seo_title', 'seo_description'] as $field) {
             if (isset($payload[$field])) {
                 $updates[$field] = is_string($payload[$field]) ? trim((string) $payload[$field]) : $payload[$field];
             }

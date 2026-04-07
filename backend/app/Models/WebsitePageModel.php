@@ -15,6 +15,7 @@ class WebsitePageModel extends Model
         'institute_id',
         'slug',
         'nav_label',
+        'menu_group',
         'title',
         'hero_title',
         'hero_subtitle',

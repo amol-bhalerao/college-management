@@ -39,7 +39,7 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
               <button type="button" class="page-item" [class.active]="selectedPage()?.id === page.id" (click)="selectPage(page)">
                 <div>
                   <strong>{{ page.nav_label || page.title }}</strong>
-                  <small>/{{ page.slug }}</small>
+                  <small>{{ page.menu_group || 'General' }} · /{{ page.slug }}</small>
                 </div>
                 <span>{{ page.is_published ? 'Published' : 'Draft' }}</span>
               </button>
@@ -93,6 +93,14 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
               <label>
                 Navigation label
                 <input type="text" name="nav_label" [(ngModel)]="form.nav_label" />
+              </label>
+              <label>
+                Menu group
+                <select name="menu_group" [(ngModel)]="form.menu_group">
+                  @for (group of menuGroupOptions; track group) {
+                    <option [value]="group">{{ group }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Slug
@@ -157,6 +165,8 @@ export class WebsiteCmsComponent {
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
 
+  protected readonly menuGroupOptions = ['Home', 'About', 'Academics', 'Departments', 'Admissions', 'Facilities', 'IQAC', 'Library', 'Alumni', 'Students', 'Contact', 'General'];
+
   protected form: WebsitePagePayload = this.createEmptyForm();
 
   constructor() {
@@ -180,6 +190,7 @@ export class WebsiteCmsComponent {
     this.form = {
       slug: page.slug,
       nav_label: page.nav_label || '',
+      menu_group: page.menu_group || 'General',
       title: page.title,
       hero_title: page.hero_title || '',
       hero_subtitle: page.hero_subtitle || '',
@@ -255,13 +266,14 @@ export class WebsiteCmsComponent {
 
   protected async previewPublicSite(): Promise<void> {
     const code = this.context.activeInstitute().code.toLowerCase();
-    window.open(`/site/${code}`, '_blank', 'noopener');
+    window.open(`/?site=${code}`, '_blank', 'noopener');
   }
 
   private createEmptyForm(): WebsitePagePayload {
     return {
       slug: '',
       nav_label: '',
+      menu_group: 'General',
       title: '',
       hero_title: '',
       hero_subtitle: '',

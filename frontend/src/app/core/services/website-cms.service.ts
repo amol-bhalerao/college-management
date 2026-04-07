@@ -10,6 +10,7 @@ export interface WebsitePage {
   institute_id: number;
   slug: string;
   nav_label: string | null;
+  menu_group: string | null;
   title: string;
   hero_title: string | null;
   hero_subtitle: string | null;
@@ -24,6 +25,7 @@ export interface WebsitePagePayload {
   institute_id?: number;
   slug?: string;
   nav_label?: string;
+  menu_group?: string;
   title: string;
   hero_title?: string;
   hero_subtitle?: string;
