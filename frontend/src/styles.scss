@@ -1,0 +1,56 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Montserrat:wght@500;600;700&family=Poppins:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap');
+@import 'ag-grid-community/styles/ag-grid.css';
+@import 'ag-grid-community/styles/ag-theme-quartz.css';
+
+:root {
+  --primary-color: #4f46e5;
+  --secondary-color: #0f172a;
+  --accent-color: #14b8a6;
+  --background-color: #f4f7fb;
+  --surface-color: #ffffff;
+  --text-color: #0f172a;
+  --muted-text: #64748b;
+  --header-start: #1d4ed8;
+  --header-end: #0f766e;
+  --font-family: 'Inter', sans-serif;
+  --radius: 18px;
+  --shadow-opacity: 0.18;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, rgba(79, 70, 229, 0.08), transparent 0 32%),
+    var(--background-color);
+  color: var(--text-color);
+  font-family: var(--font-family);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.2;
+}
+
+p {
+  line-height: 1.6;
+}
