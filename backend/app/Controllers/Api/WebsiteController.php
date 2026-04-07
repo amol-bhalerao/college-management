@@ -56,10 +56,13 @@ class WebsiteController extends BaseController
             'title' => $title,
             'hero_title' => trim((string) ($payload['hero_title'] ?? $title)),
             'hero_subtitle' => trim((string) ($payload['hero_subtitle'] ?? '')),
+            'summary_text' => trim((string) ($payload['summary_text'] ?? '')),
+            'cover_image_url' => trim((string) ($payload['cover_image_url'] ?? '')),
             'body_html' => (string) ($payload['body_html'] ?? ''),
             'seo_title' => trim((string) ($payload['seo_title'] ?? $title)),
             'seo_description' => trim((string) ($payload['seo_description'] ?? '')),
             'is_published' => (int) ($payload['is_published'] ?? 1) ? 1 : 0,
+            'show_on_home' => (int) ($payload['show_on_home'] ?? 1) ? 1 : 0,
             'sort_order' => (int) ($payload['sort_order'] ?? 1),
         ], true);
 
@@ -83,7 +86,7 @@ class WebsiteController extends BaseController
         $payload = $this->request->getJSON(true) ?? $this->request->getPost();
         $updates = [];
 
-        foreach (['nav_label', 'menu_group', 'title', 'hero_title', 'hero_subtitle', 'body_html', 'seo_title', 'seo_description'] as $field) {
+        foreach (['nav_label', 'menu_group', 'title', 'hero_title', 'hero_subtitle', 'summary_text', 'cover_image_url', 'body_html', 'seo_title', 'seo_description'] as $field) {
             if (isset($payload[$field])) {
                 $updates[$field] = is_string($payload[$field]) ? trim((string) $payload[$field]) : $payload[$field];
             }
@@ -100,7 +103,7 @@ class WebsiteController extends BaseController
             $updates['slug'] = $slug;
         }
 
-        foreach (['is_published', 'sort_order'] as $field) {
+        foreach (['is_published', 'show_on_home', 'sort_order'] as $field) {
             if (isset($payload[$field])) {
                 $updates[$field] = (int) $payload[$field];
             }

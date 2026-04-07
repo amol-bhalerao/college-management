@@ -14,10 +14,13 @@ export interface WebsitePage {
   title: string;
   hero_title: string | null;
   hero_subtitle: string | null;
+  summary_text: string | null;
+  cover_image_url: string | null;
   body_html: string | null;
   seo_title: string | null;
   seo_description: string | null;
   is_published: number;
+  show_on_home: number;
   sort_order: number;
 }
 
@@ -29,10 +32,13 @@ export interface WebsitePagePayload {
   title: string;
   hero_title?: string;
   hero_subtitle?: string;
+  summary_text?: string;
+  cover_image_url?: string;
   body_html?: string;
   seo_title?: string;
   seo_description?: string;
   is_published?: number;
+  show_on_home?: number;
   sort_order?: number;
 }
 

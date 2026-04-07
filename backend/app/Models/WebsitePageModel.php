@@ -19,10 +19,13 @@ class WebsitePageModel extends Model
         'title',
         'hero_title',
         'hero_subtitle',
+        'summary_text',
+        'cover_image_url',
         'body_html',
         'seo_title',
         'seo_description',
         'is_published',
+        'show_on_home',
         'sort_order',
     ];
 }

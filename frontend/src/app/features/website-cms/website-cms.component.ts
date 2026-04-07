@@ -16,7 +16,7 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
         <div>
           <p class="eyebrow">Website CMS</p>
           <h1>Public Website + SEO Pages</h1>
-          <p>Create and manage institute-wise public pages, hero text, and SEO metadata without coding.</p>
+          <p>Create and manage institute-wise public pages, grouped menus, homepage cards, and SEO metadata without coding.</p>
         </div>
         <div class="head-actions">
           <button type="button" class="secondary-btn" (click)="previewPublicSite()">Preview public site</button>
@@ -41,7 +41,7 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
                   <strong>{{ page.nav_label || page.title }}</strong>
                   <small>{{ page.menu_group || 'General' }} · /{{ page.slug }}</small>
                 </div>
-                <span>{{ page.is_published ? 'Published' : 'Draft' }}</span>
+                <span>{{ isPublished(page) ? 'Published' : 'Draft' }}</span>
               </button>
             }
           </div>
@@ -64,8 +64,20 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
           @if (selectedPage(); as page) {
             <div class="preview-card">
               <span class="seo-chip">SEO: {{ page.seo_title || page.title }}</span>
-              <h3>{{ page.hero_title || page.title }}</h3>
-              <p>{{ page.hero_subtitle || 'Hero subtitle will appear here.' }}</p>
+              <div class="preview-meta">
+                <div>
+                  <h3>{{ page.hero_title || page.title }}</h3>
+                  <p>{{ page.hero_subtitle || 'Hero subtitle will appear here.' }}</p>
+                  <small>Group: {{ page.menu_group || 'General' }} · Home card: {{ isHomeCard(page) ? 'Yes' : 'No' }}</small>
+                </div>
+                @if (page.cover_image_url) {
+                  <img class="preview-image" [src]="page.cover_image_url" [alt]="page.title" />
+                }
+              </div>
+              <div class="seo-box">
+                <strong>Page summary</strong>
+                <p>{{ page.summary_text || page.seo_description || 'No summary added yet.' }}</p>
+              </div>
               <div class="html-preview" [innerHTML]="page.body_html || '<p>No page body added yet.</p>'"></div>
               <div class="seo-box">
                 <strong>SEO description</strong>
@@ -123,6 +135,14 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
                 <textarea rows="2" name="hero_subtitle" [(ngModel)]="form.hero_subtitle"></textarea>
               </label>
               <label class="full-span">
+                Summary text
+                <textarea rows="2" name="summary_text" [(ngModel)]="form.summary_text" placeholder="Short summary for homepage cards and section previews"></textarea>
+              </label>
+              <label class="full-span">
+                Cover image URL
+                <input type="text" name="cover_image_url" [(ngModel)]="form.cover_image_url" placeholder="https://... or banner image link" />
+              </label>
+              <label class="full-span">
                 Page body HTML
                 <textarea rows="8" name="body_html" [(ngModel)]="form.body_html"></textarea>
               </label>
@@ -140,6 +160,18 @@ import { WebsiteCmsService, WebsitePage, WebsitePagePayload } from '../../core/s
                   <option [ngValue]="1">Published</option>
                   <option [ngValue]="0">Draft</option>
                 </select>
+              </label>
+              <label>
+                Show on homepage
+                <select name="show_on_home" [(ngModel)]="form.show_on_home">
+                  <option [ngValue]="1">Yes</option>
+                  <option [ngValue]="0">No</option>
+                </select>
+              </label>
+              <label class="full-span route-preview">
+                Shareable route preview
+                <input type="text" [value]="'/?site=' + context.activeInstitute().code.toLowerCase() + '&page=' + (form.slug || 'home')" readonly />
+                <small>Add section ids inside HTML like <code>&lt;section id="admission-process"&gt;</code> to share direct section links.</small>
               </label>
             </div>
 
@@ -179,6 +211,14 @@ export class WebsiteCmsComponent {
     this.selectedPage.set(page);
   }
 
+  protected isPublished(page: WebsitePage): boolean {
+    return Number(page.is_published) === 1;
+  }
+
+  protected isHomeCard(page: WebsitePage): boolean {
+    return Number(page.show_on_home ?? 1) === 1;
+  }
+
   protected openCreate(): void {
     this.editingId.set(null);
     this.form = this.createEmptyForm();
@@ -194,10 +234,13 @@ export class WebsiteCmsComponent {
       title: page.title,
       hero_title: page.hero_title || '',
       hero_subtitle: page.hero_subtitle || '',
+      summary_text: page.summary_text || '',
+      cover_image_url: page.cover_image_url || '',
       body_html: page.body_html || '',
       seo_title: page.seo_title || '',
       seo_description: page.seo_description || '',
       is_published: Number(page.is_published),
+      show_on_home: Number(page.show_on_home ?? 1),
       sort_order: Number(page.sort_order),
     };
     this.showModal.set(true);
@@ -277,10 +320,13 @@ export class WebsiteCmsComponent {
       title: '',
       hero_title: '',
       hero_subtitle: '',
-      body_html: '<section><h2>New page</h2><p>Add your content here.</p></section>',
+      summary_text: '',
+      cover_image_url: '',
+      body_html: '<section id="overview"><h2>New page</h2><p>Add your content here.</p></section>',
       seo_title: '',
       seo_description: '',
       is_published: 1,
+      show_on_home: 1,
       sort_order: 1,
     };
   }
