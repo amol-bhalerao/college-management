@@ -11,6 +11,7 @@ import {
   StudentMasterRow,
   StudentMasterService,
 } from '../../core/services/student-master.service';
+import { MasterDataService, MasterOptionsMap } from '../../core/services/master-data.service';
 
 @Component({
   selector: 'app-student-master',
@@ -106,15 +107,30 @@ import {
               </label>
               <label>
                 Category
-                <input type="text" name="category" [(ngModel)]="form.category" />
+                <select name="category" [(ngModel)]="form.category">
+                  <option value="">Select</option>
+                  @for (option of optionValues('caste_category'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Course / class
-                <input type="text" name="current_class" [(ngModel)]="form.current_class" />
+                <select name="current_class" [(ngModel)]="form.current_class">
+                  <option value="">Select</option>
+                  @for (option of optionValues('class'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Division
-                <input type="text" name="division" [(ngModel)]="form.division" />
+                <select name="division" [(ngModel)]="form.division">
+                  <option value="">Select</option>
+                  @for (option of optionValues('division'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Mobile number
@@ -222,8 +238,10 @@ import {
 export class StudentMasterComponent {
   protected readonly context = inject(AppContextService);
   private readonly studentService = inject(StudentMasterService);
+  private readonly masterService = inject(MasterDataService);
 
   protected readonly students = signal<StudentMasterRow[]>([]);
+  protected readonly masterOptions = signal<MasterOptionsMap>({});
   protected readonly selectedStudent = signal<StudentMasterRow | null>(null);
   protected readonly showModal = signal(false);
   protected readonly editingStudentId = signal<number | null>(null);
@@ -285,6 +303,10 @@ export class StudentMasterComponent {
 
   protected totalOutstanding(): number {
     return this.students().reduce((sum, student) => sum + Number(student.outstanding_amount || 0), 0);
+  }
+
+  protected optionValues(type: string) {
+    return this.masterOptions()[type] ?? [];
   }
 
   protected handleGridClick(event: { data?: StudentMasterRow; event?: Event | null }): void {
@@ -448,8 +470,13 @@ export class StudentMasterComponent {
   }
 
   private async loadStudents(instituteId: number): Promise<void> {
-    const students = await this.studentService.getStudents(instituteId);
+    const [students, options] = await Promise.all([
+      this.studentService.getStudents(instituteId),
+      this.masterService.getOptions(instituteId),
+    ]);
+
     this.students.set(students);
+    this.masterOptions.set(options);
 
     const selectedId = this.selectedStudent()?.id;
     if (selectedId) {

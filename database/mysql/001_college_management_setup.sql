@@ -236,6 +236,85 @@ CREATE TABLE IF NOT EXISTS `website_pages` (
   UNIQUE KEY `uq_website_pages_institute_slug` (`institute_id`, `slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE IF NOT EXISTS `master_entries` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `master_type` VARCHAR(60) NOT NULL,
+  `code` VARCHAR(80) DEFAULT NULL,
+  `label` VARCHAR(160) NOT NULL,
+  `description` TEXT DEFAULT NULL,
+  `sort_order` INT NOT NULL DEFAULT 1,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'active',
+  `meta_json` LONGTEXT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_master_entries_scope` (`institute_id`, `master_type`, `label`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `staff_profiles` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `employee_code` VARCHAR(40) NOT NULL,
+  `full_name` VARCHAR(160) NOT NULL,
+  `department` VARCHAR(120) DEFAULT NULL,
+  `designation` VARCHAR(120) DEFAULT NULL,
+  `mobile_number` VARCHAR(30) DEFAULT NULL,
+  `email` VARCHAR(160) DEFAULT NULL,
+  `joining_date` DATE DEFAULT NULL,
+  `employment_type` VARCHAR(40) NOT NULL DEFAULT 'full-time',
+  `status` VARCHAR(20) NOT NULL DEFAULT 'active',
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_staff_profiles_employee_code` (`employee_code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `staff_attendance` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `staff_id` INT UNSIGNED NOT NULL,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `academic_year_id` INT UNSIGNED DEFAULT NULL,
+  `attendance_date` DATE NOT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'present',
+  `check_in_time` VARCHAR(10) DEFAULT NULL,
+  `check_out_time` VARCHAR(10) DEFAULT NULL,
+  `remarks` TEXT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_staff_attendance_staff_date` (`staff_id`, `attendance_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `exam_sessions` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `institute_id` INT UNSIGNED NOT NULL,
+  `academic_year_id` INT UNSIGNED DEFAULT NULL,
+  `exam_name` VARCHAR(120) NOT NULL,
+  `class_name` VARCHAR(80) NOT NULL,
+  `subject_name` VARCHAR(120) NOT NULL,
+  `max_marks` DECIMAL(8,2) NOT NULL DEFAULT 100,
+  `exam_date` DATE DEFAULT NULL,
+  `status` VARCHAR(20) NOT NULL DEFAULT 'draft',
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS `exam_marks` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `exam_id` INT UNSIGNED NOT NULL,
+  `student_id` INT UNSIGNED NOT NULL,
+  `obtained_marks` DECIMAL(8,2) NOT NULL DEFAULT 0,
+  `grade` VARCHAR(10) DEFAULT NULL,
+  `result_status` VARCHAR(20) NOT NULL DEFAULT 'pass',
+  `remarks` TEXT DEFAULT NULL,
+  `created_at` DATETIME DEFAULT NULL,
+  `updated_at` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_exam_marks_exam_student` (`exam_id`, `student_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 CREATE TABLE IF NOT EXISTS `fee_receipts` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `student_id` INT UNSIGNED NOT NULL,
@@ -287,6 +366,38 @@ INSERT IGNORE INTO `students` (`id`, `institute_id`, `academic_year_id`, `gr_num
 (4, 2, 2, 'DC2025002', 'Fatima', 'Shaikh', 'Yusuf Shaikh', 'Female', 'Minority', 'B.A I', 'A', '9000000004', 'fatima.shaikh@example.edu', '2006-10-09', 'Roshan Gate, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW()),
 (5, 3, 3, 'BED2025001', 'Neha', 'More', 'Shubhangi More', 'Female', 'EWS', 'B.Ed I', 'A', '9000000005', 'neha.more@example.edu', '2004-07-14', 'Paithan Road, Aurangabad, Maharashtra', 'active', 'confirmed', NOW(), NOW());
 
+INSERT IGNORE INTO `master_entries` (`id`, `institute_id`, `master_type`, `code`, `label`, `description`, `sort_order`, `status`, `meta_json`, `created_at`, `updated_at`) VALUES
+(1, 1, 'caste_category', 'OPEN', 'Open', 'General category admissions', 1, 'active', NULL, NOW(), NOW()),
+(2, 1, 'caste_category', 'OBC', 'OBC', 'Backward class category', 2, 'active', NULL, NOW(), NOW()),
+(3, 1, 'caste_category', 'SC', 'SC', 'Scheduled caste category', 3, 'active', NULL, NOW(), NOW()),
+(4, 1, 'caste_category', 'EWS', 'EWS', 'Economically weaker section', 4, 'active', NULL, NOW(), NOW()),
+(5, 1, 'class', 'FYJC_SCI', 'FYJC Science', 'Science stream first year', 1, 'active', NULL, NOW(), NOW()),
+(6, 1, 'class', 'FYJC_COM', 'FYJC Commerce', 'Commerce stream first year', 2, 'active', NULL, NOW(), NOW()),
+(7, 1, 'class', 'FYJC_ARTS', 'FYJC Arts', 'Arts stream first year', 3, 'active', NULL, NOW(), NOW()),
+(8, 1, 'division', 'A', 'A', 'Division A', 1, 'active', NULL, NOW(), NOW()),
+(9, 1, 'division', 'B', 'B', 'Division B', 2, 'active', NULL, NOW(), NOW()),
+(10, 1, 'fee_head', 'ADMISSION_FEE', 'Admission Fee', 'One-time admission collection', 1, 'active', NULL, NOW(), NOW()),
+(11, 1, 'fee_head', 'TUITION_FEE', 'Tuition Fee', 'Regular tuition installment', 2, 'active', NULL, NOW(), NOW()),
+(12, 1, 'form_type', 'ADMISSION_FORM', 'Admission Form', 'Primary student admission form', 1, 'active', NULL, NOW(), NOW()),
+(13, 1, 'form_type', 'SCHOLARSHIP_FORM', 'Scholarship Form', 'MahaDBT / freeship form', 2, 'active', NULL, NOW(), NOW()),
+(14, 1, 'enquiry_source', 'WALK_IN', 'Walk-in', 'Walk-in visitor enquiry', 1, 'active', NULL, NOW(), NOW()),
+(15, 1, 'enquiry_source', 'WEBSITE', 'Website', 'Lead generated from website', 2, 'active', NULL, NOW(), NOW()),
+(16, 1, 'enquiry_source', 'REFERENCE', 'Reference', 'Lead from existing student or parent reference', 3, 'active', NULL, NOW(), NOW()),
+(17, 2, 'class', 'BCOM_I', 'B.Com I', 'First year B.Com class', 1, 'active', NULL, NOW(), NOW()),
+(18, 2, 'class', 'BA_I', 'B.A I', 'First year B.A class', 2, 'active', NULL, NOW(), NOW()),
+(19, 3, 'class', 'BED_I', 'B.Ed I', 'First year B.Ed class', 1, 'active', NULL, NOW(), NOW());
+
+INSERT IGNORE INTO `staff_profiles` (`id`, `institute_id`, `employee_code`, `full_name`, `department`, `designation`, `mobile_number`, `email`, `joining_date`, `employment_type`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'JC-STF-001', 'Priya Deshpande', 'Admissions', 'Admissions Officer', '9800000001', 'priya.deshpande@example.edu', '2024-06-15', 'full-time', 'active', NOW(), NOW()),
+(2, 1, 'JC-STF-002', 'Vijay Kulkarni', 'Accounts', 'Accounts Assistant', '9800000002', 'vijay.kulkarni@example.edu', '2023-07-01', 'full-time', 'active', NOW(), NOW()),
+(3, 1, 'JC-STF-003', 'Meera Patil', 'Science', 'Lecturer', '9800000003', 'meera.patil@example.edu', '2022-08-10', 'full-time', 'active', NOW(), NOW()),
+(4, 2, 'DC-STF-001', 'Sameer Shaikh', 'Administration', 'Admin Executive', '9800000004', 'sameer.shaikh@example.edu', '2024-01-12', 'contract', 'active', NOW(), NOW());
+
+INSERT IGNORE INTO `staff_attendance` (`id`, `staff_id`, `institute_id`, `academic_year_id`, `attendance_date`, `status`, `check_in_time`, `check_out_time`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 1, CURDATE(), 'present', '09:05', '17:15', 'Admissions desk counselling day.', NOW(), NOW()),
+(2, 2, 1, 1, CURDATE(), 'on-duty', '09:00', '17:00', 'Fee collection counter duty.', NOW(), NOW()),
+(3, 3, 1, 1, CURDATE(), 'leave', NULL, NULL, 'Approved casual leave.', NOW(), NOW());
+
 INSERT IGNORE INTO `scholarship_applications` (`id`, `student_id`, `institute_id`, `academic_year_id`, `scheme_name`, `status`, `is_eligible`, `expected_amount`, `created_at`, `updated_at`) VALUES
 (1, 1, 1, 1, 'Post Matric Scholarship to OBC Students', 'submitted', 1, 8000, NOW(), NOW()),
 (2, 2, 1, 1, 'Government of India Post-Matric Scholarship', 'verified', 1, 12000, NOW(), NOW()),
@@ -327,6 +438,16 @@ INSERT IGNORE INTO `certificate_requests` (`id`, `student_id`, `institute_id`, `
 (1, 1, 1, 1, 'CERT-JC-0001', 'bonafide', 'Bank account opening for scholarship process.', 'issued', 'CERT-JC-2026-0001', '2026-04-07', 'Clerk Desk', NOW(), NOW()),
 (2, 2, 1, 1, 'CERT-JC-0002', 'transfer_certificate', 'Migration to another college after relocation.', 'requested', NULL, NULL, 'Admissions Team', NOW(), NOW()),
 (3, 3, 2, 2, 'CERT-DC-0001', 'no_dues', 'Internship and library clearance requirement.', 'verified', 'CERT-DC-2026-0001', '2026-04-06', 'Account Office', NOW(), NOW());
+
+INSERT IGNORE INTO `exam_sessions` (`id`, `institute_id`, `academic_year_id`, `exam_name`, `class_name`, `subject_name`, `max_marks`, `exam_date`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 'Unit Test 1', 'FYJC Science', 'Physics', 50, '2026-04-15', 'published', NOW(), NOW()),
+(2, 1, 1, 'Mid Term', 'FYJC Commerce', 'Accountancy', 100, '2026-04-22', 'ongoing', NOW(), NOW()),
+(3, 2, 2, 'Internal Assessment', 'B.Com I', 'Business Economics', 40, '2026-04-18', 'draft', NOW(), NOW());
+
+INSERT IGNORE INTO `exam_marks` (`id`, `exam_id`, `student_id`, `obtained_marks`, `grade`, `result_status`, `remarks`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 42, 'A+', 'pass', 'Good performance in numerical problems.', NOW(), NOW()),
+(2, 1, 2, 35, 'A', 'pass', 'Consistent and neat presentation.', NOW(), NOW()),
+(3, 3, 3, 28, 'A', 'pass', 'Solid internal assessment score.', NOW(), NOW());
 
 INSERT IGNORE INTO `website_pages` (`id`, `institute_id`, `slug`, `nav_label`, `title`, `hero_title`, `hero_subtitle`, `body_html`, `seo_title`, `seo_description`, `is_published`, `sort_order`, `created_at`, `updated_at`) VALUES
 (1, 1, 'home', 'Home', 'Junior College Home', 'Admissions Open for 2025-26', 'Scholarship-friendly, institute-aware college management with modern student services.', '<section><h2>Why choose us</h2><p>Junior College supports admissions, scholarships, fee receipts, certificates, and student mentoring in one streamlined workflow.</p></section><section><h2>Highlights</h2><ul><li>Scholarship help desk</li><li>Verified fee receipts</li><li>IQAC-ready documentation</li></ul></section>', 'Junior College Admissions, Scholarship and Student Support', 'Explore admissions, scholarships, receipts, and student support services for Junior College.', 1, 1, NOW(), NOW()),

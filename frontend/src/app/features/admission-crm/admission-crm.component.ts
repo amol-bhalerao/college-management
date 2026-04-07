@@ -14,6 +14,7 @@ import {
   EnquiryRow,
   EnquirySummary,
 } from '../../core/services/admission.service';
+import { MasterDataService, MasterOptionsMap } from '../../core/services/master-data.service';
 
 @Component({
   selector: 'app-admission-crm',
@@ -154,19 +155,39 @@ import {
               </label>
               <label>
                 Source
-                <input type="text" name="source" [(ngModel)]="enquiryForm.source" />
+                <select name="source" [(ngModel)]="enquiryForm.source">
+                  <option value="">Select</option>
+                  @for (option of optionValues('enquiry_source'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Desired course
-                <input type="text" name="desired_course" [(ngModel)]="enquiryForm.desired_course" />
+                <select name="desired_course" [(ngModel)]="enquiryForm.desired_course">
+                  <option value="">Select</option>
+                  @for (option of optionValues('class'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Current class
-                <input type="text" name="current_class" [(ngModel)]="enquiryForm.current_class" />
+                <select name="current_class" [(ngModel)]="enquiryForm.current_class">
+                  <option value="">Select</option>
+                  @for (option of optionValues('class'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Category
-                <input type="text" name="category" [(ngModel)]="enquiryForm.category" />
+                <select name="category" [(ngModel)]="enquiryForm.category">
+                  <option value="">Select</option>
+                  @for (option of optionValues('caste_category'); track option.id) {
+                    <option [value]="option.value">{{ option.label }}</option>
+                  }
+                </select>
               </label>
               <label>
                 Status
@@ -268,15 +289,30 @@ import {
               <div class="form-grid">
                 <label>
                   Course / class
-                  <input type="text" name="current_class" [(ngModel)]="wizardForm.current_class" />
+                  <select name="current_class" [(ngModel)]="wizardForm.current_class">
+                    <option value="">Select</option>
+                    @for (option of optionValues('class'); track option.id) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
                 </label>
                 <label>
                   Division
-                  <input type="text" name="division" [(ngModel)]="wizardForm.division" />
+                  <select name="division" [(ngModel)]="wizardForm.division">
+                    <option value="">Select</option>
+                    @for (option of optionValues('division'); track option.id) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
                 </label>
                 <label>
                   Category
-                  <input type="text" name="category" [(ngModel)]="wizardForm.category" />
+                  <select name="category" [(ngModel)]="wizardForm.category">
+                    <option value="">Select</option>
+                    @for (option of optionValues('caste_category'); track option.id) {
+                      <option [value]="option.value">{{ option.label }}</option>
+                    }
+                  </select>
                 </label>
                 <label class="full-span">
                   Admission remarks
@@ -306,8 +342,10 @@ import {
 export class AdmissionCrmComponent {
   protected readonly context = inject(AppContextService);
   private readonly admissionService = inject(AdmissionService);
+  private readonly masterService = inject(MasterDataService);
 
   protected readonly summary = signal<EnquirySummary>({ total: 0, converted: 0, new: 0, followUp: 0, conversionRate: 0 });
+  protected readonly masterOptions = signal<MasterOptionsMap>({});
   protected readonly rowData = signal<EnquiryRow[]>([]);
   protected readonly recentAdmissions = signal<AdmissionRecord[]>([]);
   protected readonly selectedEnquiry = signal<EnquiryRow | null>(null);
@@ -369,6 +407,10 @@ export class AdmissionCrmComponent {
       const instituteId = this.context.activeInstitute().id;
       void this.load(instituteId);
     });
+  }
+
+  protected optionValues(type: string) {
+    return this.masterOptions()[type] ?? [];
   }
 
   protected handleGridClick(event: { data?: EnquiryRow; event?: Event | null }): void {
@@ -635,15 +677,17 @@ export class AdmissionCrmComponent {
   }
 
   private async load(instituteId: number): Promise<void> {
-    const [summary, enquiries, admissions] = await Promise.all([
+    const [summary, enquiries, admissions, options] = await Promise.all([
       this.admissionService.getSummary(instituteId),
       this.admissionService.getEnquiries(instituteId),
       this.admissionService.getRecentAdmissions(instituteId),
+      this.masterService.getOptions(instituteId),
     ]);
 
     this.summary.set(summary);
     this.rowData.set(enquiries);
     this.recentAdmissions.set(admissions);
+    this.masterOptions.set(options);
 
     const selectedId = this.selectedEnquiry()?.id;
     if (selectedId) {

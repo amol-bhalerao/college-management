@@ -10,6 +10,7 @@ class DemoSeeder extends Seeder
     {
         $db = $this->db;
         $now = date('Y-m-d H:i:s');
+        $today = date('Y-m-d');
 
         $db->table('organizations')->ignore(true)->insert([
             'id' => 1,
@@ -139,6 +140,47 @@ class DemoSeeder extends Seeder
             ['id' => 5, 'institute_id' => 3, 'academic_year_id' => 3, 'gr_number' => 'BED2025001', 'first_name' => 'Neha', 'last_name' => 'More', 'guardian_name' => 'Shubhangi More', 'gender' => 'Female', 'category' => 'EWS', 'current_class' => 'B.Ed I', 'division' => 'A', 'mobile_number' => '9000000005', 'email' => 'neha.more@example.edu', 'dob' => '2004-07-14', 'address' => 'Paithan Road, Aurangabad, Maharashtra', 'status' => 'active', 'admission_status' => 'confirmed', 'created_at' => $now, 'updated_at' => $now],
         ]);
 
+        if ($db->tableExists('master_entries')) {
+            $db->table('master_entries')->ignore(true)->insertBatch([
+                ['id' => 1, 'institute_id' => 1, 'master_type' => 'caste_category', 'code' => 'OPEN', 'label' => 'Open', 'description' => 'General category admissions', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 2, 'institute_id' => 1, 'master_type' => 'caste_category', 'code' => 'OBC', 'label' => 'OBC', 'description' => 'Backward class category', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 3, 'institute_id' => 1, 'master_type' => 'caste_category', 'code' => 'SC', 'label' => 'SC', 'description' => 'Scheduled caste category', 'sort_order' => 3, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 4, 'institute_id' => 1, 'master_type' => 'caste_category', 'code' => 'EWS', 'label' => 'EWS', 'description' => 'Economically weaker section', 'sort_order' => 4, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 5, 'institute_id' => 1, 'master_type' => 'class', 'code' => 'FYJC_SCI', 'label' => 'FYJC Science', 'description' => 'Science stream first year', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 6, 'institute_id' => 1, 'master_type' => 'class', 'code' => 'FYJC_COM', 'label' => 'FYJC Commerce', 'description' => 'Commerce stream first year', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 7, 'institute_id' => 1, 'master_type' => 'class', 'code' => 'FYJC_ARTS', 'label' => 'FYJC Arts', 'description' => 'Arts stream first year', 'sort_order' => 3, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 8, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'A', 'label' => 'A', 'description' => 'Division A', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 9, 'institute_id' => 1, 'master_type' => 'division', 'code' => 'B', 'label' => 'B', 'description' => 'Division B', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 10, 'institute_id' => 1, 'master_type' => 'fee_head', 'code' => 'ADMISSION_FEE', 'label' => 'Admission Fee', 'description' => 'One-time admission collection', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 11, 'institute_id' => 1, 'master_type' => 'fee_head', 'code' => 'TUITION_FEE', 'label' => 'Tuition Fee', 'description' => 'Regular tuition installment', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 12, 'institute_id' => 1, 'master_type' => 'form_type', 'code' => 'ADMISSION_FORM', 'label' => 'Admission Form', 'description' => 'Primary student admission form', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 13, 'institute_id' => 1, 'master_type' => 'form_type', 'code' => 'SCHOLARSHIP_FORM', 'label' => 'Scholarship Form', 'description' => 'MahaDBT / freeship form', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 14, 'institute_id' => 1, 'master_type' => 'enquiry_source', 'code' => 'WALK_IN', 'label' => 'Walk-in', 'description' => 'Walk-in visitor enquiry', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 15, 'institute_id' => 1, 'master_type' => 'enquiry_source', 'code' => 'WEBSITE', 'label' => 'Website', 'description' => 'Lead generated from website', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 16, 'institute_id' => 1, 'master_type' => 'enquiry_source', 'code' => 'REFERENCE', 'label' => 'Reference', 'description' => 'Lead from existing student or parent reference', 'sort_order' => 3, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 17, 'institute_id' => 2, 'master_type' => 'class', 'code' => 'BCOM_I', 'label' => 'B.Com I', 'description' => 'First year B.Com class', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 18, 'institute_id' => 2, 'master_type' => 'class', 'code' => 'BA_I', 'label' => 'B.A I', 'description' => 'First year B.A class', 'sort_order' => 2, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 19, 'institute_id' => 3, 'master_type' => 'class', 'code' => 'BED_I', 'label' => 'B.Ed I', 'description' => 'First year B.Ed class', 'sort_order' => 1, 'status' => 'active', 'meta_json' => null, 'created_at' => $now, 'updated_at' => $now],
+            ]);
+        }
+
+        if ($db->tableExists('staff_profiles')) {
+            $db->table('staff_profiles')->ignore(true)->insertBatch([
+                ['id' => 1, 'institute_id' => 1, 'employee_code' => 'JC-STF-001', 'full_name' => 'Priya Deshpande', 'department' => 'Admissions', 'designation' => 'Admissions Officer', 'mobile_number' => '9800000001', 'email' => 'priya.deshpande@example.edu', 'joining_date' => '2024-06-15', 'employment_type' => 'full-time', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 2, 'institute_id' => 1, 'employee_code' => 'JC-STF-002', 'full_name' => 'Vijay Kulkarni', 'department' => 'Accounts', 'designation' => 'Accounts Assistant', 'mobile_number' => '9800000002', 'email' => 'vijay.kulkarni@example.edu', 'joining_date' => '2023-07-01', 'employment_type' => 'full-time', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 3, 'institute_id' => 1, 'employee_code' => 'JC-STF-003', 'full_name' => 'Meera Patil', 'department' => 'Science', 'designation' => 'Lecturer', 'mobile_number' => '9800000003', 'email' => 'meera.patil@example.edu', 'joining_date' => '2022-08-10', 'employment_type' => 'full-time', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 4, 'institute_id' => 2, 'employee_code' => 'DC-STF-001', 'full_name' => 'Sameer Shaikh', 'department' => 'Administration', 'designation' => 'Admin Executive', 'mobile_number' => '9800000004', 'email' => 'sameer.shaikh@example.edu', 'joining_date' => '2024-01-12', 'employment_type' => 'contract', 'status' => 'active', 'created_at' => $now, 'updated_at' => $now],
+            ]);
+        }
+
+        if ($db->tableExists('staff_attendance')) {
+            $db->table('staff_attendance')->ignore(true)->insertBatch([
+                ['id' => 1, 'staff_id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'attendance_date' => $today, 'status' => 'present', 'check_in_time' => '09:05', 'check_out_time' => '17:15', 'remarks' => 'Admissions desk counselling day.', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 2, 'staff_id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'attendance_date' => $today, 'status' => 'on-duty', 'check_in_time' => '09:00', 'check_out_time' => '17:00', 'remarks' => 'Fee collection counter duty.', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 3, 'staff_id' => 3, 'institute_id' => 1, 'academic_year_id' => 1, 'attendance_date' => $today, 'status' => 'leave', 'check_in_time' => null, 'check_out_time' => null, 'remarks' => 'Approved casual leave.', 'created_at' => $now, 'updated_at' => $now],
+            ]);
+        }
+
         $db->table('scholarship_applications')->ignore(true)->insertBatch([
             ['id' => 1, 'student_id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'scheme_name' => 'Post Matric Scholarship to OBC Students', 'status' => 'submitted', 'is_eligible' => 1, 'expected_amount' => 8000, 'created_at' => $now, 'updated_at' => $now],
             ['id' => 2, 'student_id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'scheme_name' => 'Government of India Post-Matric Scholarship', 'status' => 'verified', 'is_eligible' => 1, 'expected_amount' => 12000, 'created_at' => $now, 'updated_at' => $now],
@@ -199,6 +241,22 @@ class DemoSeeder extends Seeder
             ['id' => 2, 'student_id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'request_number' => 'CERT-JC-0002', 'certificate_type' => 'transfer_certificate', 'purpose' => 'Migration to another college after relocation.', 'status' => 'requested', 'verification_token' => null, 'issued_on' => null, 'requested_by' => 'Admissions Team', 'created_at' => $now, 'updated_at' => $now],
             ['id' => 3, 'student_id' => 3, 'institute_id' => 2, 'academic_year_id' => 2, 'request_number' => 'CERT-DC-0001', 'certificate_type' => 'no_dues', 'purpose' => 'Internship and library clearance requirement.', 'status' => 'verified', 'verification_token' => 'CERT-DC-2026-0001', 'issued_on' => '2026-04-06', 'requested_by' => 'Account Office', 'created_at' => $now, 'updated_at' => $now],
         ]);
+
+        if ($db->tableExists('exam_sessions')) {
+            $db->table('exam_sessions')->ignore(true)->insertBatch([
+                ['id' => 1, 'institute_id' => 1, 'academic_year_id' => 1, 'exam_name' => 'Unit Test 1', 'class_name' => 'FYJC Science', 'subject_name' => 'Physics', 'max_marks' => 50, 'exam_date' => '2026-04-15', 'status' => 'published', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 2, 'institute_id' => 1, 'academic_year_id' => 1, 'exam_name' => 'Mid Term', 'class_name' => 'FYJC Commerce', 'subject_name' => 'Accountancy', 'max_marks' => 100, 'exam_date' => '2026-04-22', 'status' => 'ongoing', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 3, 'institute_id' => 2, 'academic_year_id' => 2, 'exam_name' => 'Internal Assessment', 'class_name' => 'B.Com I', 'subject_name' => 'Business Economics', 'max_marks' => 40, 'exam_date' => '2026-04-18', 'status' => 'draft', 'created_at' => $now, 'updated_at' => $now],
+            ]);
+        }
+
+        if ($db->tableExists('exam_marks')) {
+            $db->table('exam_marks')->ignore(true)->insertBatch([
+                ['id' => 1, 'exam_id' => 1, 'student_id' => 1, 'obtained_marks' => 42, 'grade' => 'A+', 'result_status' => 'pass', 'remarks' => 'Good performance in numerical problems.', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 2, 'exam_id' => 1, 'student_id' => 2, 'obtained_marks' => 35, 'grade' => 'A', 'result_status' => 'pass', 'remarks' => 'Consistent and neat presentation.', 'created_at' => $now, 'updated_at' => $now],
+                ['id' => 3, 'exam_id' => 3, 'student_id' => 3, 'obtained_marks' => 28, 'grade' => 'A', 'result_status' => 'pass', 'remarks' => 'Solid internal assessment score.', 'created_at' => $now, 'updated_at' => $now],
+            ]);
+        }
 
         if ($db->tableExists('website_pages')) {
             $db->table('website_pages')->ignore(true)->insertBatch([

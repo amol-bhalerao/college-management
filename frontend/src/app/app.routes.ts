@@ -9,6 +9,9 @@ import { CertificateCenterComponent } from './features/certificate-center/certif
 import { PublicWebsiteComponent } from './features/public-website/public-website.component';
 import { StudentLedgerComponent } from './features/student-ledger/student-ledger.component';
 import { StudentMasterComponent } from './features/student-master/student-master.component';
+import { MasterEntriesComponent } from './features/master-entries/master-entries.component';
+import { StaffHrComponent } from './features/staff-hr/staff-hr.component';
+import { ExamResultsComponent } from './features/exam-results/exam-results.component';
 import { ScholarshipWorkflowComponent } from './features/scholarship-workflow/scholarship-workflow.component';
 import { ThemeStudioComponent } from './features/theme-studio/theme-studio.component';
 import { UserManagementComponent } from './features/user-management/user-management.component';
@@ -61,6 +64,24 @@ export const routes: Routes = [
     component: StudentMasterComponent,
     canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK'])],
     title: 'Student Master',
+  },
+  {
+    path: 'masters',
+    component: MasterEntriesComponent,
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK'])],
+    title: 'Master Entries',
+  },
+  {
+    path: 'staff-hr',
+    component: StaffHrComponent,
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN'])],
+    title: 'Staff HR & Attendance',
+  },
+  {
+    path: 'exams',
+    component: ExamResultsComponent,
+    canActivate: [authGuard, roleGuard(['SUPER_ADMIN', 'CLERK'])],
+    title: 'Exam, Marks & Results',
   },
   {
     path: 'scholarships',
