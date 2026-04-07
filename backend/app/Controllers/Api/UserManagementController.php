@@ -98,4 +98,32 @@ class UserManagementController extends BaseController
             'user' => $model->find($id),
         ]);
     }
+
+    public function delete(int $id): ResponseInterface
+    {
+        $model = new UserModel();
+        $user = $model->find($id);
+
+        if (! is_array($user)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'User not found.',
+            ]);
+        }
+
+        if (($user['role_code'] ?? '') === 'SUPER_ADMIN') {
+            $superAdminCount = $model->where('role_code', 'SUPER_ADMIN')->countAllResults();
+
+            if ($superAdminCount <= 1) {
+                return $this->response->setStatusCode(409)->setJSON([
+                    'message' => 'At least one super admin account must remain active.',
+                ]);
+            }
+        }
+
+        $model->delete($id);
+
+        return $this->response->setJSON([
+            'message' => 'User deleted successfully.',
+        ]);
+    }
 }

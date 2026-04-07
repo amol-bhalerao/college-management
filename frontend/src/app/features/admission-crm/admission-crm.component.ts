@@ -10,6 +10,7 @@ import {
   AdmissionRecord,
   AdmissionService,
   AdmissionWizardPayload,
+  EnquiryPayload,
   EnquiryRow,
   EnquirySummary,
 } from '../../core/services/admission.service';
@@ -26,9 +27,12 @@ import {
           <h1>Enquiry, Admission Wizard & Student Master</h1>
           <p>Track leads, complete the admission form in steps, and create the student master from the same flow.</p>
         </div>
-        <button type="button" class="primary-btn" (click)="openWizard(selectedEnquiry())" [disabled]="!selectedEnquiry()">
-          Start admission wizard
-        </button>
+        <div class="page-actions">
+          <button type="button" class="secondary-btn" (click)="openEnquiryForm()">+ Add enquiry</button>
+          <button type="button" class="primary-btn" (click)="openWizard(selectedEnquiry())" [disabled]="!selectedEnquiry()">
+            Start admission wizard
+          </button>
+        </div>
       </div>
 
       <div class="stats-grid">
@@ -54,7 +58,7 @@ import {
         <div class="panel__header">
           <div>
             <h2>Lead register</h2>
-            <p>Choose a lead and launch the wizard to create the student master and final admission entry.</p>
+            <p>Use row actions to view, edit, delete, or start the admission wizard from the same grid.</p>
           </div>
           <span class="tag">Wizard-ready</span>
         </div>
@@ -67,7 +71,7 @@ import {
           [pagination]="true"
           [paginationPageSize]="6"
           [animateRows]="true"
-          (rowClicked)="openDetails($event.data)"
+          (cellClicked)="handleGridClick($event)"
         ></ag-grid-angular>
       </article>
 
@@ -116,10 +120,83 @@ import {
 
             <div class="actions">
               <button type="button" class="primary-btn" (click)="openWizard(enquiry)">Start admission form</button>
+              <button type="button" class="secondary-btn" (click)="openEnquiryForm(enquiry)">Edit enquiry</button>
               <button type="button" class="secondary-btn" (click)="convertSelected(enquiry)">Quick convert</button>
               <a class="whatsapp-btn" [href]="buildWhatsAppLink(enquiry)" target="_blank" rel="noreferrer">Send WhatsApp reminder</a>
             </div>
           </div>
+        </div>
+      }
+
+      @if (showEnquiryForm()) {
+        <div class="detail-modal" (click)="closeEnquiryForm()">
+          <form class="detail-card" (click)="$event.stopPropagation()" (ngSubmit)="saveEnquiry()">
+            <div class="panel__header">
+              <div>
+                <h2>{{ editingEnquiryId() ? 'Update enquiry' : 'Add new enquiry' }}</h2>
+                <p>Capture new lead details or update follow-up progress from the same desk.</p>
+              </div>
+              <button type="button" class="ghost-btn" (click)="closeEnquiryForm()">Close</button>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Student name
+                <input type="text" name="student_name" [(ngModel)]="enquiryForm.student_name" required />
+              </label>
+              <label>
+                Mobile number
+                <input type="text" name="mobile_number" [(ngModel)]="enquiryForm.mobile_number" />
+              </label>
+              <label>
+                Email
+                <input type="email" name="email" [(ngModel)]="enquiryForm.email" />
+              </label>
+              <label>
+                Source
+                <input type="text" name="source" [(ngModel)]="enquiryForm.source" />
+              </label>
+              <label>
+                Desired course
+                <input type="text" name="desired_course" [(ngModel)]="enquiryForm.desired_course" />
+              </label>
+              <label>
+                Current class
+                <input type="text" name="current_class" [(ngModel)]="enquiryForm.current_class" />
+              </label>
+              <label>
+                Category
+                <input type="text" name="category" [(ngModel)]="enquiryForm.category" />
+              </label>
+              <label>
+                Status
+                <select name="status" [(ngModel)]="enquiryForm.status">
+                  <option value="new">new</option>
+                  <option value="contacted">contacted</option>
+                  <option value="follow-up">follow-up</option>
+                  <option value="converted">converted</option>
+                </select>
+              </label>
+              <label>
+                Assigned to
+                <input type="text" name="assigned_to" [(ngModel)]="enquiryForm.assigned_to" />
+              </label>
+              <label>
+                Follow-up date
+                <input type="date" name="follow_up_date" [(ngModel)]="enquiryForm.follow_up_date" />
+              </label>
+              <label class="full-span">
+                Notes
+                <textarea rows="3" name="notes" [(ngModel)]="enquiryForm.notes"></textarea>
+              </label>
+            </div>
+
+            <div class="actions wizard-actions">
+              <button type="submit" class="primary-btn" [disabled]="isEnquirySaving()">
+                {{ isEnquirySaving() ? 'Saving...' : (editingEnquiryId() ? 'Update enquiry' : 'Create enquiry') }}
+              </button>
+            </div>
+          </form>
         </div>
       }
 
@@ -235,19 +312,38 @@ export class AdmissionCrmComponent {
   protected readonly recentAdmissions = signal<AdmissionRecord[]>([]);
   protected readonly selectedEnquiry = signal<EnquiryRow | null>(null);
   protected readonly showWizard = signal(false);
+  protected readonly showEnquiryForm = signal(false);
   protected readonly wizardStep = signal(1);
   protected readonly isSaving = signal(false);
+  protected readonly isEnquirySaving = signal(false);
+  protected readonly editingEnquiryId = signal<number | null>(null);
 
   protected wizardForm: AdmissionWizardPayload = this.createEmptyForm();
+  protected enquiryForm: EnquiryPayload = this.createEmptyEnquiryForm();
 
   protected readonly columnDefs: ColDef<EnquiryRow>[] = [
     { field: 'enquiry_number', headerName: 'Enquiry No.' },
-    { field: 'student_name', headerName: 'Student' },
+    { field: 'student_name', headerName: 'Student', minWidth: 180 },
     { field: 'source', headerName: 'Source' },
-    { field: 'desired_course', headerName: 'Desired Course' },
+    { field: 'desired_course', headerName: 'Desired Course', minWidth: 170 },
     { field: 'status', headerName: 'Status' },
-    { field: 'assigned_to', headerName: 'Assigned To' },
+    { field: 'assigned_to', headerName: 'Assigned To', minWidth: 160 },
     { field: 'follow_up_date', headerName: 'Follow-Up' },
+    {
+      headerName: 'Actions',
+      minWidth: 260,
+      sortable: false,
+      filter: false,
+      pinned: 'right',
+      cellRenderer: () => `
+        <div class="grid-actions">
+          <button type="button" class="grid-action" data-action="view">View</button>
+          <button type="button" class="grid-action" data-action="edit">Edit</button>
+          <button type="button" class="grid-action" data-action="admit">Admit</button>
+          <button type="button" class="grid-action grid-action--danger" data-action="delete">Delete</button>
+        </div>
+      `,
+    },
   ];
 
   protected readonly admissionColumnDefs: ColDef<AdmissionRecord>[] = [
@@ -275,6 +371,38 @@ export class AdmissionCrmComponent {
     });
   }
 
+  protected handleGridClick(event: { data?: EnquiryRow; event?: Event | null }): void {
+    if (!event.data) {
+      return;
+    }
+
+    const action = (event.event?.target as HTMLElement | null)?.closest<HTMLElement>('[data-action]')?.dataset['action'];
+
+    if (!action) {
+      this.openDetails(event.data);
+      return;
+    }
+
+    if (action === 'view') {
+      this.openDetails(event.data);
+      return;
+    }
+
+    if (action === 'edit') {
+      this.openEnquiryForm(event.data);
+      return;
+    }
+
+    if (action === 'admit') {
+      this.openWizard(event.data);
+      return;
+    }
+
+    if (action === 'delete') {
+      void this.deleteEnquiry(event.data);
+    }
+  }
+
   protected openDetails(row?: EnquiryRow): void {
     if (row) {
       this.selectedEnquiry.set(row);
@@ -283,6 +411,37 @@ export class AdmissionCrmComponent {
 
   protected closeDetails(): void {
     this.selectedEnquiry.set(null);
+  }
+
+  protected openEnquiryForm(enquiry?: EnquiryRow): void {
+    if (enquiry) {
+      this.editingEnquiryId.set(enquiry.id);
+      this.enquiryForm = {
+        institute_id: this.context.activeInstitute().id,
+        student_name: enquiry.student_name,
+        mobile_number: enquiry.mobile_number || '',
+        email: enquiry.email || '',
+        source: enquiry.source || 'Walk-in',
+        desired_course: enquiry.desired_course || '',
+        current_class: enquiry.current_class || '',
+        category: enquiry.category || '',
+        status: enquiry.status,
+        assigned_to: enquiry.assigned_to || 'Admissions Desk',
+        follow_up_date: enquiry.follow_up_date || '',
+        notes: enquiry.notes || '',
+      };
+    } else {
+      this.editingEnquiryId.set(null);
+      this.enquiryForm = this.createEmptyEnquiryForm();
+    }
+
+    this.showEnquiryForm.set(true);
+  }
+
+  protected closeEnquiryForm(): void {
+    this.showEnquiryForm.set(false);
+    this.editingEnquiryId.set(null);
+    this.enquiryForm = this.createEmptyEnquiryForm();
   }
 
   protected openWizard(enquiry: EnquiryRow | null): void {
@@ -314,11 +473,52 @@ export class AdmissionCrmComponent {
     this.wizardStep.update((step) => Math.max(step - 1, 1));
   }
 
+  protected async saveEnquiry(): Promise<void> {
+    this.isEnquirySaving.set(true);
+
+    try {
+      const payload: EnquiryPayload = {
+        ...this.enquiryForm,
+        institute_id: this.context.activeInstitute().id,
+      };
+
+      if (this.editingEnquiryId()) {
+        await this.admissionService.updateEnquiry(this.editingEnquiryId()!, payload);
+      } else {
+        await this.admissionService.createEnquiry(payload);
+      }
+
+      await Swal.fire({
+        icon: 'success',
+        title: 'Saved',
+        text: this.editingEnquiryId() ? 'Enquiry updated successfully.' : 'New enquiry added successfully.',
+      });
+      this.closeEnquiryForm();
+      await this.load(this.context.activeInstitute().id);
+    } catch (error: any) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Save failed',
+        text: error?.error?.message || 'Please review the enquiry details and try again.',
+      });
+    } finally {
+      this.isEnquirySaving.set(false);
+    }
+  }
+
   protected async convertSelected(enquiry: EnquiryRow): Promise<void> {
-    await this.admissionService.convertEnquiry(enquiry.id);
-    await Swal.fire({ icon: 'success', title: 'Converted', text: 'The enquiry has been converted into an admission record.' });
-    this.closeDetails();
-    await this.load(this.context.activeInstitute().id);
+    try {
+      await this.admissionService.convertEnquiry(enquiry.id);
+      await Swal.fire({ icon: 'success', title: 'Converted', text: 'The enquiry has been converted into an admission record.' });
+      this.closeDetails();
+      await this.load(this.context.activeInstitute().id);
+    } catch (error: any) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Conversion failed',
+        text: error?.error?.message || 'Unable to convert this enquiry right now.',
+      });
+    }
   }
 
   protected async submitWizard(): Promise<void> {
@@ -349,6 +549,23 @@ export class AdmissionCrmComponent {
     const phone = (enquiry.mobile_number ?? '').replace(/\D/g, '');
     const message = encodeURIComponent(`Dear ${enquiry.student_name}, this is a reminder from ${this.context.activeInstitute().name} regarding your admission enquiry ${enquiry.enquiry_number}. Please complete the next step.`);
     return `https://wa.me/91${phone}?text=${message}`;
+  }
+
+  private createEmptyEnquiryForm(): EnquiryPayload {
+    return {
+      institute_id: this.context.activeInstitute().id,
+      student_name: '',
+      mobile_number: '',
+      email: '',
+      source: 'Walk-in',
+      desired_course: '',
+      current_class: '',
+      category: '',
+      status: 'new',
+      assigned_to: 'Admissions Desk',
+      follow_up_date: '',
+      notes: '',
+    };
   }
 
   private createEmptyForm(): AdmissionWizardPayload {
@@ -389,6 +606,34 @@ export class AdmissionCrmComponent {
     };
   }
 
+  private async deleteEnquiry(enquiry: EnquiryRow): Promise<void> {
+    const result = await Swal.fire({
+      icon: 'warning',
+      title: 'Delete enquiry?',
+      text: `Remove ${enquiry.student_name} from the lead register?`,
+      showCancelButton: true,
+      confirmButtonText: 'Delete',
+      confirmButtonColor: '#dc2626',
+    });
+
+    if (!result.isConfirmed) {
+      return;
+    }
+
+    try {
+      await this.admissionService.deleteEnquiry(enquiry.id);
+      this.closeDetails();
+      await this.load(this.context.activeInstitute().id);
+      await Swal.fire({ icon: 'success', title: 'Deleted', text: 'Enquiry removed successfully.' });
+    } catch (error: any) {
+      await Swal.fire({
+        icon: 'error',
+        title: 'Delete failed',
+        text: error?.error?.message || 'Unable to delete this enquiry right now.',
+      });
+    }
+  }
+
   private async load(instituteId: number): Promise<void> {
     const [summary, enquiries, admissions] = await Promise.all([
       this.admissionService.getSummary(instituteId),
@@ -399,5 +644,10 @@ export class AdmissionCrmComponent {
     this.summary.set(summary);
     this.rowData.set(enquiries);
     this.recentAdmissions.set(admissions);
+
+    const selectedId = this.selectedEnquiry()?.id;
+    if (selectedId) {
+      this.selectedEnquiry.set(enquiries.find((row) => row.id === selectedId) ?? null);
+    }
   }
 }

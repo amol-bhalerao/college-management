@@ -40,6 +40,22 @@ export interface AdmissionRecord {
   institute_name: string | null;
 }
 
+export interface EnquiryPayload {
+  institute_id?: number;
+  academic_year_id?: number;
+  student_name: string;
+  mobile_number?: string;
+  email?: string;
+  source?: string;
+  desired_course?: string;
+  current_class?: string;
+  category?: string;
+  status?: string;
+  assigned_to?: string;
+  follow_up_date?: string;
+  notes?: string;
+}
+
 export interface AdmissionWizardPayload {
   enquiry_id: number;
   first_name: string;
@@ -80,6 +96,18 @@ export class AdmissionService {
     );
 
     return response.admissions;
+  }
+
+  async createEnquiry(payload: EnquiryPayload): Promise<void> {
+    await firstValueFrom(this.http.post(`${environment.apiBaseUrl}/enquiries`, payload));
+  }
+
+  async updateEnquiry(id: number, payload: EnquiryPayload): Promise<void> {
+    await firstValueFrom(this.http.put(`${environment.apiBaseUrl}/enquiries/${id}`, payload));
+  }
+
+  async deleteEnquiry(id: number): Promise<void> {
+    await firstValueFrom(this.http.delete(`${environment.apiBaseUrl}/enquiries/${id}`));
   }
 
   async createAdmission(payload: AdmissionWizardPayload): Promise<{ message: string; student: unknown; admission: AdmissionRecord }> {

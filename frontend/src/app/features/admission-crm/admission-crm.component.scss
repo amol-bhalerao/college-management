@@ -9,7 +9,8 @@
 
 .page-head,
 .panel__header,
-.actions {
+.actions,
+.page-actions {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
@@ -86,6 +87,27 @@
   width: 100%;
   border-radius: calc(var(--radius) - 4px);
   overflow: hidden;
+}
+
+.grid-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.grid-action {
+  border: 1px solid rgba(79, 70, 229, 0.25);
+  background: #fff;
+  color: var(--primary-color);
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+}
+
+.grid-action--danger {
+  border-color: rgba(220, 38, 38, 0.3);
+  color: #b91c1c;
 }
 
 .crm-grid {
@@ -217,6 +239,7 @@
   .detail-grid,
   .page-head,
   .actions,
+  .page-actions,
   .form-grid {
     grid-template-columns: 1fr;
     flex-direction: column;

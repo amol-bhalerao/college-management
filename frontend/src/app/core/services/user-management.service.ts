@@ -35,4 +35,8 @@ export class UserManagementService {
   async updateUser(id: number, payload: Partial<AppUserRow> & { password?: string }): Promise<void> {
     await firstValueFrom(this.http.put(`${environment.apiBaseUrl}/users/${id}`, payload));
   }
+
+  async deleteUser(id: number): Promise<void> {
+    await firstValueFrom(this.http.delete(`${environment.apiBaseUrl}/users/${id}`));
+  }
 }

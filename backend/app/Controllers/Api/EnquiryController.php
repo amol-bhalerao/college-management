@@ -48,6 +48,121 @@ class EnquiryController extends BaseController
         ]);
     }
 
+    public function create(): ResponseInterface
+    {
+        $model = new EnquiryModel();
+        $payload = $this->request->getJSON(true) ?? $this->request->getPost();
+        $studentName = trim((string) ($payload['student_name'] ?? ''));
+        $instituteId = (int) ($payload['institute_id'] ?? 1);
+
+        if ($studentName === '') {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'Student name is required.',
+            ]);
+        }
+
+        $db = db_connect();
+        $academicYearId = (int) ($payload['academic_year_id'] ?? 0);
+
+        if ($academicYearId <= 0) {
+            $academicYearId = (int) ($db->table('academic_years')
+                ->select('id')
+                ->where('institute_id', $instituteId)
+                ->orderBy('is_current', 'DESC')
+                ->orderBy('id', 'DESC')
+                ->get()
+                ->getRowArray()['id'] ?? 1);
+        }
+
+        $insertId = $model->insert([
+            'institute_id' => $instituteId,
+            'academic_year_id' => $academicYearId,
+            'enquiry_number' => $this->generateEnquiryNumber($instituteId),
+            'student_name' => $studentName,
+            'mobile_number' => trim((string) ($payload['mobile_number'] ?? '')),
+            'email' => trim((string) ($payload['email'] ?? '')),
+            'source' => trim((string) ($payload['source'] ?? 'Walk-in')),
+            'desired_course' => trim((string) ($payload['desired_course'] ?? '')),
+            'current_class' => trim((string) ($payload['current_class'] ?? '')),
+            'category' => trim((string) ($payload['category'] ?? '')),
+            'status' => trim((string) ($payload['status'] ?? 'new')),
+            'assigned_to' => trim((string) ($payload['assigned_to'] ?? 'Admissions Desk')),
+            'follow_up_date' => ($payload['follow_up_date'] ?? '') !== '' ? (string) $payload['follow_up_date'] : null,
+            'notes' => trim((string) ($payload['notes'] ?? '')),
+        ], true);
+
+        return $this->response->setStatusCode(201)->setJSON([
+            'message' => 'Enquiry created successfully.',
+            'enquiry' => $model->find($insertId),
+        ]);
+    }
+
+    public function update(int $id): ResponseInterface
+    {
+        $model = new EnquiryModel();
+        $enquiry = $model->find($id);
+
+        if (! is_array($enquiry)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Enquiry not found.',
+            ]);
+        }
+
+        $payload = $this->request->getJSON(true) ?? $this->request->getPost();
+        $updates = array_filter([
+            'student_name' => isset($payload['student_name']) ? trim((string) $payload['student_name']) : null,
+            'mobile_number' => isset($payload['mobile_number']) ? trim((string) $payload['mobile_number']) : null,
+            'email' => isset($payload['email']) ? trim((string) $payload['email']) : null,
+            'source' => isset($payload['source']) ? trim((string) $payload['source']) : null,
+            'desired_course' => isset($payload['desired_course']) ? trim((string) $payload['desired_course']) : null,
+            'current_class' => isset($payload['current_class']) ? trim((string) $payload['current_class']) : null,
+            'category' => isset($payload['category']) ? trim((string) $payload['category']) : null,
+            'status' => isset($payload['status']) ? trim((string) $payload['status']) : null,
+            'assigned_to' => isset($payload['assigned_to']) ? trim((string) $payload['assigned_to']) : null,
+            'follow_up_date' => array_key_exists('follow_up_date', $payload) ? (($payload['follow_up_date'] ?? '') !== '' ? (string) $payload['follow_up_date'] : null) : null,
+            'notes' => isset($payload['notes']) ? trim((string) $payload['notes']) : null,
+        ], static fn ($value) => $value !== null);
+
+        if ($updates === []) {
+            return $this->response->setStatusCode(422)->setJSON([
+                'message' => 'No enquiry changes were provided.',
+            ]);
+        }
+
+        $model->update($id, $updates);
+
+        return $this->response->setJSON([
+            'message' => 'Enquiry updated successfully.',
+            'enquiry' => $model->find($id),
+        ]);
+    }
+
+    public function delete(int $id): ResponseInterface
+    {
+        $model = new EnquiryModel();
+        $enquiry = $model->find($id);
+
+        if (! is_array($enquiry)) {
+            return $this->response->setStatusCode(404)->setJSON([
+                'message' => 'Enquiry not found.',
+            ]);
+        }
+
+        $linkedAdmissions = db_connect()->table('admissions')->where('enquiry_id', $id)->countAllResults();
+
+        if ($linkedAdmissions > 0 || ($enquiry['status'] ?? '') === 'converted') {
+            return $this->response->setStatusCode(409)->setJSON([
+                'message' => 'Converted enquiries cannot be deleted because they are linked to admission records.',
+            ]);
+        }
+
+        $model->delete($id);
+
+        return $this->response->setJSON([
+            'message' => 'Enquiry deleted successfully.',
+        ]);
+    }
+
     public function recentAdmissions(?int $instituteId = null): ResponseInterface
     {
         $builder = db_connect()->table('admissions a')
@@ -192,6 +307,15 @@ class EnquiryController extends BaseController
             'student' => $studentModel->find((int) $studentId),
             'admission' => $admissionRecord,
         ]);
+    }
+
+    private function generateEnquiryNumber(int $instituteId): string
+    {
+        $db = db_connect();
+        $instituteCode = $db->table('institutes')->select('code')->where('id', $instituteId)->get()->getRowArray()['code'] ?? 'ENQ';
+        $sequence = $db->table('enquiries')->where('institute_id', $instituteId)->countAllResults() + 1;
+
+        return sprintf('ENQ-%s-%04d', strtoupper($instituteCode), $sequence);
     }
 
     private function generateGrNumber(int $instituteId, int $academicYearId): string
