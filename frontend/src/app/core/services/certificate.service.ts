@@ -65,6 +65,13 @@ export interface CertificateRow extends StudentDirectoryItem {
   issued_on: string | null;
   requested_by: string | null;
   institute_name: string | null;
+  institute_header_title: string | null;
+  institute_header_subtitle: string | null;
+  institute_header_address: string | null;
+  institute_principal_name: string | null;
+  institute_footer_note: string | null;
+  institute_contact_phone: string | null;
+  institute_contact_email: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

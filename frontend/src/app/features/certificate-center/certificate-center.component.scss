@@ -186,6 +186,7 @@
 }
 
 .print-template {
+  position: relative;
   border: 1px solid rgba(79, 70, 229, 0.12);
   border-radius: 16px;
   padding: 1rem;
@@ -193,7 +194,9 @@
 }
 
 .template-head,
-.id-card-body {
+.id-card-body,
+.document-head,
+.signature-band {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -201,7 +204,8 @@
 }
 
 .template-head h3,
-.letter-template h3 {
+.letter-template h3,
+.letterhead h3 {
   margin: 0.2rem 0 0;
 }
 
@@ -210,6 +214,115 @@
   margin: 0;
   color: var(--primary-color);
   font-weight: 700;
+}
+
+.document-head {
+  align-items: flex-start;
+  padding-bottom: 0.85rem;
+  margin-bottom: 0.85rem;
+  border-bottom: 2px solid rgba(79, 70, 229, 0.22);
+}
+
+.letterhead {
+  display: grid;
+  gap: 0.18rem;
+}
+
+.letterhead small,
+.document-meta span,
+.document-footer small,
+.tc-line small,
+.tc-note {
+  color: var(--muted-text);
+}
+
+.document-meta {
+  display: grid;
+  gap: 0.3rem;
+  text-align: right;
+  font-size: 0.88rem;
+}
+
+.watermark {
+  position: absolute;
+  top: 48%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 5rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: rgba(79, 70, 229, 0.06);
+  pointer-events: none;
+}
+
+.tc-sheet {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.tc-line {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 0.75rem;
+  padding: 0.75rem 0.8rem;
+  border: 1px solid rgba(99, 102, 241, 0.14);
+  border-radius: 12px;
+  background: rgba(248, 250, 252, 0.92);
+}
+
+.tc-index {
+  display: inline-grid;
+  place-items: center;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  background: var(--primary-color);
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.tc-line label {
+  display: block;
+  margin-bottom: 0.15rem;
+  color: var(--muted-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.tc-line strong {
+  display: block;
+}
+
+.tc-note {
+  margin: 0.9rem 0 0;
+  font-style: italic;
+}
+
+.signature-band {
+  margin-top: 1rem;
+  align-items: end;
+}
+
+.seal-box {
+  min-width: 110px;
+  min-height: 58px;
+  border: 1px dashed rgba(100, 116, 139, 0.8);
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  color: var(--muted-text);
+  font-size: 0.8rem;
+}
+
+.document-footer {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.9rem;
+  padding-top: 0.7rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.28);
 }
 
 .avatar-badge {

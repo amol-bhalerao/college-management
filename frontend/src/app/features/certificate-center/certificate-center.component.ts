@@ -214,28 +214,127 @@ import {
                   </section>
                 }
                 @case ('transfer_certificate') {
-                  <section class="print-template letter-template">
-                    <p class="template-label">School Leaving / Transfer Certificate</p>
-                    <h3>Student particulars</h3>
+                  <section class="print-template tc-template official-document">
+                    <div class="watermark">TC</div>
 
-                    <div class="detail-grid">
-                      <article><span>Student</span><strong>{{ request.first_name }} {{ request.last_name }}</strong><small>GR: {{ request.gr_number || '—' }}</small></article>
-                      <article><span>Mother / Guardian</span><strong>{{ request.mother_name || request.guardian_name || '—' }}</strong><small>{{ request.nationality || 'Indian' }}</small></article>
-                      <article><span>DOB / Birth place</span><strong>{{ request.dob || '—' }}</strong><small>{{ request.place_of_birth || '—' }}, {{ request.birth_district || '—' }}</small></article>
-                      <article><span>Religion / Category</span><strong>{{ request.religion || '—' }}</strong><small>{{ request.category || '—' }} · {{ request.caste_subcaste || '—' }}</small></article>
-                      <article><span>Date of admission</span><strong>{{ request.date_of_admission || '—' }}</strong><small>Previous school: {{ request.previous_school || '—' }}</small></article>
-                      <article><span>Leaving details</span><strong>{{ request.date_of_leaving || '—' }}</strong><small>{{ request.reason_for_leaving || request.purpose || 'Further academic transition.' }}</small></article>
-                      <article><span>Class last attended</span><strong>{{ request.class_last_attended || request.current_class || '—' }}</strong><small>Division {{ request.division || '—' }}</small></article>
-                      <article><span>Progress / Conduct</span><strong>{{ request.progress_status || 'Good' }}</strong><small>{{ request.conduct || 'Good' }}</small></article>
+                    <header class="document-head">
+                      <div class="letterhead">
+                        <p class="template-label">{{ request.institute_header_title || request.institute_name }}</p>
+                        <h3>School Leaving / Transfer Certificate</h3>
+                        <p>{{ request.institute_header_subtitle || 'Academic office record' }}</p>
+                        <small>{{ request.institute_header_address || 'Address not configured' }}</small>
+                      </div>
+
+                      <div class="document-meta">
+                        <span><strong>Certificate No:</strong> {{ request.request_number }}</span>
+                        <span><strong>Issue Date:</strong> {{ displayDate(request.issued_on) }}</span>
+                        <span><strong>Academic Year:</strong> {{ context.activeAcademicYear() }}</span>
+                      </div>
+                    </header>
+
+                    <div class="tc-sheet">
+                      <div class="tc-line">
+                        <span class="tc-index">1</span>
+                        <div>
+                          <label>Name of student</label>
+                          <strong>{{ studentFullName(request) }}</strong>
+                          <small>GR No: {{ request.gr_number || '—' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">2</span>
+                        <div>
+                          <label>Mother's / Guardian's name</label>
+                          <strong>{{ request.mother_name || request.guardian_name || '—' }}</strong>
+                          <small>Nationality: {{ request.nationality || 'Indian' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">3</span>
+                        <div>
+                          <label>Religion / Category / Caste</label>
+                          <strong>{{ request.religion || '—' }} · {{ request.category || '—' }}</strong>
+                          <small>{{ request.caste_subcaste || 'Sub-caste not recorded' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">4</span>
+                        <div>
+                          <label>Date of birth & place of birth</label>
+                          <strong>{{ displayDate(request.dob) }} · {{ request.place_of_birth || '—' }}</strong>
+                          <small>{{ request.date_of_birth_words || 'DOB in words pending' }} · {{ request.birth_taluka || '—' }}, {{ request.birth_district || '—' }}, {{ request.birth_state || '—' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">5</span>
+                        <div>
+                          <label>Date of admission & previous school</label>
+                          <strong>{{ displayDate(request.date_of_admission) }}</strong>
+                          <small>{{ request.previous_school || 'Previous school not recorded' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">6</span>
+                        <div>
+                          <label>Class last attended</label>
+                          <strong>{{ request.class_last_attended || request.current_class || '—' }}</strong>
+                          <small>Division: {{ request.division || '—' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">7</span>
+                        <div>
+                          <label>Date of leaving school / college</label>
+                          <strong>{{ displayDate(request.date_of_leaving) }}</strong>
+                          <small>{{ request.reason_for_leaving || request.purpose || 'Further academic transition.' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">8</span>
+                        <div>
+                          <label>Progress and conduct</label>
+                          <strong>{{ request.progress_status || 'Good' }}</strong>
+                          <small>Conduct: {{ request.conduct || 'Good' }}</small>
+                        </div>
+                      </div>
+
+                      <div class="tc-line">
+                        <span class="tc-index">9</span>
+                        <div>
+                          <label>Remarks</label>
+                          <strong>{{ request.tc_remarks || 'No adverse remarks.' }}</strong>
+                          <small>Requested by {{ request.requested_by || 'Office desk' }}</small>
+                        </div>
+                      </div>
                     </div>
 
-                    <p>
-                      Certified that <strong>{{ request.first_name }} {{ request.last_name }}</strong> was a bonafide student of
-                      <strong>{{ request.institute_name }}</strong>. The above particulars are recorded for issuing the transfer certificate
-                      in the standard school leaving format commonly used in Maharashtra institutions.
+                    <p class="tc-note">
+                      Certified that the above particulars are taken from the General Register and are true to the best of the institution's knowledge.
                     </p>
-                    <p><strong>Remarks:</strong> {{ request.tc_remarks || 'No adverse remarks.' }}</p>
-                    <p class="signature-row">Principal / Office Seal</p>
+
+                    <div class="signature-band">
+                      <div>
+                        <span>Date</span>
+                        <strong>{{ displayDate(request.issued_on) }}</strong>
+                      </div>
+                      <div class="seal-box">Office Seal</div>
+                      <div>
+                        <span>Principal / Head of Institution</span>
+                        <strong>{{ request.institute_principal_name || 'Principal' }}</strong>
+                      </div>
+                    </div>
+
+                    <footer class="document-footer">
+                      <small>{{ request.institute_footer_note || 'Document can be verified using the token below.' }}</small>
+                      <small>Verification Token: {{ request.verification_token || 'Pending issue' }}</small>
+                    </footer>
                   </section>
                 }
                 @case ('no_dues') {
@@ -445,6 +544,27 @@ export class CertificateCenterComponent {
     return `${first}${last}`.toUpperCase() || 'ST';
   }
 
+  protected studentFullName(request: CertificateRow): string {
+    return `${request.first_name || ''} ${request.last_name || ''}`.trim() || '—';
+  }
+
+  protected displayDate(value?: string | null): string {
+    if (!value) {
+      return '—';
+    }
+
+    const parsed = new Date(value);
+    if (Number.isNaN(parsed.getTime())) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat('en-IN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    }).format(parsed);
+  }
+
   protected verifyUrl(token: string): string {
     return `http://127.0.0.1:8080/api/verify/certificate/${token}`;
   }
@@ -518,12 +638,35 @@ export class CertificateCenterComponent {
         <head>
           <title>Certificate Print</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 24px; color: #0f172a; }
-            .print-template { border: 1px solid #cbd5e1; border-radius: 16px; padding: 20px; }
-            .template-head, .id-card-body { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
-            .template-label { color: #4338ca; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+            @page { size: A4; margin: 12mm; }
+            * { box-sizing: border-box; }
+            body { font-family: "Times New Roman", serif; padding: 0; margin: 0; color: #0f172a; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .print-template { position: relative; border: 1px solid #cbd5e1; border-radius: 16px; padding: 18px 20px; background: #fff; }
+            .template-head, .id-card-body, .document-head, .signature-band { display: flex; justify-content: space-between; gap: 16px; align-items: center; }
+            .template-label { color: #312e81; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
             .avatar-badge { width: 80px; height: 80px; border-radius: 50%; background: #e0e7ff; display:flex; align-items:center; justify-content:center; font-size: 28px; font-weight: 700; }
             .student-meta { display:grid; gap: 6px; }
+            .letterhead h3, .letter-template h3 { margin: 6px 0; }
+            .letterhead p, .letterhead small, .document-meta span, .document-footer small, .tc-note, .student-meta span { display:block; }
+            .document-head { align-items: flex-start; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 2px solid #1e3a8a; }
+            .document-meta { min-width: 220px; display: grid; gap: 6px; font-size: 12px; text-align: right; }
+            .official-document { overflow: hidden; }
+            .watermark { position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); font-size: 100px; font-weight: 700; color: rgba(30, 64, 175, 0.06); pointer-events: none; }
+            .tc-sheet { display: grid; gap: 8px; margin-top: 10px; }
+            .tc-line { display: grid; grid-template-columns: 32px 1fr; gap: 10px; padding: 9px 10px; border: 1px solid #dbe4ff; border-radius: 10px; background: #f8fbff; }
+            .tc-index { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 999px; background: #1d4ed8; color: #fff; font-size: 12px; font-weight: 700; }
+            .tc-line label { display: block; font-size: 12px; color: #475569; text-transform: uppercase; letter-spacing: .04em; margin-bottom: 3px; }
+            .tc-line strong { display: block; font-size: 15px; }
+            .tc-line small { display: block; margin-top: 2px; color: #475569; }
+            .tc-note { margin: 14px 0 10px; font-style: italic; }
+            .signature-band { margin-top: 18px; align-items: end; }
+            .seal-box { min-width: 110px; min-height: 58px; border: 1px dashed #64748b; border-radius: 10px; display: grid; place-items: center; font-size: 12px; color: #475569; }
+            .document-footer { margin-top: 12px; padding-top: 10px; border-top: 1px solid #cbd5e1; display: grid; gap: 4px; }
+            .detail-grid { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+            .detail-grid article { padding: 10px; border: 1px solid #dbe4ff; border-radius: 10px; background: #f8fbff; }
+            .detail-grid span { display:block; margin-bottom: 4px; font-size: 12px; color: #475569; text-transform: uppercase; }
+            .detail-grid strong { display:block; }
+            .detail-grid small { color: #475569; }
             .signature-row { margin-top: 30px; font-weight: 700; }
           </style>
         </head>
