@@ -255,22 +255,7 @@ export class WebsiteCmsComponent {
 
   protected async previewPublicSite(): Promise<void> {
     const code = this.context.activeInstitute().code.toLowerCase();
-    const site = await this.websiteService.getPublicSite(code);
-    const firstPage = site.pages[0];
-
-    await Swal.fire({
-      width: 900,
-      title: firstPage?.hero_title || site.institute.name,
-      html: `
-        <div style="text-align:left; display:grid; gap:12px;">
-          <div><strong>Institute:</strong> ${site.institute.name}</div>
-          <div><strong>Website URL:</strong> ${site.institute.website_url ?? 'Not set'}</div>
-          <div><strong>Published pages:</strong> ${site.pages.length}</div>
-          <div>${firstPage?.hero_subtitle ?? 'No hero subtitle available.'}</div>
-        </div>
-      `,
-      confirmButtonText: 'Close',
-    });
+    window.open(`/site/${code}`, '_blank', 'noopener');
   }
 
   private createEmptyForm(): WebsitePagePayload {

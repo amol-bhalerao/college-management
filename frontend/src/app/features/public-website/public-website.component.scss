@@ -1,0 +1,158 @@
+:host {
+  display: block;
+}
+
+.public-site {
+  min-height: 100vh;
+  display: grid;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: linear-gradient(180deg, #f8fbff 0%, #eef4fb 100%);
+}
+
+.site-header,
+.site-actions {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.35rem;
+  color: #4338ca;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.site-header h1,
+.hero-card h2,
+.sidebar-card h3 {
+  margin: 0;
+}
+
+.site-header p,
+.hero-card p,
+.sidebar-card p,
+.site-footer span,
+.state-card p {
+  color: #475569;
+}
+
+.primary-btn,
+.ghost-btn,
+.site-nav button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.primary-btn,
+.ghost-btn {
+  padding: 0.75rem 1rem;
+}
+
+.primary-btn {
+  border: 0;
+  color: #fff;
+  background: linear-gradient(135deg, #1d4ed8, #0f766e);
+}
+
+.ghost-btn {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: rgba(255, 255, 255, 0.8);
+  color: #0f172a;
+}
+
+.site-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.site-nav button {
+  border: 1px solid rgba(79, 70, 229, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  color: #312e81;
+  padding: 0.6rem 0.9rem;
+}
+
+.site-nav button.active {
+  background: rgba(79, 70, 229, 0.12);
+  border-color: rgba(79, 70, 229, 0.35);
+}
+
+.hero-card,
+.content-card,
+.sidebar-card,
+.state-card {
+  padding: 1rem 1.1rem;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 24px 48px rgba(15, 23, 42, 0.08);
+}
+
+.seo-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(20, 184, 166, 0.12);
+  color: #0f766e;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.content-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 1rem;
+}
+
+.content-meta {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+}
+
+.content-meta span {
+  color: #4338ca;
+  font-weight: 700;
+}
+
+.html-body {
+  display: grid;
+  gap: 0.75rem;
+  line-height: 1.6;
+}
+
+.sidebar-card {
+  display: grid;
+  gap: 1rem;
+}
+
+.sidebar-card ul {
+  margin: 0;
+  padding-left: 1rem;
+  color: #334155;
+}
+
+.site-footer {
+  display: grid;
+  gap: 0.3rem;
+  padding: 1rem 0 0.5rem;
+}
+
+@media (max-width: 960px) {
+  .site-header,
+  .site-actions,
+  .content-layout {
+    grid-template-columns: 1fr;
+    display: grid;
+  }
+}

@@ -6,6 +6,7 @@ import { InstituteHeaderComponent } from './features/institute-header/institute-
 import { LoginComponent } from './features/login/login.component';
 import { AdmissionCrmComponent } from './features/admission-crm/admission-crm.component';
 import { CertificateCenterComponent } from './features/certificate-center/certificate-center.component';
+import { PublicWebsiteComponent } from './features/public-website/public-website.component';
 import { StudentLedgerComponent } from './features/student-ledger/student-ledger.component';
 import { StudentMasterComponent } from './features/student-master/student-master.component';
 import { ScholarshipWorkflowComponent } from './features/scholarship-workflow/scholarship-workflow.component';
@@ -25,6 +26,11 @@ export const routes: Routes = [
     component: LoginComponent,
     canActivate: [guestGuard],
     title: 'Sign In',
+  },
+  {
+    path: 'site/:code',
+    component: PublicWebsiteComponent,
+    title: 'Institute Website',
   },
   {
     path: 'dashboard',
