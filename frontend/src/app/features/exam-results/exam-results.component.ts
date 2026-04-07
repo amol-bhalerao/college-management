@@ -16,6 +16,7 @@ import {
 } from '../../core/services/exam-results.service';
 import { MasterDataService, MasterOptionsMap } from '../../core/services/master-data.service';
 import { StudentMasterRow, StudentMasterService } from '../../core/services/student-master.service';
+import { InstituteService, InstituteSettings } from '../../core/services/institute.service';
 
 @Component({
   selector: 'app-exam-results',
@@ -72,7 +73,11 @@ import { StudentMasterRow, StudentMasterService } from '../../core/services/stud
               <h2>Mark register · {{ exam.exam_name }}</h2>
               <p>{{ exam.class_name }} · {{ exam.subject_name }} · Max {{ exam.max_marks }}</p>
             </div>
-            <button type="button" class="primary-btn" (click)="openMarkModal(exam)">+ Add / update mark</button>
+            <div class="page-actions">
+              <button type="button" class="secondary-btn" (click)="printResultSheet('A4')">Print A4</button>
+              <button type="button" class="secondary-btn" (click)="printResultSheet('A5')">Print A5</button>
+              <button type="button" class="primary-btn" (click)="openMarkModal(exam)">+ Add / update mark</button>
+            </div>
           </div>
 
           <div class="exam-summary">
@@ -80,6 +85,85 @@ import { StudentMasterRow, StudentMasterService } from '../../core/services/stud
             <span>{{ exam.exam_date || 'Date pending' }}</span>
             <span>{{ exam.marks_entered || 0 }} marks entered</span>
             <span>Average {{ exam.average_score || 0 }}</span>
+          </div>
+
+          <div id="result-print-surface" class="print-sheet">
+            <header class="doc-header">
+              <div class="doc-logo">
+                @if (instituteSettings()?.logo_url) {
+                  <img [src]="instituteSettings()?.logo_url!" alt="Institute logo" />
+                } @else {
+                  <div class="doc-logo-fallback">{{ context.activeInstitute().code }}</div>
+                }
+              </div>
+              <div class="doc-title">
+                <h3>{{ instituteSettings()?.header_title || context.activeInstitute().name }}</h3>
+                <strong>{{ instituteSettings()?.header_subtitle || context.activeInstitute().type }}</strong>
+                <p>{{ instituteSettings()?.header_address || 'Institute address not configured yet.' }}</p>
+                <small>{{ instituteSettings()?.contact_phone || 'Phone' }} · {{ instituteSettings()?.contact_email || 'Email' }}</small>
+              </div>
+            </header>
+
+            <div class="doc-ribbon">
+              <div>
+                <span class="doc-label">Document</span>
+                <strong>Exam Marksheet / Result Sheet</strong>
+              </div>
+              <div>
+                <span class="doc-label">Printed on</span>
+                <strong>{{ printableDate() }}</strong>
+              </div>
+            </div>
+
+            <div class="meta-grid">
+              <article><span>Exam</span><strong>{{ exam.exam_name }}</strong><small>{{ exam.subject_name }}</small></article>
+              <article><span>Class</span><strong>{{ exam.class_name }}</strong><small>Academic year {{ context.activeAcademicYear() }}</small></article>
+              <article><span>Students appeared</span><strong>{{ marks().length }}</strong><small>Pass: {{ passedStudents() }} · Fail: {{ failedStudents() }}</small></article>
+              <article><span>Evaluation</span><strong>Max {{ exam.max_marks }}</strong><small>Average {{ exam.average_score || 0 }}</small></article>
+            </div>
+
+            <table class="result-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>GR No</th>
+                  <th>Student Name</th>
+                  <th>Class</th>
+                  <th>Marks</th>
+                  <th>Grade</th>
+                  <th>Result</th>
+                  <th>Remarks</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (mark of marks(); track mark.id; let index = $index) {
+                  <tr>
+                    <td>{{ index + 1 }}</td>
+                    <td>{{ mark.gr_number || '—' }}</td>
+                    <td>{{ mark.first_name }} {{ mark.last_name }}</td>
+                    <td>{{ mark.current_class || exam.class_name }} {{ mark.division || '' }}</td>
+                    <td>{{ mark.obtained_marks }} / {{ exam.max_marks }}</td>
+                    <td>{{ mark.grade || '—' }}</td>
+                    <td>{{ mark.result_status }}</td>
+                    <td>{{ mark.remarks || '—' }}</td>
+                  </tr>
+                } @empty {
+                  <tr>
+                    <td colspan="8">No marks have been entered yet for this exam session.</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+
+            <div class="doc-footer">
+              <div>
+                <strong>Note</strong>
+                <p>This result sheet is system-generated for office and student reference. Final promotion rules remain subject to institute policy.</p>
+              </div>
+              <div class="signature-block">
+                <span>Exam In-Charge / Principal</span>
+              </div>
+            </div>
           </div>
 
           <ag-grid-angular
@@ -211,8 +295,10 @@ export class ExamResultsComponent {
   private readonly examService = inject(ExamResultsService);
   private readonly studentService = inject(StudentMasterService);
   private readonly masterService = inject(MasterDataService);
+  private readonly instituteService = inject(InstituteService);
 
   protected readonly summary = signal<ExamSummary>({ totalExams: 0, publishedResults: 0, draftResults: 0, marksEntered: 0, passPercentage: 0 });
+  protected readonly instituteSettings = signal<InstituteSettings | null>(null);
   protected readonly exams = signal<ExamSessionRow[]>([]);
   protected readonly students = signal<StudentMasterRow[]>([]);
   protected readonly marks = signal<ExamMarkRow[]>([]);
@@ -281,6 +367,18 @@ export class ExamResultsComponent {
 
   protected classOptions() {
     return this.masterOptions()['class'] ?? [];
+  }
+
+  protected printableDate(): string {
+    return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  protected passedStudents(): number {
+    return this.marks().filter((mark) => mark.result_status === 'pass').length;
+  }
+
+  protected failedStudents(): number {
+    return this.marks().filter((mark) => mark.result_status === 'fail').length;
   }
 
   protected availableStudents(): StudentMasterRow[] {
@@ -388,6 +486,10 @@ export class ExamResultsComponent {
     }
   }
 
+  protected printResultSheet(pageSize: 'A4' | 'A5'): void {
+    this.printSurface('result-print-surface', `${this.selectedExam()?.exam_name ?? 'Result Sheet'} Print`, pageSize);
+  }
+
   protected async saveMark(): Promise<void> {
     if (!this.markForm.exam_id || !this.markForm.student_id) {
       await Swal.fire({ icon: 'warning', title: 'Student required', text: 'Please select a student first.' });
@@ -472,17 +574,19 @@ export class ExamResultsComponent {
   }
 
   private async load(instituteId: number, focusExamId?: number): Promise<void> {
-    const [summary, exams, students, options] = await Promise.all([
+    const [summary, exams, students, options, institute] = await Promise.all([
       this.examService.getSummary(instituteId),
       this.examService.getExams(instituteId),
       this.studentService.getStudents(instituteId),
       this.masterService.getOptions(instituteId),
+      this.instituteService.getSettings(instituteId),
     ]);
 
     this.summary.set(summary);
     this.exams.set(exams);
     this.students.set(students);
     this.masterOptions.set(options);
+    this.instituteSettings.set(institute);
 
     const selectedId = focusExamId ?? this.selectedExam()?.id;
     if (selectedId) {
@@ -506,5 +610,53 @@ export class ExamResultsComponent {
       ...(existing ?? response.exam),
       ...response.exam,
     });
+  }
+
+  private printSurface(surfaceId: string, title: string, pageSize: 'A4' | 'A5'): void {
+    const printMarkup = document.getElementById(surfaceId)?.innerHTML;
+
+    if (!printMarkup) {
+      return;
+    }
+
+    const popup = window.open('', '_blank', 'width=1100,height=850');
+    if (!popup) {
+      return;
+    }
+
+    const pageHeight = pageSize === 'A4' ? '297mm' : '210mm';
+
+    popup.document.write(`
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            @page { size: ${pageSize} portrait; margin: 8mm; }
+            html, body { margin: 0; padding: 0; background: #fff; }
+            body { font-family: Arial, sans-serif; color: #0f172a; }
+            .print-sheet { width: 100%; min-height: calc(${pageHeight} - 16mm); box-sizing: border-box; }
+            .doc-header { display: grid; grid-template-columns: 22mm 1fr; gap: 4mm; align-items: center; padding-bottom: 4mm; border-bottom: 1px solid #cbd5e1; }
+            .doc-logo img, .doc-logo-fallback { width: 20mm; height: 20mm; border-radius: 4mm; object-fit: cover; }
+            .doc-logo-fallback { display: flex; align-items: center; justify-content: center; background: #e0e7ff; font-weight: 700; color: #312e81; }
+            .doc-title h3, .doc-title p, .doc-title small, .doc-title strong { margin: 0; display: block; }
+            .doc-ribbon { display: flex; justify-content: space-between; gap: 4mm; margin: 4mm 0; padding: 3mm; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3mm; }
+            .doc-label { display: block; color: #64748b; font-size: 11px; }
+            .meta-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3mm; margin: 4mm 0; }
+            .meta-grid article { padding: 3mm; border: 1px solid #e2e8f0; border-radius: 3mm; background: #fff; }
+            .meta-grid span { display: block; color: #64748b; font-size: 11px; margin-bottom: 1mm; }
+            .result-table { width: 100%; border-collapse: collapse; margin-top: 4mm; font-size: 12px; }
+            .result-table th, .result-table td { border: 1px solid #cbd5e1; padding: 2.4mm; text-align: left; vertical-align: top; }
+            .result-table th { background: #eef2ff; }
+            .doc-footer { display: flex; justify-content: space-between; gap: 6mm; margin-top: 6mm; }
+            .doc-footer p { margin: 1mm 0 0; }
+            .signature-block { min-width: 44mm; padding-top: 9mm; border-top: 1px solid #94a3b8; text-align: center; }
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          <div class="print-sheet">${printMarkup}</div>
+        </body>
+      </html>
+    `);
+    popup.document.close();
   }
 }

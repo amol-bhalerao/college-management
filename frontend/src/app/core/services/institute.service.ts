@@ -18,6 +18,7 @@ export interface InstituteSettings {
   principal_name: string | null;
   footer_note: string | null;
   website_url: string | null;
+  logo_url: string | null;
 }
 
 @Injectable({ providedIn: 'root' })

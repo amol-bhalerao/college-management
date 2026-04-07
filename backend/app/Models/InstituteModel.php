@@ -25,6 +25,7 @@ class InstituteModel extends Model
         'principal_name',
         'footer_note',
         'website_url',
+        'logo_url',
         'status',
     ];
 }

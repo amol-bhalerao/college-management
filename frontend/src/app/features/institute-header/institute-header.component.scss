@@ -16,6 +16,7 @@
 .preview-panel { display: grid; gap: 1rem; }
 .header-preview { display: grid; gap: 0.35rem; padding: 1rem; color: #fff; border-radius: calc(var(--radius) - 4px); background: linear-gradient(135deg, var(--header-start), var(--header-end)); }
 .header-preview span { width: fit-content; padding: 0.25rem 0.55rem; border-radius: 999px; background: rgba(255,255,255,0.16); font-size: 0.8rem; }
+.logo-preview { width: 72px; height: 72px; border-radius: 16px; object-fit: cover; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.18); }
 .receipt-preview { display: grid; gap: 0.75rem; }
 .receipt-line { padding: 0.85rem; border-radius: calc(var(--radius) - 6px); background: rgba(79,70,229,0.05); }
 .receipt-line span { display: block; margin-bottom: 0.35rem; color: var(--muted-text); font-size: 0.85rem; }

@@ -26,6 +26,7 @@ CREATE TABLE IF NOT EXISTS `institutes` (
   `principal_name` VARCHAR(160) DEFAULT NULL,
   `footer_note` TEXT DEFAULT NULL,
   `website_url` VARCHAR(180) DEFAULT NULL,
+  `logo_url` VARCHAR(255) DEFAULT NULL,
   `status` VARCHAR(20) NOT NULL DEFAULT 'active',
   `created_at` DATETIME DEFAULT NULL,
   `updated_at` DATETIME DEFAULT NULL,
@@ -338,10 +339,10 @@ CREATE TABLE IF NOT EXISTS `fee_receipts` (
 INSERT IGNORE INTO `organizations` (`id`, `name`, `code`, `status`, `created_at`, `updated_at`) VALUES
 (1, 'Demo Education Trust', 'DET', 'active', NOW(), NOW());
 
-INSERT IGNORE INTO `institutes` (`id`, `organization_id`, `name`, `code`, `type`, `contact_email`, `contact_phone`, `receipt_prefix`, `header_title`, `header_subtitle`, `header_address`, `principal_name`, `footer_note`, `website_url`, `status`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Junior College', 'JC', 'Higher Secondary', 'jc@example.edu', '9876543210', 'JC-R', 'Demo Education Trust - Junior College', 'Affiliated Higher Secondary Section', 'Main Road, Aurangabad, Maharashtra', 'Dr. Sunita Deshmukh', 'Quality education, discipline, and student support are our core values.', 'https://jc.demo-college.local', 'active', NOW(), NOW()),
-(2, 1, 'Degree College', 'DC', 'Undergraduate', 'degree@example.edu', '9876543211', 'DC-R', 'Demo Education Trust - Degree College', 'NAAC-ready Undergraduate Programs', 'Civil Lines, Aurangabad, Maharashtra', 'Prof. Rajesh Kulkarni', 'All receipts and certificates can be verified through QR validation.', 'https://degree.demo-college.local', 'active', NOW(), NOW()),
-(3, 1, 'B.Ed College', 'BED', 'Professional', 'bed@example.edu', '9876543212', 'BED-R', 'Demo Education Trust - B.Ed College', 'Professional Teacher Education Wing', 'Station Road, Aurangabad, Maharashtra', 'Dr. Nilofer Shaikh', 'Institute follows academic-year-based and IQAC-aligned operations.', 'https://bed.demo-college.local', 'active', NOW(), NOW());
+INSERT IGNORE INTO `institutes` (`id`, `organization_id`, `name`, `code`, `type`, `contact_email`, `contact_phone`, `receipt_prefix`, `header_title`, `header_subtitle`, `header_address`, `principal_name`, `footer_note`, `website_url`, `logo_url`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Junior College', 'JC', 'Higher Secondary', 'jc@example.edu', '9876543210', 'JC-R', 'Demo Education Trust - Junior College', 'Affiliated Higher Secondary Section', 'Main Road, Aurangabad, Maharashtra', 'Dr. Sunita Deshmukh', 'Quality education, discipline, and student support are our core values.', 'https://jc.demo-college.local', 'https://placehold.co/120x120/1d4ed8/ffffff?text=JC', 'active', NOW(), NOW()),
+(2, 1, 'Degree College', 'DC', 'Undergraduate', 'degree@example.edu', '9876543211', 'DC-R', 'Demo Education Trust - Degree College', 'NAAC-ready Undergraduate Programs', 'Civil Lines, Aurangabad, Maharashtra', 'Prof. Rajesh Kulkarni', 'All receipts and certificates can be verified through QR validation.', 'https://degree.demo-college.local', 'https://placehold.co/120x120/0f766e/ffffff?text=DC', 'active', NOW(), NOW()),
+(3, 1, 'B.Ed College', 'BED', 'Professional', 'bed@example.edu', '9876543212', 'BED-R', 'Demo Education Trust - B.Ed College', 'Professional Teacher Education Wing', 'Station Road, Aurangabad, Maharashtra', 'Dr. Nilofer Shaikh', 'Institute follows academic-year-based and IQAC-aligned operations.', 'https://bed.demo-college.local', 'https://placehold.co/120x120/7c3aed/ffffff?text=BED', 'active', NOW(), NOW());
 
 INSERT IGNORE INTO `academic_years` (`id`, `institute_id`, `label`, `start_date`, `end_date`, `is_current`, `created_at`, `updated_at`) VALUES
 (1, 1, '2025-26', '2025-06-01', '2026-05-31', 1, NOW(), NOW()),

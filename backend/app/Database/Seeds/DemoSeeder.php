@@ -74,6 +74,7 @@ class DemoSeeder extends Seeder
             'principal_name' => 'Dr. Sunita Deshmukh',
             'footer_note' => 'Quality education, discipline, and student support are our core values.',
             'website_url' => 'https://jc.demo-college.local',
+            'logo_url' => 'https://placehold.co/120x120/1d4ed8/ffffff?text=JC',
             'updated_at' => $now,
         ]);
 
@@ -82,6 +83,7 @@ class DemoSeeder extends Seeder
             'principal_name' => 'Prof. Rajesh Kulkarni',
             'footer_note' => 'All receipts and certificates can be verified through QR validation.',
             'website_url' => 'https://degree.demo-college.local',
+            'logo_url' => 'https://placehold.co/120x120/0f766e/ffffff?text=DC',
             'updated_at' => $now,
         ]);
 
@@ -90,6 +92,7 @@ class DemoSeeder extends Seeder
             'principal_name' => 'Dr. Nilofer Shaikh',
             'footer_note' => 'Institute follows academic-year-based and IQAC-aligned operations.',
             'website_url' => 'https://bed.demo-college.local',
+            'logo_url' => 'https://placehold.co/120x120/7c3aed/ffffff?text=BED',
             'updated_at' => $now,
         ]);
 

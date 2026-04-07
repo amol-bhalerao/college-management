@@ -52,6 +52,7 @@ class InstituteController extends BaseController
             'principal_name',
             'footer_note',
             'website_url',
+            'logo_url',
         ];
 
         $updates = array_intersect_key($payload, array_flip($allowedFields));

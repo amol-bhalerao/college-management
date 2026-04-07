@@ -65,6 +65,11 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
           </div>
 
           <label>
+            Logo URL
+            <input type="text" [(ngModel)]="form.logo_url" name="logo_url" placeholder="https://example.edu/logo.png" />
+          </label>
+
+          <label>
             Website URL
             <input type="text" [(ngModel)]="form.website_url" name="website_url" />
           </label>
@@ -79,7 +84,11 @@ import { InstituteService, InstituteSettings } from '../../core/services/institu
 
         <article class="panel preview-panel">
           <div class="header-preview">
-            <span>{{ context.activeInstitute().code }}</span>
+            @if (form.logo_url) {
+              <img class="logo-preview" [src]="form.logo_url" alt="Institute logo" />
+            } @else {
+              <span>{{ context.activeInstitute().code }}</span>
+            }
             <h2>{{ form.header_title || context.activeInstitute().name }}</h2>
             <strong>{{ form.header_subtitle || 'Institute-specific receipt and certificate header' }}</strong>
             <p>{{ form.header_address || 'Address will appear here.' }}</p>

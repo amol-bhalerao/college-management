@@ -121,6 +121,121 @@
   color: var(--muted-text);
 }
 
+.print-sheet {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: calc(var(--radius) - 6px);
+  background: #fff;
+}
+
+.doc-header {
+  display: grid;
+  grid-template-columns: 84px 1fr;
+  gap: 1rem;
+  align-items: center;
+  padding-bottom: 0.9rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+.doc-logo img,
+.doc-logo-fallback {
+  width: 72px;
+  height: 72px;
+  border-radius: 16px;
+  object-fit: cover;
+}
+
+.doc-logo-fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(79, 70, 229, 0.12);
+  color: var(--primary-color);
+  font-weight: 800;
+}
+
+.doc-title h3,
+.doc-title p,
+.doc-title small,
+.doc-title strong {
+  margin: 0;
+  display: block;
+}
+
+.doc-ribbon {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: 1rem 0;
+  padding: 0.85rem;
+  border-radius: 14px;
+  background: rgba(79, 70, 229, 0.05);
+}
+
+.doc-label {
+  display: block;
+  color: var(--muted-text);
+  font-size: 0.78rem;
+  margin-bottom: 0.2rem;
+}
+
+.meta-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.meta-grid article {
+  padding: 0.8rem;
+  border-radius: 14px;
+  background: rgba(148, 163, 184, 0.08);
+}
+
+.meta-grid span {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--muted-text);
+  font-size: 0.78rem;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.result-table th,
+.result-table td {
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  padding: 0.6rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.result-table th {
+  background: rgba(79, 70, 229, 0.08);
+}
+
+.doc-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.doc-footer p {
+  margin: 0.25rem 0 0;
+  color: var(--muted-text);
+}
+
+.signature-block {
+  min-width: 220px;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.45);
+  text-align: center;
+}
+
 .grid-actions {
   display: flex;
   gap: 0.35rem;

@@ -13,6 +13,7 @@ import {
   StaffRow,
   StaffSummary,
 } from '../../core/services/staff-hr.service';
+import { InstituteService, InstituteSettings } from '../../core/services/institute.service';
 
 @Component({
   selector: 'app-staff-hr',
@@ -83,6 +84,8 @@ import {
             <div class="actions">
               <button type="button" class="primary-btn" (click)="openAttendance(staff)">Mark attendance</button>
               <button type="button" class="ghost-btn" (click)="openEdit(staff)">Edit staff</button>
+              <button type="button" class="secondary-btn" (click)="openLeaveLetter(staff)">Leave letter</button>
+              <button type="button" class="secondary-btn" (click)="openPayrollSlip(staff)">Salary slip</button>
             </div>
           </div>
         </div>
@@ -203,6 +206,270 @@ import {
           </form>
         </div>
       }
+
+      @if (showLeaveModal()) {
+        <div class="detail-modal" (click)="closeLeaveModal()">
+          <div class="detail-card detail-card--wide" (click)="$event.stopPropagation()">
+            <div class="panel__header">
+              <div>
+                <h2>Staff Leave Letter</h2>
+                <p>{{ selected()?.full_name }} · {{ leaveForm.leave_type }}</p>
+              </div>
+              <button type="button" class="ghost-btn" (click)="closeLeaveModal()">Close</button>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Leave type
+                <select name="leave_type" [(ngModel)]="leaveForm.leave_type">
+                  <option value="Casual Leave">Casual Leave</option>
+                  <option value="Medical Leave">Medical Leave</option>
+                  <option value="On Duty">On Duty</option>
+                  <option value="Earned Leave">Earned Leave</option>
+                </select>
+              </label>
+              <label>
+                Approval status
+                <select name="approval_status" [(ngModel)]="leaveForm.approval_status">
+                  <option value="Approved">Approved</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Rejected">Rejected</option>
+                </select>
+              </label>
+              <label>
+                From date
+                <input type="date" name="leave_from_date" [(ngModel)]="leaveForm.from_date" />
+              </label>
+              <label>
+                To date
+                <input type="date" name="leave_to_date" [(ngModel)]="leaveForm.to_date" />
+              </label>
+              <label class="full-span">
+                Reason
+                <textarea rows="3" name="leave_reason" [(ngModel)]="leaveForm.reason"></textarea>
+              </label>
+            </div>
+
+            <div id="leave-print-surface" class="print-sheet">
+              <header class="doc-header">
+                <div class="doc-logo">
+                  @if (instituteSettings()?.logo_url) {
+                    <img [src]="instituteSettings()?.logo_url!" alt="Institute logo" />
+                  } @else {
+                    <div class="doc-logo-fallback">{{ context.activeInstitute().code }}</div>
+                  }
+                </div>
+                <div class="doc-title">
+                  <h3>{{ instituteSettings()?.header_title || context.activeInstitute().name }}</h3>
+                  <strong>{{ instituteSettings()?.header_subtitle || context.activeInstitute().type }}</strong>
+                  <p>{{ instituteSettings()?.header_address || 'Institute address not configured yet.' }}</p>
+                  <small>{{ instituteSettings()?.contact_phone || 'Phone' }} · {{ instituteSettings()?.contact_email || 'Email' }}</small>
+                </div>
+              </header>
+
+              <div class="doc-ribbon">
+                <div>
+                  <span class="doc-label">Document</span>
+                  <strong>Leave Application / Approval Letter</strong>
+                </div>
+                <div>
+                  <span class="doc-label">Printed on</span>
+                  <strong>{{ printableDate() }}</strong>
+                </div>
+              </div>
+
+              <div class="meta-grid meta-grid--three">
+                <article><span>Employee</span><strong>{{ selected()?.full_name || '—' }}</strong><small>{{ selected()?.employee_code || '—' }}</small></article>
+                <article><span>Department</span><strong>{{ selected()?.department || '—' }}</strong><small>{{ selected()?.designation || '—' }}</small></article>
+                <article><span>Leave days</span><strong>{{ leaveDays() }}</strong><small>{{ leaveForm.approval_status }}</small></article>
+              </div>
+
+              <p class="doc-copy">
+                This is to certify that <strong>{{ selected()?.full_name || 'the staff member' }}</strong>,
+                working as <strong>{{ selected()?.designation || 'staff member' }}</strong> in the
+                <strong>{{ selected()?.department || 'concerned department' }}</strong>, has applied for
+                <strong>{{ leaveForm.leave_type }}</strong> from <strong>{{ leaveForm.from_date || '—' }}</strong>
+                to <strong>{{ leaveForm.to_date || '—' }}</strong> for the following reason:
+                <strong>{{ leaveForm.reason || 'official / personal reason' }}</strong>.
+              </p>
+
+              <p class="doc-copy">
+                Current status of this request: <strong>{{ leaveForm.approval_status }}</strong>.
+                This letter is issued for office reference and staff record purposes.
+              </p>
+
+              <div class="doc-footer">
+                <div>
+                  <strong>Office note</strong>
+                  <p>Please attach supporting documents if required as per HR policy.</p>
+                </div>
+                <div class="signature-block">
+                  <span>HR Office / Principal</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions actions--end">
+              <button type="button" class="secondary-btn" (click)="printLeave('A4')">Print A4</button>
+              <button type="button" class="secondary-btn" (click)="printLeave('A5')">Print A5</button>
+            </div>
+          </div>
+        </div>
+      }
+
+      @if (showPayrollModal()) {
+        <div class="detail-modal" (click)="closePayrollModal()">
+          <div class="detail-card detail-card--wide" (click)="$event.stopPropagation()">
+            <div class="panel__header">
+              <div>
+                <h2>Salary Slip / Payroll Print</h2>
+                <p>{{ selected()?.full_name }} · {{ payrollForm.month_label }}</p>
+              </div>
+              <button type="button" class="ghost-btn" (click)="closePayrollModal()">Close</button>
+            </div>
+
+            <div class="form-grid">
+              <label>
+                Salary month
+                <input type="text" name="salary_month_label" [(ngModel)]="payrollForm.month_label" />
+              </label>
+              <label>
+                Payment mode
+                <select name="payment_mode" [(ngModel)]="payrollForm.payment_mode">
+                  <option value="Bank Transfer">Bank Transfer</option>
+                  <option value="Cash">Cash</option>
+                  <option value="Cheque">Cheque</option>
+                </select>
+              </label>
+              <label>
+                Working days
+                <input type="number" min="1" name="working_days" [(ngModel)]="payrollForm.working_days" />
+              </label>
+              <label>
+                Paid days
+                <input type="number" min="1" name="paid_days" [(ngModel)]="payrollForm.paid_days" />
+              </label>
+              <label>
+                Basic pay
+                <input type="number" min="0" step="0.01" name="basic_pay" [(ngModel)]="payrollForm.basic_pay" />
+              </label>
+              <label>
+                HRA
+                <input type="number" min="0" step="0.01" name="hra" [(ngModel)]="payrollForm.hra" />
+              </label>
+              <label>
+                Special allowance
+                <input type="number" min="0" step="0.01" name="special_allowance" [(ngModel)]="payrollForm.special_allowance" />
+              </label>
+              <label>
+                Deductions
+                <input type="number" min="0" step="0.01" name="deductions" [(ngModel)]="payrollForm.deductions" />
+              </label>
+              <label>
+                Bonus / arrears
+                <input type="number" min="0" step="0.01" name="bonus" [(ngModel)]="payrollForm.bonus" />
+              </label>
+            </div>
+
+            <div id="payroll-print-surface" class="print-sheet">
+              <header class="doc-header">
+                <div class="doc-logo">
+                  @if (instituteSettings()?.logo_url) {
+                    <img [src]="instituteSettings()?.logo_url!" alt="Institute logo" />
+                  } @else {
+                    <div class="doc-logo-fallback">{{ context.activeInstitute().code }}</div>
+                  }
+                </div>
+                <div class="doc-title">
+                  <h3>{{ instituteSettings()?.header_title || context.activeInstitute().name }}</h3>
+                  <strong>{{ instituteSettings()?.header_subtitle || context.activeInstitute().type }}</strong>
+                  <p>{{ instituteSettings()?.header_address || 'Institute address not configured yet.' }}</p>
+                  <small>{{ instituteSettings()?.contact_phone || 'Phone' }} · {{ instituteSettings()?.contact_email || 'Email' }}</small>
+                </div>
+              </header>
+
+              <div class="doc-ribbon">
+                <div>
+                  <span class="doc-label">Document</span>
+                  <strong>Salary Slip / Payroll Statement</strong>
+                </div>
+                <div>
+                  <span class="doc-label">Period</span>
+                  <strong>{{ payrollForm.month_label }}</strong>
+                </div>
+              </div>
+
+              <div class="meta-grid meta-grid--three">
+                <article><span>Employee</span><strong>{{ selected()?.full_name || '—' }}</strong><small>{{ selected()?.employee_code || '—' }}</small></article>
+                <article><span>Department</span><strong>{{ selected()?.department || '—' }}</strong><small>{{ selected()?.designation || '—' }}</small></article>
+                <article><span>Attendance</span><strong>{{ payrollForm.paid_days }} / {{ payrollForm.working_days }}</strong><small>{{ payrollForm.payment_mode }}</small></article>
+              </div>
+
+              <table class="salary-table">
+                <thead>
+                  <tr>
+                    <th>Earnings</th>
+                    <th>Amount</th>
+                    <th>Deductions</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Basic Pay</td>
+                    <td>{{ payrollForm.basic_pay }}</td>
+                    <td>Statutory / Other Deduction</td>
+                    <td>{{ payrollForm.deductions }}</td>
+                  </tr>
+                  <tr>
+                    <td>HRA</td>
+                    <td>{{ payrollForm.hra }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>Special Allowance</td>
+                    <td>{{ payrollForm.special_allowance }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <td>Bonus / Arrears</td>
+                    <td>{{ payrollForm.bonus }}</td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                  <tr>
+                    <th>Gross Pay</th>
+                    <th>{{ grossSalary() }}</th>
+                    <th>Total Deductions</th>
+                    <th>{{ payrollForm.deductions }}</th>
+                  </tr>
+                  <tr>
+                    <th colspan="2">Net Pay</th>
+                    <th colspan="2">{{ netSalary() }}</th>
+                  </tr>
+                </tbody>
+              </table>
+
+              <div class="doc-footer">
+                <div>
+                  <strong>Payroll note</strong>
+                  <p>This is a computer-generated salary slip prepared for staff reference and accounts records.</p>
+                </div>
+                <div class="signature-block">
+                  <span>Accounts Office / Authorized Signatory</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="actions actions--end">
+              <button type="button" class="secondary-btn" (click)="printPayroll('A4')">Print A4</button>
+              <button type="button" class="secondary-btn" (click)="printPayroll('A5')">Print A5</button>
+            </div>
+          </div>
+        </div>
+      }
     </section>
   `,
   styleUrl: './staff-hr.component.scss',
@@ -210,12 +477,16 @@ import {
 export class StaffHrComponent {
   protected readonly context = inject(AppContextService);
   private readonly staffService = inject(StaffHrService);
+  private readonly instituteService = inject(InstituteService);
 
   protected readonly summary = signal<StaffSummary>({ totalStaff: 0, activeStaff: 0, presentToday: 0, onLeave: 0, absentToday: 0 });
   protected readonly rows = signal<StaffRow[]>([]);
   protected readonly selected = signal<StaffRow | null>(null);
+  protected readonly instituteSettings = signal<InstituteSettings | null>(null);
   protected readonly showStaffModal = signal(false);
   protected readonly showAttendanceModal = signal(false);
+  protected readonly showLeaveModal = signal(false);
+  protected readonly showPayrollModal = signal(false);
   protected readonly editingId = signal<number | null>(null);
   protected readonly isSaving = signal(false);
   protected readonly isAttendanceSaving = signal(false);
@@ -223,6 +494,8 @@ export class StaffHrComponent {
   protected attendanceDate = new Date().toISOString().slice(0, 10);
   protected staffForm: StaffPayload = this.createEmptyStaffForm();
   protected attendanceForm: StaffAttendancePayload = this.createEmptyAttendanceForm();
+  protected leaveForm = this.createEmptyLeaveForm();
+  protected payrollForm = this.createEmptyPayrollForm();
 
   protected readonly columnDefs: ColDef<StaffRow>[] = [
     { field: 'employee_code', headerName: 'Emp Code', minWidth: 140 },
@@ -277,6 +550,29 @@ export class StaffHrComponent {
     }
 
     return value;
+  }
+
+  protected printableDate(): string {
+    return new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  protected leaveDays(): number {
+    const from = new Date(this.leaveForm.from_date || this.attendanceDate);
+    const to = new Date(this.leaveForm.to_date || this.leaveForm.from_date || this.attendanceDate);
+    const diff = Math.round((to.getTime() - from.getTime()) / (1000 * 60 * 60 * 24));
+
+    return Math.max(1, diff + 1);
+  }
+
+  protected grossSalary(): number {
+    return Number(this.payrollForm.basic_pay || 0)
+      + Number(this.payrollForm.hra || 0)
+      + Number(this.payrollForm.special_allowance || 0)
+      + Number(this.payrollForm.bonus || 0);
+  }
+
+  protected netSalary(): number {
+    return this.grossSalary() - Number(this.payrollForm.deductions || 0);
   }
 
   protected refresh(): void {
@@ -357,6 +653,53 @@ export class StaffHrComponent {
   protected closeAttendanceModal(): void {
     this.showAttendanceModal.set(false);
     this.attendanceForm = this.createEmptyAttendanceForm();
+  }
+
+  protected openLeaveLetter(row: StaffRow): void {
+    this.selected.set(row);
+    this.leaveForm = {
+      leave_type: row.attendance_status === 'leave' ? 'Casual Leave' : 'On Duty',
+      from_date: row.attendance_date || this.attendanceDate,
+      to_date: row.attendance_date || this.attendanceDate,
+      reason: row.remarks || 'Staff leave / duty note recorded by the HR office.',
+      approval_status: row.attendance_status === 'leave' ? 'Approved' : 'Pending',
+    };
+    this.showLeaveModal.set(true);
+  }
+
+  protected closeLeaveModal(): void {
+    this.showLeaveModal.set(false);
+    this.leaveForm = this.createEmptyLeaveForm();
+  }
+
+  protected openPayrollSlip(row: StaffRow): void {
+    const defaultBasic = row.designation?.toLowerCase().includes('lecturer') ? 32000 : 26000;
+    this.selected.set(row);
+    this.payrollForm = {
+      month_label: new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' }),
+      working_days: 26,
+      paid_days: row.attendance_status === 'leave' ? 25 : 26,
+      basic_pay: defaultBasic,
+      hra: Math.round(defaultBasic * 0.24),
+      special_allowance: 2500,
+      deductions: 1800,
+      bonus: 0,
+      payment_mode: 'Bank Transfer',
+    };
+    this.showPayrollModal.set(true);
+  }
+
+  protected closePayrollModal(): void {
+    this.showPayrollModal.set(false);
+    this.payrollForm = this.createEmptyPayrollForm();
+  }
+
+  protected printLeave(pageSize: 'A4' | 'A5'): void {
+    this.printSurface('leave-print-surface', 'Staff Leave Letter', pageSize);
+  }
+
+  protected printPayroll(pageSize: 'A4' | 'A5'): void {
+    this.printSurface('payroll-print-surface', 'Staff Salary Slip', pageSize);
   }
 
   protected async saveStaff(): Promise<void> {
@@ -441,6 +784,30 @@ export class StaffHrComponent {
     };
   }
 
+  private createEmptyLeaveForm() {
+    return {
+      leave_type: 'Casual Leave',
+      from_date: this.attendanceDate,
+      to_date: this.attendanceDate,
+      reason: 'Personal / official reason',
+      approval_status: 'Approved',
+    };
+  }
+
+  private createEmptyPayrollForm() {
+    return {
+      month_label: new Date().toLocaleString('en-IN', { month: 'long', year: 'numeric' }),
+      working_days: 26,
+      paid_days: 26,
+      basic_pay: 26000,
+      hra: 6000,
+      special_allowance: 2500,
+      deductions: 1800,
+      bonus: 0,
+      payment_mode: 'Bank Transfer',
+    };
+  }
+
   private async deleteStaff(row: StaffRow): Promise<void> {
     const result = await Swal.fire({
       icon: 'warning',
@@ -470,17 +837,68 @@ export class StaffHrComponent {
   }
 
   private async load(instituteId: number): Promise<void> {
-    const [summary, staff] = await Promise.all([
+    const [summary, staff, institute] = await Promise.all([
       this.staffService.getSummary(instituteId, this.attendanceDate),
       this.staffService.getStaff(instituteId, this.attendanceDate),
+      this.instituteService.getSettings(instituteId),
     ]);
 
     this.summary.set(summary);
     this.rows.set(staff);
+    this.instituteSettings.set(institute);
 
     const selectedId = this.selected()?.id;
     if (selectedId) {
       this.selected.set(staff.find((row) => row.id === selectedId) ?? null);
     }
+  }
+
+  private printSurface(surfaceId: string, title: string, pageSize: 'A4' | 'A5'): void {
+    const printMarkup = document.getElementById(surfaceId)?.innerHTML;
+
+    if (!printMarkup) {
+      return;
+    }
+
+    const popup = window.open('', '_blank', 'width=1100,height=850');
+    if (!popup) {
+      return;
+    }
+
+    const pageHeight = pageSize === 'A4' ? '297mm' : '210mm';
+
+    popup.document.write(`
+      <html>
+        <head>
+          <title>${title}</title>
+          <style>
+            @page { size: ${pageSize} portrait; margin: 8mm; }
+            html, body { margin: 0; padding: 0; background: #fff; }
+            body { font-family: Arial, sans-serif; color: #0f172a; }
+            .print-sheet { width: 100%; min-height: calc(${pageHeight} - 16mm); box-sizing: border-box; }
+            .doc-header { display: grid; grid-template-columns: 22mm 1fr; gap: 4mm; align-items: center; padding-bottom: 4mm; border-bottom: 1px solid #cbd5e1; }
+            .doc-logo img, .doc-logo-fallback { width: 20mm; height: 20mm; border-radius: 4mm; object-fit: cover; }
+            .doc-logo-fallback { display: flex; align-items: center; justify-content: center; background: #e0e7ff; font-weight: 700; color: #312e81; }
+            .doc-title h3, .doc-title p, .doc-title small, .doc-title strong { margin: 0; display: block; }
+            .doc-ribbon { display: flex; justify-content: space-between; gap: 4mm; margin: 4mm 0; padding: 3mm; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 3mm; }
+            .doc-label { display: block; color: #64748b; font-size: 11px; }
+            .meta-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3mm; margin: 4mm 0; }
+            .meta-grid article { padding: 3mm; border: 1px solid #e2e8f0; border-radius: 3mm; background: #fff; }
+            .meta-grid span { display: block; color: #64748b; font-size: 11px; margin-bottom: 1mm; }
+            .doc-copy { line-height: 1.6; margin: 4mm 0; }
+            .salary-table { width: 100%; border-collapse: collapse; margin-top: 4mm; font-size: 12px; }
+            .salary-table th, .salary-table td { border: 1px solid #cbd5e1; padding: 2.4mm; text-align: left; }
+            .salary-table th { background: #eef2ff; }
+            .doc-footer { display: flex; justify-content: space-between; gap: 6mm; margin-top: 6mm; }
+            .doc-footer p { margin: 1mm 0 0; }
+            .signature-block { min-width: 44mm; padding-top: 9mm; border-top: 1px solid #94a3b8; text-align: center; }
+          </style>
+        </head>
+        <body onload="window.print(); window.close();">
+          <div class="print-sheet">${printMarkup}</div>
+        </body>
+      </html>
+    `);
+    popup.document.close();
   }
 }
